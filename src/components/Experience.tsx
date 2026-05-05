@@ -1,7 +1,9 @@
-import { marcusProfile } from "@/data/marcus-profile";
+import { useExperiences } from "@/hooks/useCandidateData";
 import ExperienceCard from "./ExperienceCard";
 
 const Experience = () => {
+  const { data: experiences, isLoading } = useExperiences();
+
   return (
     <section id="experience" className="py-24 px-6">
       <div className="max-w-4xl mx-auto">
@@ -16,60 +18,42 @@ const Experience = () => {
         </div>
 
         {/* Experience cards */}
-        <div className="space-y-6">
-          {marcusProfile.experience.map((exp, index) => (
-            <ExperienceCard
-              key={exp.company}
-              {...exp}
-              index={index}
-            />
-          ))}
-        </div>
-
-        {/* Skills Grid */}
-        <div className="mt-16 grid md:grid-cols-3 gap-6">
-          <div className="p-6 bg-success-muted border border-success/20 rounded-2xl">
-            <h4 className="text-sm font-mono uppercase tracking-wider text-success mb-4">
-              Strong
-            </h4>
-            <ul className="space-y-2">
-              {marcusProfile.skills.strong.map((skill) => (
-                <li key={skill} className="text-foreground flex items-center gap-2">
-                  <span className="text-success">✓</span>
-                  {skill}
-                </li>
-              ))}
-            </ul>
+        {isLoading && (
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse p-6 md:p-8 bg-card border border-border rounded-2xl">
+                <div className="flex justify-between mb-6">
+                  <div>
+                    <div className="h-7 w-48 bg-secondary rounded mb-2" />
+                    <div className="h-5 w-32 bg-secondary rounded" />
+                  </div>
+                  <div className="h-5 w-24 bg-secondary rounded" />
+                </div>
+                <div className="space-y-3">
+                  <div className="h-4 w-full bg-secondary rounded" />
+                  <div className="h-4 w-5/6 bg-secondary rounded" />
+                  <div className="h-4 w-4/6 bg-secondary rounded" />
+                </div>
+              </div>
+            ))}
           </div>
+        )}
 
-          <div className="p-6 bg-secondary border border-border rounded-2xl">
-            <h4 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-4">
-              Moderate
-            </h4>
-            <ul className="space-y-2">
-              {marcusProfile.skills.moderate.map((skill) => (
-                <li key={skill} className="text-foreground flex items-center gap-2">
-                  <span className="text-muted-foreground">○</span>
-                  {skill}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {!isLoading && (!experiences || experiences.length === 0) && (
+          <p className="text-muted-foreground text-lg">No experience records yet.</p>
+        )}
 
-          <div className="p-6 bg-warning-muted border border-warning/20 rounded-2xl">
-            <h4 className="text-sm font-mono uppercase tracking-wider text-warning mb-4">
-              Gaps (I'll tell you)
-            </h4>
-            <ul className="space-y-2">
-              {marcusProfile.skills.gaps.map((skill) => (
-                <li key={skill} className="text-foreground flex items-center gap-2">
-                  <span className="text-warning">✗</span>
-                  {skill}
-                </li>
-              ))}
-            </ul>
+        {!isLoading && experiences && experiences.length > 0 && (
+          <div className="space-y-6">
+            {experiences.map((exp, index) => (
+              <ExperienceCard
+                key={exp.id}
+                experience={exp}
+                index={index}
+              />
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

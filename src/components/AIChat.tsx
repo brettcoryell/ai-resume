@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { demoResponses } from "@/data/marcus-profile";
+import { EDGE_FN_URL } from "@/lib/supabase";
+import { useCandidateProfile } from "@/hooks/useCandidateData";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,66 +14,56 @@ interface AIChatProps {
   onClose: () => void;
 }
 
-const suggestedQuestions = [
-  "Would this person be good for a Series B startup with messy data infrastructure?",
-  "How did they reduce costs by $1.2M? Was it technical or political?",
-  "Tell me about their biggest failure.",
-  "What kind of leadership experience do they have?",
+// Stable session ID for this browser tab
+const SESSION_ID = crypto.randomUUID();
+
+const DEFAULT_QUESTIONS = [
+  "What's your biggest weakness?",
+  "Tell me about a project that failed.",
+  "Why did you leave your last role?",
+  "What would your last manager say about you?",
 ];
 
 const AIChat = ({ isOpen, onClose }: AIChatProps) => {
+  const { data: profile } = useCandidateProfile();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [displayedResponse, setDisplayedResponse] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const candidateName = profile?.name ?? "the candidate";
+  const initial = candidateName.charAt(0).toUpperCase();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, displayedResponse]);
+  }, [messages, isLoading]);
 
-  const getResponse = (question: string): string => {
-    const q = question.toLowerCase();
-    if (q.includes("series b") || q.includes("infrastructure") || q.includes("messy")) {
-      return demoResponses.default;
-    }
-    if (q.includes("cost") || q.includes("$1.2m") || q.includes("reduce")) {
-      return demoResponses.costReduction;
-    }
-    if (q.includes("failure") || q.includes("mistake") || q.includes("wrong")) {
-      return demoResponses.failure;
-    }
-    if (q.includes("leadership") || q.includes("lead") || q.includes("team") || q.includes("manage")) {
-      return demoResponses.leadership;
-    }
-    return demoResponses.default;
-  };
+  const sendMessage = async (question: string) => {
+    if (!question.trim() || isLoading) return;
 
-  const typeResponse = (response: string) => {
-    setIsTyping(true);
-    setDisplayedResponse("");
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < response.length) {
-        setDisplayedResponse(response.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(interval);
-        setIsTyping(false);
-        setMessages((prev) => [...prev, { role: "assistant", content: response }]);
-        setDisplayedResponse("");
-      }
-    }, 8);
-  };
-
-  const handleSubmit = (question: string) => {
-    if (!question.trim() || isTyping) return;
-    setMessages((prev) => [...prev, { role: "user", content: question }]);
+    const userMsg: Message = { role: "user", content: question };
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setTimeout(() => {
-      const response = getResponse(question);
-      typeResponse(response);
-    }, 500);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${EDGE_FN_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: question, sessionId: SESSION_ID }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { message: reply } = await res.json();
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Sorry, I ran into an error. Please try again in a moment." },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -84,10 +75,10 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center text-accent-foreground font-serif font-bold">
-              M
+              {initial}
             </div>
             <div>
-              <p className="text-foreground font-medium">Ask AI About Marcus</p>
+              <p className="text-foreground font-medium">Ask AI About {candidateName}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Ready to answer your questions
@@ -104,20 +95,20 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && !isTyping && (
+          {messages.length === 0 && !isLoading && (
             <div className="h-full flex flex-col items-center justify-center text-center px-6">
               <Sparkles className="w-12 h-12 text-accent mb-4" />
               <h3 className="text-xl font-serif text-foreground mb-2">
                 What would you like to know?
               </h3>
               <p className="text-muted-foreground text-sm mb-6 max-w-md">
-                Ask specific questions about Marcus's experience, skills, or fit for your role. Get honest, detailed answers.
+                Ask specific questions about experience, skills, or fit for your role. Get honest, detailed answers.
               </p>
               <div className="w-full max-w-md space-y-2">
-                {suggestedQuestions.map((q, i) => (
+                {DEFAULT_QUESTIONS.map((q, i) => (
                   <button
                     key={i}
-                    onClick={() => handleSubmit(q)}
+                    onClick={() => sendMessage(q)}
                     className="w-full text-left p-3 bg-secondary rounded-xl text-sm text-foreground hover:bg-muted transition-colors border border-transparent hover:border-accent/30"
                   >
                     "{q}"
@@ -128,13 +119,7 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
           )}
 
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex",
-                msg.role === "user" ? "justify-end" : "justify-start"
-              )}
-            >
+            <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
                   "max-w-[85%] rounded-2xl px-4 py-3",
@@ -148,13 +133,14 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
             </div>
           ))}
 
-          {isTyping && (
+          {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[85%] bg-secondary text-foreground rounded-2xl rounded-bl-md px-4 py-3">
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {displayedResponse}
-                  <span className="inline-block w-2 h-4 bg-accent ml-1 animate-typing-cursor" />
-                </p>
+              <div className="bg-secondary text-foreground rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="flex gap-1 items-center h-5">
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
             </div>
           )}
@@ -165,23 +151,20 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
         {/* Input */}
         <div className="p-4 border-t border-border">
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit(input);
-            }}
+            onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
             className="flex gap-3"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a follow-up question..."
-              disabled={isTyping}
+              placeholder="Ask a question..."
+              disabled={isLoading}
               className="flex-1 bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground border border-border focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={!input.trim() || isTyping}
+              disabled={!input.trim() || isLoading}
               className="px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
               <Send className="w-5 h-5" />

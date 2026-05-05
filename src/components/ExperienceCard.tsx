@@ -2,31 +2,44 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface AIContext {
-  situation: string;
-  approach: string;
-  technicalWork: string;
-  lessonsLearned: string;
+export interface Experience {
+  id: string;
+  company_name: string;
+  title: string;
+  title_progression: string | null;
+  start_date: string;
+  end_date: string | null;
+  is_current: boolean;
+  bullet_points: string[];
+  display_order: number;
 }
 
 interface ExperienceCardProps {
-  company: string;
-  role: string;
-  period: string;
-  highlights: string[];
-  aiContext: AIContext;
+  experience: Experience;
   index: number;
 }
 
-const ExperienceCard = ({
-  company,
-  role,
-  period,
-  highlights,
-  aiContext,
-  index,
-}: ExperienceCardProps) => {
+function formatDate(dateStr: string): string {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
+
+const ExperienceCard = ({ experience, index }: ExperienceCardProps) => {
   const [expanded, setExpanded] = useState(false);
+
+  const {
+    company_name,
+    title,
+    title_progression,
+    start_date,
+    end_date,
+    is_current,
+    bullet_points,
+  } = experience;
+
+  const period = `${formatDate(start_date)} — ${is_current || !end_date ? "Present" : formatDate(end_date)}`;
 
   return (
     <div
@@ -39,21 +52,23 @@ const ExperienceCard = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-2xl font-serif text-foreground mb-1">{company}</h3>
-          <p className="text-primary">{role}</p>
+          <h3 className="text-2xl font-serif text-foreground mb-1">{company_name}</h3>
+          <p className="text-primary">{title_progression || title}</p>
         </div>
         <span className="text-sm font-mono text-muted-foreground">{period}</span>
       </div>
 
-      {/* Highlights */}
-      <ul className="space-y-3 mb-6">
-        {highlights.map((highlight, i) => (
-          <li key={i} className="flex items-start gap-3 text-muted-foreground">
-            <span className="text-accent mt-1.5">→</span>
-            <span>{highlight}</span>
-          </li>
-        ))}
-      </ul>
+      {/* Bullet points */}
+      {bullet_points && bullet_points.length > 0 && (
+        <ul className="space-y-3 mb-6">
+          {bullet_points.map((point, i) => (
+            <li key={i} className="flex items-start gap-3 text-muted-foreground">
+              <span className="text-accent mt-1.5">→</span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* AI Context Toggle */}
       <button
@@ -69,35 +84,12 @@ const ExperienceCard = ({
         )}
       </button>
 
-      {/* Expanded AI Context */}
+      {/* Expanded AI Context placeholder */}
       {expanded && (
         <div className="mt-4 p-4 bg-secondary rounded-xl border border-border animate-slide-down">
-          <div className="grid gap-4 text-sm">
-            <div>
-              <span className="text-text-subtle font-mono text-xs uppercase tracking-wider">
-                Situation
-              </span>
-              <p className="text-foreground mt-1">{aiContext.situation}</p>
-            </div>
-            <div>
-              <span className="text-text-subtle font-mono text-xs uppercase tracking-wider">
-                Approach
-              </span>
-              <p className="text-foreground mt-1">{aiContext.approach}</p>
-            </div>
-            <div>
-              <span className="text-text-subtle font-mono text-xs uppercase tracking-wider">
-                Technical Work
-              </span>
-              <p className="text-foreground mt-1">{aiContext.technicalWork}</p>
-            </div>
-            <div>
-              <span className="text-text-subtle font-mono text-xs uppercase tracking-wider">
-                Lessons Learned
-              </span>
-              <p className="text-text-highlight mt-1 italic">"{aiContext.lessonsLearned}"</p>
-            </div>
-          </div>
+          <p className="text-muted-foreground text-sm italic">
+            AI context available via chat — ask me about my time at {company_name}.
+          </p>
         </div>
       )}
     </div>
