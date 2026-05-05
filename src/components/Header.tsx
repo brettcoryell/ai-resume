@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCandidateProfile } from "@/hooks/useCandidateData";
 
 interface HeaderProps {
   onOpenChat?: () => void;
@@ -9,6 +10,17 @@ interface HeaderProps {
 const Header = ({ onOpenChat }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: profile } = useCandidateProfile();
+
+  // Derive initials from name in database
+  const initials = profile?.name
+    ? profile.name
+        .split(" ")
+        .filter(Boolean)
+        .map((w: string) => w[0].toUpperCase())
+        .slice(0, 2)
+        .join("")
+    : "BC"; // fallback while loading
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +58,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
           onClick={() => scrollToSection("hero")}
           className="font-serif text-xl text-foreground hover:text-primary transition-colors"
         >
-          MC
+          {initials}
         </button>
 
         {/* Desktop nav */}
