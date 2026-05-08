@@ -493,6 +493,10 @@ CRITICAL RULES:
 - For faq_responses: extract all pre-written career site Q&A entries (thoughts titled
   "Career Website FAQ — ..."). If multiple versions exist (v1, v2, v3 / REVISED), use
   the most recent version only. Each entry becomes one row with the question and answer.
+  Expected questions include: "Tell me about yourself", "What's your biggest weakness?",
+  "Why are you looking?", "Where do you see yourself in 5 years?", "Tell me about a time
+  you failed", "What would your last manager say about you?", "What kind of work
+  environment do you thrive in?" — search the full corpus for all of these.
 - Output ONLY valid JSON. No markdown, no backticks, no commentary.
 
 OUTPUT FORMAT (exact keys required):
