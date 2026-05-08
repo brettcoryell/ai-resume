@@ -97,8 +97,7 @@ traceability back to the OB thought that sourced each row.
 - `analyze-jd` — takes `{jobDescription}`, returns structured fit assessment JSON:
   `{verdict, headline, opening, gaps[], transfers, recommendation}`
 
-Both functions use `claude-sonnet-4-20250514` (note: deprecated as of June 2026 —
-update to a newer model when you next touch these files).
+Both functions use `claude-sonnet-4-6` (updated 2026-05-07 from deprecated claude-sonnet-4-20250514).
 
 ### Auth
 - Admin user: brettcoryell@yahoo.com (password set in Supabase Auth dashboard)
@@ -242,6 +241,14 @@ Claude's extraction used `"competence"` as an instruction_type. The DB check
 constraint only allows `honesty | tone | boundaries | other`. Fixed by normalizing
 unknown values to `"other"` in the script before inserting.
 
+### 9. `gap_type` CHECK constraint violation (2026-05-07)
+The `gaps_weaknesses` table has `gap_type IN ('skill', 'experience', 'environment', 'role_type')`.
+The sync script passed Claude's raw output directly, so invented values like `'tolerance'` caused
+DB inserts to fail. Fixed by adding a `VALID_GAP_TYPES` normalization guard in both `sync_gaps()`
+(Mode 1) and `run_extract()` (Mode 2), defaulting unknowns to `'skill'`. Same pattern as the
+existing `VALID_INSTR_TYPES` guard for `instruction_type`. Also added the four valid values to
+the extraction prompt so Claude produces correct values from the start.
+
 ### 8. Skills extraction: too few, wrong categories
 First extraction produced only 10 skills using "developing" as a category (invalid).
 Fixed by updating the extraction prompt to explicitly require 25-35 discrete skills
@@ -281,9 +288,7 @@ and enforce `strong | moderate | gap` as the only valid category values.
 - **Fix duplicate experiences** — The re-run created a second Neighborly row with
   slightly different title. Run `--stats` and manually delete the duplicate from
   Supabase dashboard, or add dedup logic to the extract upsert.
-- **Update deprecated model** — Both edge functions and sync script use
-  `claude-sonnet-4-20250514` which is deprecated (EOL June 2026). Update to the
-  current Claude Sonnet model across all three files.
+- ~~**Update deprecated model**~~ — Done 2026-05-07. All three files now use `claude-sonnet-4-6`.
 
 ### Medium priority
 - **Git-to-Vercel auto-deploy** — Connect the GitHub repo in the Vercel dashboard
