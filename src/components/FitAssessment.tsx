@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FileText, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EDGE_FN_URL } from "@/lib/supabase";
+import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 
 type TabType = "strong" | "weak" | "custom";
 
@@ -74,7 +74,7 @@ const FitAssessment = () => {
     try {
       const res = await fetch(`${EDGE_FN_URL}/analyze-jd`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: EDGE_FN_HEADERS,
         body: JSON.stringify({ jobDescription: jdText }),
       });
 

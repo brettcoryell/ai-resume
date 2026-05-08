@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EDGE_FN_URL } from "@/lib/supabase";
+import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
 
 interface Message {
@@ -49,7 +49,7 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
     try {
       const res = await fetch(`${EDGE_FN_URL}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: EDGE_FN_HEADERS,
         body: JSON.stringify({ message: question, sessionId: SESSION_ID }),
       });
 

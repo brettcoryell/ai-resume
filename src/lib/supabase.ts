@@ -9,5 +9,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Edge function base URL (same project)
+// Edge function base URL and auth header (same project)
 export const EDGE_FN_URL = `${supabaseUrl}/functions/v1`;
+export const EDGE_FN_HEADERS = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${supabaseAnonKey}`,
+};
