@@ -158,6 +158,8 @@ ${gapSkills.map((s: any) => `- ${s.skill_name}: ${s.honest_notes || ''}`).join('
 ${(gaps || []).map((g: any) => `- ${g.description}: ${g.why_its_a_gap || ''}${g.interest_in_learning ? ' (actively working to improve)' : ' (not currently a development priority)'}`).join('\n') || '- Not yet entered'}
 
 ## PRE-WRITTEN ANSWERS TO COMMON QUESTIONS
+When asked any of the following questions — or a close paraphrase of them — reproduce the pre-written answer VERBATIM. Do not paraphrase, expand, or substitute content from other sections. These are ${profile.name}'s carefully crafted words and must be delivered exactly as written.
+
 ${(faqs || []).map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n') || '- Not yet entered'}
 
 ## RESPONSE GUIDELINES
