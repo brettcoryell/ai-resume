@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, Sparkles } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
@@ -17,12 +17,56 @@ interface AIChatProps {
 // Stable session ID for this browser tab
 const SESSION_ID = crypto.randomUUID();
 
+// Exact FAQ question keys — must match faq_responses.question in the DB
 const DEFAULT_QUESTIONS = [
+  "Tell me about yourself",
   "What's your biggest weakness?",
-  "Tell me about a project that failed.",
-  "Why did you leave your last role?",
+  "Why are you looking?",
+  "Where do you see yourself in 5 years?",
   "What would your last manager say about you?",
+  "What kind of work environment do you thrive in?",
+  "Tell me about a time you failed",
 ];
+
+// Maps common paraphrases to canonical FAQ keys so typed questions also get verbatim answers
+const FAQ_ALIASES: Array<{ canonical: string; keywords: string[] }> = [
+  {
+    canonical: "Tell me about yourself",
+    keywords: ["about yourself", "introduce yourself", "tell me about you", "your background", "who are you"],
+  },
+  {
+    canonical: "What's your biggest weakness?",
+    keywords: ["weakness", "weaknesses", "not good at", "areas for improvement", "where do you struggle"],
+  },
+  {
+    canonical: "Why are you looking?",
+    keywords: ["why are you looking", "why did you leave", "why did you leave your last", "on the market", "job search", "looking for a new"],
+  },
+  {
+    canonical: "Where do you see yourself in 5 years?",
+    keywords: ["5 years", "five years", "where do you see yourself", "your future", "long-term goal"],
+  },
+  {
+    canonical: "What would your last manager say about you?",
+    keywords: ["manager say", "boss say", "supervisor say", "reference say", "would say about you", "former manager"],
+  },
+  {
+    canonical: "What kind of work environment do you thrive in?",
+    keywords: ["work environment", "company culture", "thrive in", "work style", "ideal workplace", "team environment"],
+  },
+  {
+    canonical: "Tell me about a time you failed",
+    keywords: ["time you failed", "project that failed", "failure", "biggest failure", "memorable failure", "went wrong", "didn't work out"],
+  },
+];
+
+function normalizeQuestion(input: string): string {
+  const lower = input.toLowerCase();
+  for (const { canonical, keywords } of FAQ_ALIASES) {
+    if (keywords.some((kw) => lower.includes(kw))) return canonical;
+  }
+  return input;
+}
 
 const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const { data: profile } = useCandidateProfile();
@@ -41,6 +85,7 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const sendMessage = async (question: string) => {
     if (!question.trim() || isLoading) return;
 
+    const normalized = normalizeQuestion(question);
     const userMsg: Message = { role: "user", content: question };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -50,7 +95,7 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
       const res = await fetch(`${EDGE_FN_URL}/chat`, {
         method: "POST",
         headers: EDGE_FN_HEADERS,
-        body: JSON.stringify({ message: question, sessionId: SESSION_ID }),
+        body: JSON.stringify({ message: normalized, sessionId: SESSION_ID }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -85,12 +130,23 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {messages.length > 0 && (
+              <button
+                onClick={() => setMessages([])}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground border border-border hover:border-accent/50 rounded-lg transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Questions
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
