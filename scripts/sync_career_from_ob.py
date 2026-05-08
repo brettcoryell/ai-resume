@@ -490,6 +490,9 @@ CRITICAL RULES:
   Use "gap" for genuine weaknesses only; "moderate" for real but not expert-level skills.
 - For gaps: gap_type MUST be EXACTLY one of: "skill", "experience", "environment", "role_type"
   — no other values are valid. Map all gap types to the closest option; default to "skill".
+- For faq_responses: extract all pre-written career site Q&A entries (thoughts titled
+  "Career Website FAQ — ..."). If multiple versions exist (v1, v2, v3 / REVISED), use
+  the most recent version only. Each entry becomes one row with the question and answer.
 - Output ONLY valid JSON. No markdown, no backticks, no commentary.
 
 OUTPUT FORMAT (exact keys required):
@@ -544,6 +547,13 @@ OUTPUT FORMAT (exact keys required):
       "instruction_type": "honesty",
       "priority": 10,
       "instruction": "Specific instruction for how the AI should respond"
+    }
+  ],
+  "faq_responses": [
+    {
+      "question": "Tell me about yourself",
+      "answer": "Complete pre-written answer (latest version only)",
+      "is_common_question": true
     }
   ]
 }"""
@@ -767,6 +777,38 @@ def run_extract(sb, anthropic_client, dry_run, verbose):
             else:
                 sb.table("ai_instructions").insert(row).execute()
                 print(f"  ✓ Inserted: {text[:60]}")
+    print()
+
+    # ── faq_responses ─────────────────────────────────────────────────────
+    faqs = extracted.get("faq_responses", [])
+    print(f"── faq_responses ({len(faqs)} entries) ────────────────────────")
+    for faq in faqs:
+        question = faq.get("question", "")
+        answer = faq.get("answer", "")
+        if not question or not answer:
+            continue
+        row = {
+            "candidate_id": candidate_id,
+            "question": question,
+            "answer": answer,
+            "is_common_question": bool(faq.get("is_common_question", True)),
+        }
+        if dry_run:
+            print(f"  [DRY RUN] Q: {question[:70]}")
+        else:
+            existing = (
+                sb.table("faq_responses")
+                .select("id")
+                .eq("candidate_id", candidate_id)
+                .eq("question", question)
+                .execute()
+            )
+            if existing.data:
+                sb.table("faq_responses").update(row).eq("id", existing.data[0]["id"]).execute()
+                print(f"  ✓ Updated: {question[:70]}")
+            else:
+                sb.table("faq_responses").insert(row).execute()
+                print(f"  ✓ Inserted: {question[:70]}")
     print()
 
 
