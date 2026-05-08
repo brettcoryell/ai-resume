@@ -578,7 +578,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose):
 
     response = anthropic_client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=8192,
+        max_tokens=16384,
         system=EXTRACT_SYSTEM,
         messages=[{
             "role": "user",
