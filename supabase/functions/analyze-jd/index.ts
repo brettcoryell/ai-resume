@@ -110,7 +110,7 @@ Respond with a valid JSON object — no markdown, no backticks, just raw JSON:
 }`;
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: systemPrompt,
       messages: [{ role: 'user', content: `Analyze this job description:\n\n${jobDescription}` }],

@@ -405,12 +405,15 @@ def sync_gaps(sb, thoughts, profile, dry_run, verbose):
     for t in items:
         m = t["metadata"]
         desc, why = parse_gap_content(t["content"])
+        VALID_GAP_TYPES = {"skill", "experience", "environment", "role_type"}
+        raw_gap_type = m.get("gap_type", "skill")
+        gap_type = raw_gap_type if raw_gap_type in VALID_GAP_TYPES else "skill"
         row = {k: v for k, v in {
             "candidate_id": profile["id"],
             "ob_thought_id": t["id"],
             "description": desc,
             "why_its_a_gap": why or None,
-            "gap_type": m.get("gap_type", "skill"),
+            "gap_type": gap_type,
             "interest_in_learning": bool(m.get("interest_in_learning", False)),
         }.items() if v is not None}
         _upsert_by_ob_id(sb, "gaps_weaknesses", row, t["id"], dry_run, desc[:60])
@@ -485,6 +488,8 @@ CRITICAL RULES:
   IMPORTANT: category MUST be EXACTLY one of: "strong", "moderate", or "gap"
   — no other values are valid. Never use "developing", "advanced", or any other word.
   Use "gap" for genuine weaknesses only; "moderate" for real but not expert-level skills.
+- For gaps: gap_type MUST be EXACTLY one of: "skill", "experience", "environment", "role_type"
+  — no other values are valid. Map all gap types to the closest option; default to "skill".
 - Output ONLY valid JSON. No markdown, no backticks, no commentary.
 
 OUTPUT FORMAT (exact keys required):
@@ -572,7 +577,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose):
     import anthropic as anthropic_module
 
     response = anthropic_client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         max_tokens=8192,
         system=EXTRACT_SYSTEM,
         messages=[{
@@ -702,11 +707,14 @@ def run_extract(sb, anthropic_client, dry_run, verbose):
     print(f"── gaps_weaknesses ({len(gaps)} entries) ───────────────────────")
     for gap in gaps:
         desc = gap.get("description", "")
+        VALID_GAP_TYPES = {"skill", "experience", "environment", "role_type"}
+        raw_gap_type = gap.get("gap_type", "skill")
+        gap_type = raw_gap_type if raw_gap_type in VALID_GAP_TYPES else "skill"
         row = {
             "candidate_id": candidate_id,
             "description": desc,
             "why_its_a_gap": gap.get("why_its_a_gap") or None,
-            "gap_type": gap.get("gap_type", "skill"),
+            "gap_type": gap_type,
             "interest_in_learning": bool(gap.get("interest_in_learning", False)),
         }
 
