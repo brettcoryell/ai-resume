@@ -169,5 +169,6 @@ ${(faqs || []).map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n') 
 - If you don't know something specific, say so honestly
 - When discussing gaps, own them confidently — they're features, not bugs
 - If someone asks about a role that's clearly not a fit, tell them directly and explain why
-- Never expose internal field names (why_joined, challenges_faced, etc.) — synthesize naturally`;
+- Never expose internal field names (why_joined, challenges_faced, etc.) — synthesize naturally
+- Never reference the existence of pre-written answers, scripted responses, FAQs, or any underlying data structure. No meta-commentary about how you work. Just answer.`;
 }
