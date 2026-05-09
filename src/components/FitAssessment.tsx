@@ -23,12 +23,44 @@ interface AnalysisResult {
 }
 
 const DEMO_JDS = {
-  strong: `Senior Platform Engineer — Series B Fintech
+  strong: `Chief Information Officer — Global Financial Services Firm ($5B+ revenue)
 
-We're looking for someone with deep API design experience, comfort with ambiguity, and the ability to lead cross-functional initiatives. You'll own our integration platform serving hundreds of partners...`,
-  weak: `Head of Product, Consumer — Series C Mobile App
+We are seeking a seasoned CIO to lead enterprise technology strategy across a 2,000-person global organization. The ideal candidate has served as a senior technology executive at a multi-billion dollar company, with demonstrated success in large-scale digital transformation, enterprise architecture modernization, and building high-performance IT organizations.
 
-We need a consumer product leader with mobile-first experience and deep growth/experimentation background. You'll own our core mobile experience and drive user acquisition...`,
+Key Responsibilities:
+• Define and execute a multi-year technology roadmap aligned to business strategy
+• Own enterprise cybersecurity posture in partnership with the CISO function
+• Lead a technology organization of 150+ across infrastructure, applications, and security
+• Partner with the CEO, CFO, and Board on technology risk, investment, and AI strategy
+• Drive AI/ML adoption across the enterprise to accelerate operational efficiency
+• Manage $80M+ annual IT budget and key vendor relationships
+
+Requirements:
+• 15+ years of technology leadership; 5+ years as CIO, CISO, or equivalent C-suite role
+• Track record leading transformations at companies with $1B+ revenue
+• Deep expertise in enterprise security, risk management, and compliance
+• Experience presenting to boards and audit committees on technology risk and investment
+• Background in regulated industries (financial services, healthcare, or pharma a plus)
+• Demonstrated ability to build and scale high-performing technology organizations`,
+
+  weak: `IT Manager — Regional Logistics Company (250 employees)
+
+We're looking for a hands-on IT Manager to oversee day-to-day technology operations and a small internal team. This is a player-coach role in a lean environment where you'll be expected to handle both strategic direction and direct technical work.
+
+Key Responsibilities:
+• Manage a team of 4 IT support and systems staff
+• Maintain and troubleshoot on-premise server infrastructure and network
+• Own helpdesk operations and SLA management for internal users
+• Evaluate and implement SaaS tools within a $500K annual IT budget
+• Ensure basic compliance with data protection regulations
+• Serve as the primary escalation point for all IT issues
+
+Requirements:
+• 5–8 years of IT experience, including 2+ years in a management role
+• Hands-on experience with Windows Server, Active Directory, and networking
+• Comfortable rolling up your sleeves — this is a lean, generalist team
+• Experience with Microsoft 365 administration
+• CompTIA, MCSA, or similar certifications preferred`,
 };
 
 const verdictStyle: Record<Verdict, { banner: string; icon: string; text: string }> = {
@@ -157,10 +189,16 @@ const FitAssessment = () => {
               </span>
             </div>
             <textarea
-              className="w-full bg-secondary rounded-xl p-4 border border-border text-sm font-mono text-muted-foreground leading-relaxed resize-none focus:outline-none focus:border-accent/50 transition-colors"
-              rows={6}
+              className={cn(
+                "w-full bg-secondary rounded-xl p-4 border border-border text-sm font-mono text-muted-foreground leading-relaxed resize-none transition-colors",
+                activeTab === "custom"
+                  ? "focus:outline-none focus:border-accent/50 cursor-text"
+                  : "cursor-default opacity-80"
+              )}
+              rows={8}
               value={jdText}
-              onChange={(e) => setJdText(e.target.value)}
+              onChange={(e) => activeTab === "custom" && setJdText(e.target.value)}
+              readOnly={activeTab !== "custom"}
               placeholder="Paste a job description here..."
             />
             <div className="mt-4 flex justify-end">
