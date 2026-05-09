@@ -351,3 +351,11 @@ cd ~/Code/AI/ai-resume
 supabase functions deploy chat
 supabase functions deploy analyze-jd
 ```
+
+---
+
+## Lessons Learned
+
+Dense reference — symptom, root cause, exact fix. One to three lines max. Add an entry after every bug fix before committing.
+
+**JWT error on edge function calls** (`UNAUTHORIZED_INVALID_JWT_FORMAT`): `VITE_SUPABASE_ANON_KEY` was set to `sb_publishable_*` format, which is not a JWT. Edge functions require a Bearer JWT. Fix: `vercel env rm VITE_SUPABASE_ANON_KEY production` then re-add using the JWT key from `supabase projects api-keys` (the `anon` row, starts with `eyJ`).
