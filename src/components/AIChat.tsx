@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, Sparkles, ChevronLeft } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Volume2, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
@@ -73,7 +73,59 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const [loadingAudioIndex, setLoadingAudioIndex] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
+    setPlayingIndex(null);
+  };
+
+  const speakMessage = async (text: string, index: number) => {
+    if (playingIndex === index) {
+      stopAudio();
+      return;
+    }
+    stopAudio();
+
+    setLoadingAudioIndex(index);
+    try {
+      const res = await fetch(`${EDGE_FN_URL}/tts`, {
+        method: 'POST',
+        headers: EDGE_FN_HEADERS,
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error(`TTS error ${res.status}`);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        setPlayingIndex(null);
+        audioRef.current = null;
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(url);
+        setPlayingIndex(null);
+        audioRef.current = null;
+      };
+
+      setLoadingAudioIndex(null);
+      setPlayingIndex(index);
+      audio.play();
+    } catch {
+      setLoadingAudioIndex(null);
+    }
+  };
 
   const candidateName = profile?.name ?? "the candidate";
   const initial = candidateName.charAt(0).toUpperCase();
@@ -110,6 +162,10 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isOpen) stopAudio();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -175,7 +231,7 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+            <div key={i} className={cn("flex flex-col", msg.role === "user" ? "items-end" : "items-start")}>
               <div
                 className={cn(
                   "max-w-[85%] rounded-2xl px-4 py-3",
@@ -186,6 +242,28 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
               >
                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
               </div>
+              {msg.role === "assistant" && (
+                <button
+                  onClick={() => speakMessage(msg.content, i)}
+                  disabled={loadingAudioIndex !== null}
+                  className={cn(
+                    "mt-1 flex items-center gap-1 px-2 py-1 rounded-lg text-sm transition-colors",
+                    playingIndex === i
+                      ? "text-accent bg-accent/10 hover:bg-accent/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                  title={playingIndex === i ? "Stop" : "Hear this in Brett's voice"}
+                >
+                  {loadingAudioIndex === i ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : playingIndex === i ? (
+                    <Square className="w-3 h-3 fill-current" />
+                  ) : (
+                    <Volume2 className="w-3 h-3" />
+                  )}
+                  <span>{playingIndex === i ? "Stop" : "Hear this"}</span>
+                </button>
+              )}
             </div>
           ))}
 
