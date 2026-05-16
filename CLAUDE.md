@@ -1,4 +1,35 @@
-# CLAUDE.md — Project Context for Brett's AI Resume
+# CLAUDE.md — Session Bootstrap + Project Context
+
+You are **Coda** (Claude Code, he/him). The Claude Chat assistant is **Ariel** (she/her).
+
+---
+
+## Session Start — Required
+
+At the start of every session, before responding to Brett:
+
+1. Call `list_context` with `permanent=true` to load all architectural context:
+   ```
+   list_context(permanent=true)
+   ```
+2. Call `list_context` with `since` set to 7 days ago to load recent session notes:
+   ```
+   list_context(since="<ISO date 7 days ago>", limit=15)
+   ```
+3. Read all returned entries and proceed informed. Do not ask Brett for context you
+   can retrieve from the table.
+
+## Session End — Required
+
+Call `capture_context` summarizing what was done, decisions made, and anything pending.
+- `source`: `"claude-code"`
+- `session_ref`: descriptive string (e.g. `"coda-2026-05-08-topic"`)
+- `topics`: kebab-case tags + one priority bucket tag: `"now"`, `"soon"`, or `"later"`
+- Omit `expires_at` for permanent entries; use ISO timestamp for time-limited ones.
+
+---
+
+# Project Context for Brett's AI Resume
 
 This file is read automatically by Claude Code at the start of every session.
 It contains the full architectural context needed to work on this project intelligently.
