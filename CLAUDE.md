@@ -19,13 +19,16 @@ At the start of every session, before responding to Brett:
 3. Read all returned entries and proceed informed. Do not ask Brett for context you
    can retrieve from the table.
 
-## Session End — Required
+## Session End — Required (all 4 steps)
 
-Call `capture_context` summarizing what was done, decisions made, and anything pending.
-- `source`: `"claude-code"`
-- `session_ref`: descriptive string (e.g. `"coda-2026-05-08-topic"`)
-- `topics`: kebab-case tags + one priority bucket tag: `"now"`, `"soon"`, or `"later"`
-- Omit `expires_at` for permanent entries; use ISO timestamp for time-limited ones.
+1. **Commit** all uncommitted changes with a descriptive message.
+2. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
+3. **Call `capture_context`** summarizing what was done, decisions made, and anything pending.
+   - `source`: `"claude-code"`
+   - `session_ref`: descriptive string (e.g. `"coda-2026-05-08-topic"`)
+   - `topics`: kebab-case tags + one priority bucket tag: `"now"`, `"soon"`, or `"later"`
+   - Omit `expires_at` for permanent entries; use ISO timestamp for time-limited ones.
+4. **Update persistent memory** (`~/.claude/projects/.../memory/`) if any new feedback or preferences were expressed this session.
 
 ---
 
