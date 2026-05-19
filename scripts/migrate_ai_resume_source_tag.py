@@ -62,15 +62,27 @@ def get_supabase():
 # ── Scope definitions ──────────────────────────────────────────────────────
 
 ARTICLE_ALLOWLIST = {
-    # Indian Hill 1990 - 1993.pdf
+    # Indian Hill 1990 - 1993.pdf  (3 chunks)
     "05322769-8ec8-41fc-bfe2-4a284470f5e8",
     "98657d36-9f5a-4566-95ab-734737f7d49c",
     "ebb54ef1-dfc7-4de8-873c-fa078eab279b",
-    # The Hill School 1995 - 1998.pdf
+    # Grad school at UVA.pdf  (3 chunks)
+    "d4eba78b-cb12-43d4-920e-1456f8020cdc",
+    "0c6bfc40-146b-4dd3-a241-d6a14366c0f3",
+    "9d8e30ec-9a34-48fc-b8aa-28784abfb12c",
+    # The Hill School 1995 - 1998.pdf  (5 chunks)
     "2fa2dad1-1822-4ce8-8811-ba677dc1aa3c",
     "e00ab38f-cfa7-4d21-9704-fb4f57a9603b",
     "cdb12703-2c3c-4632-bc05-738cc4203f39",
+    "b30ee685-66c9-42c3-9d45-c5134b9790c9",
     "f67cbd23-2656-4d6c-9e13-ec7a06803e79",
+    # Sprint 1998 - 2003.pdf  (6 chunks)
+    "314c170d-b956-4eb5-af92-bb43a2c091ce",
+    "db523428-cc53-4a1a-bc1c-60c4bc62f750",
+    "bb571ab3-8e41-4d6b-b6e7-f604b68b4dd6",
+    "679c7f6d-139c-40e1-a188-767a068d9bf3",
+    "4fab3fec-796b-4868-b069-31e7cdcbe9a6",
+    "64092008-8a62-40a3-9d44-956ff0561d2b",
 }
 
 CAREER_TOPICS = {
