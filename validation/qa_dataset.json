@@ -1,286 +1,498 @@
-[
-  {
-    "id": "qa-001",
-    "question": "What was your first job out of college?",
-    "expected_keywords": ["Indian Hill", "physics", "teacher", "Cincinnati", "1990"],
-    "expected_entities": ["Indian Hill High School"],
-    "notes": "Should not say 'Cincinnati Public Schools' — that's wrong. School is Indian Hill High School, located in Cincinnati.",
-    "source": "Indian Hill 1990-1993 article"
+{
+  "_meta": {
+    "version": "1.2",
+    "updated": "2026-05-19",
+    "total_pairs": 43,
+    "brett_approved_count": 28,
+    "coda_additions_pending_review": 15,
+    "source_spec": "wiki/notes/Project-AI-Resume-Validation.md",
+    "groups": {
+      "A": "Career Philosophy and Through-Line (Q1-Q5)",
+      "B": "Sprint 1998-2003 (Q6-Q11)",
+      "C": "Purdue 2004-2007 (Q12-Q19)",
+      "D": "Emory (Q20-Q22)",
+      "E": "NIU (Q23)",
+      "F": "Neighborly (Q24-Q26)",
+      "G": "FAQ Responses (Q27-Q28)",
+      "H": "Indian Hill 1990-1993 (Q29-Q31)",
+      "I": "The Hill School 1995-1998 (Q32-Q35)",
+      "J": "UVA Graduate School 1993-1995 (Q36-Q37)",
+      "K": "Factual Verification and Honest Self-Assessment (Q38-Q43)"
+    }
   },
-  {
-    "id": "qa-002",
-    "question": "Who was Dr. Karl Feltman and what did you learn from him?",
-    "expected_keywords": ["principal", "Indian Hill", "fair", "equal", "manipulate", "merit"],
-    "expected_entities": ["Karl Feltman", "Indian Hill"],
-    "notes": "Should cover: fairness vs equality ('every policy needs an exception route'); 'go be manipulative' = handle with skill; merit contract; prediction that Brett would want to be in charge. Should NOT reference Cincinnati Public Schools.",
-    "source": "Indian Hill 1990-1993 article"
-  },
-  {
-    "id": "qa-003",
-    "question": "Why did you leave teaching?",
-    "expected_keywords": ["technology", "computer science", "UVA", "master", "credentials"],
-    "expected_entities": [],
-    "notes": "Should mention conflict with colleague who felt territorial about computer work, decision to get MS in CS to formalize credentials.",
-    "source": "Indian Hill 1990-1993 article"
-  },
-  {
-    "id": "qa-004",
-    "question": "Where did you get your master's degree and what was your research?",
-    "expected_keywords": ["UVA", "Virginia", "machine learning", "DNA", "computer science"],
-    "expected_entities": ["University of Virginia"],
-    "notes": "MS in Computer Science at UVA 1993-1995. Research: DNA sequence alignment (NP-complete problem). Advisor: Dr. Gabe Robbins. Briefly had the best-performing algorithm in the world — by a factor of three.",
-    "source": "UVA grad school articles"
-  },
-  {
-    "id": "qa-005",
-    "question": "Did you know Randy Pausch?",
-    "expected_keywords": ["Pausch", "UVA", "advisor", "virtual reality", "Last Lecture", "Carnegie Mellon"],
-    "expected_entities": ["Randy Pausch"],
-    "notes": "He was almost Brett's advisor at UVA. Brett chose machine learning (Gabe Robbins) over virtual reality. Pausch later became famous for 'The Last Lecture' at CMU.",
-    "source": "UVA grad school article — brushes with greatness"
-  },
-  {
-    "id": "qa-006",
-    "question": "Who invented the Six Degrees of Kevin Bacon game?",
-    "expected_keywords": ["Tjaden", "UVA", "Kevin Bacon", "master", "website"],
-    "expected_entities": ["Brett Tjaden"],
-    "notes": "Brett Tjaden — fellow UVA grad student — built it as his master's project. Brett's own project was DNA sequence alignment and 'no one has ever heard of it.'",
-    "source": "UVA grad school article — brushes with greatness"
-  },
-  {
-    "id": "qa-007",
-    "question": "What was The Hill School and how did you end up there?",
-    "expected_keywords": ["Hill School", "Pottstown", "Pennsylvania", "boarding school", "Director of Technology", "first technology hire"],
-    "expected_entities": ["The Hill School"],
-    "notes": "Private all-boys boarding school in Pottstown, PA. First technology hire. Started because the school needed to resolve a Mac vs. PC debate — answered by saying 'we can do both.'",
-    "source": "The Hill School 1995-1998 article"
-  },
-  {
-    "id": "qa-008",
-    "question": "How did you teach yourself new technology skills at The Hill School?",
-    "expected_keywords": ["Barnes", "Noble", "Philadelphia", "Saturday", "read", "implement"],
-    "expected_entities": [],
-    "notes": "Saturday mornings at Barnes & Noble in Philadelphia — read about routers, firewalls, email servers, then came home and implemented. Did this for nearly two years. Same 'expert by Monday' pattern.",
-    "source": "The Hill School 1995-1998 article — Saturday mornings"
-  },
-  {
-    "id": "qa-009",
-    "question": "Who is Jon Shirley?",
-    "expected_keywords": ["Microsoft", "President", "Hill School", "trustee", "strategic plan", "network"],
-    "expected_entities": ["Jon Shirley", "The Hill School", "Microsoft"],
-    "notes": "Former President of Microsoft, trustee at The Hill School. At age 30, Brett sat with him to build an IT strategic plan. One of Brett's career regrets is not maintaining that relationship.",
-    "source": "The Hill School 1995-1998 article — Jon Shirley"
-  },
-  {
-    "id": "qa-010",
-    "question": "Who is Len Sassaman?",
-    "expected_keywords": ["Sassaman", "Hill School", "cybersecurity", "Linux", "Bitcoin", "student"],
-    "expected_entities": ["Len Sassaman", "The Hill School"],
-    "notes": "Student in Brett's tech support team at The Hill School. Brett introduced him to Linux via a puzzle: account with 'man' command, figure out where else you can go. Sassaman became a noted cybersecurity expert and credible candidate for Bitcoin inventor (Brett personally doesn't believe this).",
-    "source": "The Hill School 1995-1998 article — Len Sassaman"
-  },
-  {
-    "id": "qa-011",
-    "question": "What is Paranet and what was its culture like?",
-    "expected_keywords": ["Paranet", "Sprint", "Houston", "consulting", "orientation", "NOMAN", "Myers-Briggs"],
-    "expected_entities": ["Paranet"],
-    "notes": "Houston-based IT consulting firm, acquired by Sprint. Known for intentional culture: mandatory week-long new hire orientation, Director of Fun, NOMAN framework (Network Operations Management), Myers-Briggs for all employees. Slogans: 'Sell sell sell; bill bill bill; hire hire hire'; 'We can teach you, help you, or do it for you.'",
-    "source": "Sprint 1998-2003 article — Paranet culture"
-  },
-  {
-    "id": "qa-012",
-    "question": "What was the Tenneco Y2K project?",
-    "expected_keywords": ["Tenneco", "Y2K", "18 million", "project manager", "50 consultants", "260 sites", "Paul Matker"],
-    "expected_entities": ["Tenneco", "Paul Matker"],
-    "notes": "$18M multinational Y2K remediation. Brett had zero PM experience and had never opened Microsoft Project. Sales manager Paul Matker pushed him to volunteer. Al said 'Ok.' Brett reorganized the 25,000-task plan down to 2,000. Set wedding for Dec 31, 1999.",
-    "source": "Sprint 1998-2003 article — Tenneco Y2K"
-  },
-  {
-    "id": "qa-013",
-    "question": "What is your Myers-Briggs type?",
-    "expected_keywords": ["ENTJ", "INTJ", "Myers-Briggs", "extroverted", "teacher"],
-    "expected_entities": [],
-    "notes": "ENTJ at work, more INTJ personally. Paranet facilitator speculated the teacher years developed an extroverted working persona.",
-    "source": "Sprint 1998-2003 article — Paranet orientation"
-  },
-  {
-    "id": "qa-014",
-    "question": "How did you end up in Houston at Sprint?",
-    "expected_keywords": ["Houston", "complain", "internal applications", "Director", "IS/IT"],
-    "expected_entities": [],
-    "notes": "He complained repeatedly about broken internal systems. Director of internal applications called him and said 'nobody complains more than you, so come interview.' He got the job — that's how he got to Houston.",
-    "source": "Sprint 1998-2003 article — dot-com team building"
-  },
-  {
-    "id": "qa-015",
-    "question": "What is your 'expert by Monday' approach?",
-    "expected_keywords": ["O'Reilly", "book", "Saturday", "expert", "Monday", "plane"],
-    "expected_entities": [],
-    "notes": "Repeatedly handed consultants a four-inch O'Reilly book and said 'Be an expert when you get off the plane.' Traced to his own pattern from The Hill School Saturday mornings. Also: bought 'The Portable MBA in Finance and Accounting' over a weekend when becoming Chief of Staff.",
-    "source": "Sprint 1998-2003 article — dot-com team building"
-  },
-  {
-    "id": "qa-016",
-    "question": "Where does the $300 million figure on your resume come from?",
-    "expected_keywords": ["Chief of Staff", "Keith Woods", "Sprint", "profit", "shareholder", "P/E"],
-    "expected_entities": ["Keith Woods"],
-    "notes": "Chief of Staff period at Sprint. Helped turn the division from losing money to profitable. Improvement in net profit x Sprint's P/E ratio = directly attributable increase in shareholder value.",
-    "source": "Sprint 1998-2003 article — Chief of Staff / real MBA"
-  },
-  {
-    "id": "qa-017",
-    "question": "What do you mean when you say Sprint gave you an MBA?",
-    "expected_keywords": ["Chief of Staff", "Keith Woods", "budget", "financial", "executive", "MBA"],
-    "expected_entities": ["Keith Woods", "Sprint"],
-    "notes": "As CoS to SVP Keith Woods: read financial statements, built budget models, analyzed profitability, did salary equity analysis, learned executive relationships and informal influence ('last person Keith talked to before decisions'). Real money, real consequences.",
-    "source": "Sprint 1998-2003 article — Chief of Staff / real MBA"
-  },
-  {
-    "id": "qa-018",
-    "question": "Who is John Shipley?",
-    "expected_keywords": ["Shipley", "Comptroller", "Purdue", "UAT", "binder", "SAP", "NIU"],
-    "expected_entities": ["John Shipley", "Purdue University"],
-    "notes": "Comptroller at Purdue and key stakeholder on the SAP implementation. Arrived at the ERP Executive Steering Committee to review UAT results with a three-inch binder for every one of his areas — tabs, answers to any question. Brett's benchmark for genuine preparation. Later interviewed unsuccessfully for CFO at NIU — a classic B-players-refusing-to-hire-A-players situation.",
-    "source": "Purdue biographical OB thoughts + SQL-injected experience context"
-  },
-  {
-    "id": "qa-019",
-    "question": "What were your roles at Purdue University?",
-    "expected_keywords": ["Director", "Organizational Effectiveness", "Deputy CIO", "AVP Infrastructure", "2004", "2007"],
-    "expected_entities": ["Purdue University"],
-    "notes": "Three distinct roles: Director of Organizational Effectiveness (Aug 2004 - Aug 2005); Deputy CIO — first ever at Purdue (Aug 2005 - Jun 2006); Deputy CIO & AVP Infrastructure (Jun 2006 - Apr 2007).",
-    "source": "Brett's correction in previous session"
-  },
-  {
-    "id": "qa-020",
-    "question": "What is the ERP selection process you're most proud of?",
-    "expected_keywords": ["Purdue", "SAP", "400", "requirements", "Oracle", "PeopleSoft", "commitment", "steering committee"],
-    "expected_entities": ["Purdue University"],
-    "notes": "Led 400-person requirements effort, scripted demos, full scoring. Oracle announced acquisition of PeopleSoft mid-process. After the SAP selection, went around the room and asked each person to commit out loud to peers — a deliberate move that seeded the same behavior two years later at the Finance module go/no-go.",
-    "source": "Purdue biographical OB thoughts"
-  },
-  {
-    "id": "qa-021",
-    "question": "Tell me about a time you worked with law enforcement.",
-    "expected_keywords": ["Secret Service", "FBI", "Purdue", "NIU", "Neighborly"],
-    "expected_entities": [],
-    "notes": "Three instances: (1) Purdue — Secret Service came investigating threatening emails to the President of the US; (2) NIU — FBI collaboration (details in experiences); (3) Neighborly — FBI collaboration. Should mention at least Purdue + one other.",
-    "source": "Purdue biographical OB thoughts + instructions"
-  },
-  {
-    "id": "qa-022",
-    "question": "What happened at Elementum?",
-    "expected_keywords": ["Elementum", "seven months", "CEO", "COO", "equity", "left"],
-    "expected_entities": ["Elementum"],
-    "notes": "Left after 7 months. CEO kept making unauthorized commitments to Sanofi client. COO confirmed the CEO's operating style wouldn't change. Brett left rather than accommodate it. Walked away from unvested equity (may be worth tens of millions, or nothing — genuinely uncertain).",
-    "source": "ai-resume experience + instructions"
-  },
-  {
-    "id": "qa-023",
-    "question": "What are your two honest weaknesses?",
-    "expected_keywords": ["network", "networking", "Jon Shirley", "weak network", "not looking for any role"],
-    "expected_entities": [],
-    "notes": "Two self-identified honest weaknesses: (1) professional network is thinner than it should be — didn't maintain relationships, including with Jon Shirley; (2) low tolerance for persistent chaos / bad management environments. Should mention both.",
-    "source": "gaps + instructions + FAQ"
-  },
-  {
-    "id": "qa-024",
-    "question": "How many of your direct reports have gone on to become CIOs or C-suite executives?",
-    "expected_keywords": ["nine", "9", "CIO", "C-suite"],
-    "expected_entities": [],
-    "notes": "Nine. This is Brett's own count as of 2026. Should not oversell — it's a genuine and powerful metric but it's Brett's own count.",
-    "source": "instructions + candidate_profile"
-  },
-  {
-    "id": "qa-025",
-    "question": "Are you available for a hands-on software engineering or DevOps role?",
-    "expected_keywords": ["not", "executive", "strategic", "research", "Python"],
-    "expected_entities": [],
-    "expected_answer_direction": "decline",
-    "notes": "Should say no. Brett codes Python for research (ACUTE), understands cloud architecture at design level, but is a strategic technology executive — not a production engineer.",
-    "source": "gaps + instructions"
-  },
-  {
-    "id": "qa-026",
-    "question": "Would you be a good fit for an early-stage startup with a small team, no structure, and high chaos?",
-    "expected_keywords": ["not", "Elementum", "turnaround", "transformation", "structure"],
-    "expected_entities": [],
-    "expected_answer_direction": "decline",
-    "notes": "Should decline honestly. Brett's best work has been transformations at established organizations. At Elementum, structural chaos was precisely why he left. He brings structure to ambiguity — but needs the ambiguity to eventually resolve.",
-    "source": "gaps + instructions"
-  },
-  {
-    "id": "qa-027",
-    "question": "Are you a PhD?",
-    "expected_keywords": ["doctoral candidate", "not yet", "in progress", "Rennes"],
-    "expected_entities": ["University of Rennes"],
-    "expected_answer_direction": "honest correction",
-    "notes": "Should clarify: doctoral candidate at Rennes School of Business / University of Rennes, not yet complete. The degree is in progress.",
-    "source": "instructions + experiences"
-  },
-  {
-    "id": "qa-028",
-    "question": "What is the ACUTE project?",
-    "expected_keywords": ["ACUTE", "ATT&CK", "ML", "machine learning", "MITRE", "TTP", "predict", "Rennes"],
-    "expected_entities": ["ACUTE"],
-    "notes": "Using ML to predict attacker TTP sequences from ATT&CK-coded SIEM events — identify attacker identity and predict next steps. Research-level, not a deployed commercial product.",
-    "source": "experiences + instructions"
-  },
-  {
-    "id": "qa-029",
-    "question": "What is Critical Chain project management and where did you use it?",
-    "expected_keywords": ["Critical Chain", "buffer", "Purdue", "schedule", "slack"],
-    "expected_entities": ["Purdue University"],
-    "notes": "From 'The Goal' / Goldratt. Pulls hidden schedule slack into visible shared buffers. Applied at Purdue with Jeff Witten. Addresses natural tendency to sandbag estimates and delay starting.",
-    "source": "Purdue biographical OB thoughts"
-  },
-  {
-    "id": "qa-030",
-    "question": "What is your career through-line?",
-    "expected_keywords": ["competence", "trust", "opportunity", "yes", "willingness"],
-    "expected_entities": [],
-    "notes": "Brett's self-described through-line: 'competence creates trust, trust creates opportunity, willingness to say yes to unfamiliar work.' Should see this phrasing or close paraphrase.",
-    "source": "instructions"
-  },
-  {
-    "id": "qa-031",
-    "question": "Did you work at Cincinnati Public Schools?",
-    "expected_keywords": ["Indian Hill", "not", "Cincinnati"],
-    "expected_entities": ["Indian Hill High School"],
-    "expected_answer_direction": "correct misconception",
-    "notes": "IMPORTANT factual test. Answer should be NO. Brett taught at Indian Hill High School, which is located in Cincinnati. He never worked for Cincinnati Public Schools. The ai-resume experiences table has incorrect rows with company_name 'Cincinnati Public Schools' — this tests whether the system gives the correct answer despite the bad data.",
-    "source": "Brett's explicit correction in prior session"
-  },
-  {
-    "id": "qa-032",
-    "question": "What was your role at Neighborly and how did you become CISO?",
-    "expected_keywords": ["Neighborly", "CISO", "SVP", "General Counsel", "CFO", "CTO", "coalition"],
-    "expected_entities": ["Neighborly"],
-    "notes": "Global SVP IT + CISO. The CISO title wasn't given — Brett built a coalition with the General Counsel and CFO to get authority from a reluctant CTO. PCI compliance, ERM, MSP transition, security operating model from scratch.",
-    "source": "experiences table"
-  },
-  {
-    "id": "qa-033",
-    "question": "What was your first hire ever?",
-    "expected_keywords": ["Hill School", "Computer Lab", "woman", "first employee"],
-    "expected_entities": ["The Hill School"],
-    "notes": "At The Hill School — the woman who watched over the six-computer Computer Lab. Together they created the student Tech Support Team from the boys who were always hanging around.",
-    "source": "The Hill School 1995-1998 article — tech support team"
-  },
-  {
-    "id": "qa-034",
-    "question": "What was your biggest salary equity analysis work?",
-    "expected_keywords": ["Sprint", "NIU", "Northern Illinois", "salary", "equity", "$500,000", "half a million"],
-    "expected_entities": [],
-    "notes": "Originated at Sprint for Keith Woods. Replicated at Purdue. Replicated again at NIU — VP of HR said the model was worth $500,000 in consulting value before institutional politics blocked the full implementation.",
-    "source": "Sprint 1998-2003 article + NIU experiences"
-  },
-  {
-    "id": "qa-035",
-    "question": "Tell me about yourself.",
-    "expected_keywords": ["CIO", "CISO", "20 years", "C-level", "higher education", "healthcare", "franchising"],
-    "expected_entities": [],
-    "notes": "This is a pre-written FAQ response. Should be reproduced verbatim or near-verbatim. Must include the core executive framing: former CIO/CISO, 20 years C-level leadership, multibillion-dollar companies, healthcare/higher education/retail/franchising, President's Cabinet, $9B PE sale.",
-    "source": "faq_responses — 'Tell me about yourself'"
-  }
-]
+  "pairs": [
+    {
+      "id": "Q1",
+      "group": "A",
+      "brett_approved": true,
+      "question": "What is the core pattern that runs through Brett's entire career?",
+      "expected_answer": "Competence creates trust, trust creates opportunity, and a willingness to say yes to unfamiliar work creates the next level of competence. The learning happens in the doing. Brett has never mapped out a conventional career plan — he has followed interesting work and let performance open the next door. 'I say yes to the opportunity, I do a good job, and then I get to do a bigger job.'",
+      "expected_keywords": ["competence", "trust", "opportunity", "yes", "learning", "performance", "career"],
+      "expected_entities": [],
+      "source_chunk": null,
+      "notes": "Core through-line question. Should be addressable from biographical interview sessions."
+    },
+    {
+      "id": "Q2",
+      "group": "A",
+      "brett_approved": true,
+      "question": "Why did Brett leave The Hill School, and what did he learn there that stayed with him?",
+      "expected_answer": "Brett left The Hill School because the scale wasn't sufficient to qualify him for a major university CIO role — a self-aware diagnosis made without external prompting. While there, at age 29, he was taught one-on-one how to build a technology strategic plan — and how it feeds into an institutional strategic plan — by Jon Shirley, the former President of Microsoft, who was a sitting trustee. Brett names not maintaining that relationship after leaving as one of the genuine regrets of his career.",
+      "expected_keywords": ["Hill School", "CIO", "scale", "strategic plan", "Jon Shirley", "Microsoft", "regret", "network"],
+      "expected_entities": ["The Hill School", "Jon Shirley", "Microsoft"],
+      "source_chunk": null,
+      "notes": "Tests whether Hill School reasoning and Jon Shirley connection are both preserved."
+    },
+    {
+      "id": "Q3",
+      "group": "A",
+      "brett_approved": true,
+      "question": "Who was the finest small-group persuader Brett ever encountered, and what did he learn from that person?",
+      "expected_answer": "The CIO who hired Brett at Emory. He was a pure natural — could change the minds of a room full of smart, aligned people without anyone understanding how. When Brett asked him to teach it as part of his professional development plan, the CIO had no idea what he was doing and couldn't articulate a single word of it. The lesson: some capabilities are entirely implicit even to their owner.",
+      "expected_keywords": ["persuader", "Emory", "CIO", "implicit", "natural", "professional development", "influence"],
+      "expected_entities": ["Emory"],
+      "source_chunk": null,
+      "notes": "Answer should name Emory and the lesson about implicit capability."
+    },
+    {
+      "id": "Q4",
+      "group": "A",
+      "brett_approved": true,
+      "question": "What is Brett's core management philosophy in his own words?",
+      "expected_answer": "Good work with good people. Hard competitors in the marketplace, kind companions in the workplace. People are rare and valuable by default, not by performance. When someone is struggling, the burden of proof falls on the system and situation first, not the person. Brett works to find whether there's a good person trapped in a bad process before concluding they've exceeded their situation — and if so, rescues rather than punishes.",
+      "expected_keywords": ["good work", "good people", "kind", "burden of proof", "system", "process", "valuable", "management"],
+      "expected_entities": [],
+      "source_chunk": null,
+      "notes": "Direct quote context. 'Good work with good people' must appear or be closely paraphrased."
+    },
+    {
+      "id": "Q5",
+      "group": "A",
+      "brett_approved": true,
+      "question": "What is Brett's book idea, and what is its central argument?",
+      "expected_answer": "Working title: In Defense of Management. Core argument: Leadership always gets the attention from authors and business schools. Management deserves a coequal place — it is not well taught, not well regarded, and yet remains part of the daily reality of senior leaders in large organizations. The art and craft of management — getting the best out of people, developing them, handling performance with humanity — is systematically undertaught, and as a result managers produce worse outcomes for people than they should. Managers as underserved craftspeople is the animating framing.",
+      "expected_keywords": ["In Defense of Management", "management", "leadership", "undertaught", "craftspeople", "book"],
+      "expected_entities": [],
+      "source_chunk": null,
+      "notes": "Title 'In Defense of Management' should appear."
+    },
+    {
+      "id": "Q6",
+      "group": "B",
+      "brett_approved": true,
+      "question": "How did Brett progress through Sprint, and what was the scale of his final role there?",
+      "expected_answer": "Brett progressed from risk management consultant (no prior experience — studied up fast) to project manager on an $18M Y2K project with 50 consultants and a 25,000-line Microsoft Project file, to Chicago consulting team lead, to nationwide infrastructure practice lead overseeing five consulting managers in five cities, to Chief of Staff to the SVP running the division. As Chief of Staff he managed a $120M budget, restructured product line profitability, and helped make the decision — with the SVP and Sprint's COO — to shut down the division when the dot-com era cooled and the Sprint/WorldCom merger collapsed.",
+      "expected_keywords": ["Sprint", "Chief of Staff", "$120M", "Y2K", "$18M", "WorldCom", "COO", "wind-down", "dot-com"],
+      "expected_entities": ["Sprint", "WorldCom"],
+      "source_chunk": null,
+      "notes": "Tests whether multiple Sprint career stages are all present in the pipeline."
+    },
+    {
+      "id": "Q7",
+      "group": "B",
+      "brett_approved": true,
+      "question": "Where did the $300M in shareholder value on Brett's resume come from?",
+      "expected_answer": "From rebalancing the product portfolio and analyzing the sales pipeline during the Sprint consulting division wind-down period, which returned the division to profitability before the shutdown decision was made. Managing a wind-down at that scale is a fundamentally different capability than managing growth — Brett did both inside the same Chief of Staff role.",
+      "expected_keywords": ["$300M", "shareholder value", "product portfolio", "profitability", "wind-down", "Sprint", "Chief of Staff"],
+      "expected_entities": ["Sprint"],
+      "source_chunk": null,
+      "notes": "Common resume question. Answer must include the mechanism (portfolio rebalancing + pipeline analysis), not just the number."
+    },
+    {
+      "id": "Q8",
+      "group": "B",
+      "brett_approved": true,
+      "question": "What was Paranet, and what about its culture stayed with Brett for the rest of his career?",
+      "expected_answer": "Paranet was a Houston-based IT consulting firm Sprint acquired. Before Sprint absorbed it, Brett spent about two years inside one of the most intentionally designed organizations he ever encountered. The culture was loud, fun, bold, and daring — work hard, play hard, run by a CEO who was a natural salesman. Every new hire spent their first week at a dry-county location in Texas for orientation. They had a Director of Fun whose contribution to the company vocabulary was: 'If it's not fun, it's not worth it.' They had a visual framework called NOMAN (Network Operations Management) that gave everyone a common language. The Myers-Briggs assessment was part of orientation — Brett tested ENTJ at work, more INTJ personally; the facilitator speculated his years as a teacher had developed an extroverted working persona. The slogans he carried for the rest of his career: 'Sell, sell, bill, bill, hire, hire.' 'We can teach you, help you, or do it for you.' 'Point to where it hurts.' Brett has never been able to fully recreate Paranet's orientation at any company he later led — partly because those roles were almost always turnarounds with budget pressure, not growth contexts.",
+      "expected_keywords": ["Paranet", "Houston", "Sprint", "Director of Fun", "NOMAN", "Myers-Briggs", "ENTJ", "INTJ", "orientation", "culture"],
+      "expected_entities": ["Paranet", "Sprint"],
+      "source_chunk": null,
+      "notes": "Source: Sprint PDF chunks. Tests whether Paranet cultural details are in the pipeline."
+    },
+    {
+      "id": "Q9",
+      "group": "B",
+      "brett_approved": true,
+      "question": "What was the Tenneco Y2K project, and how did Brett end up running it?",
+      "expected_answer": "Brett's first assignment at Paranet sent him to Tenneco — a Fortune 250 manufacturing conglomerate — as a risk consultant on a Y2K remediation already in progress. He had no formal risk management experience. His delivery manager Paul Matker pushed him to volunteer when the project manager quit. Brett walked into the sponsor's office (Al) and said he could do it. Al said 'Ok' and Brett walked out before he could unsay it. The project: $18M, multinational, 50 consultants, 25,000 tasks in Microsoft Project, 260 sites across the US, Canada, and Mexico, just over a year left. Brett reorganized the plan down to about 2,000 tasks, set dates through durations and predecessor links. Tenneco made it through Y2K successfully. Brett had set his wedding for December 31, 1999 and rolled off the project in October, got married, and took a Caribbean cruise for his honeymoon.",
+      "expected_keywords": ["Tenneco", "Y2K", "$18M", "Paranet", "Paul Matker", "25,000 tasks", "260 sites", "wedding", "Fortune 250"],
+      "expected_entities": ["Tenneco", "Paranet", "Paul Matker"],
+      "source_chunk": null,
+      "notes": "Source: Sprint PDF chunks. Rich narrative — tests fidelity of story details."
+    },
+    {
+      "id": "Q10",
+      "group": "B",
+      "brett_approved": true,
+      "question": "How did Brett's habit of complaining about systems get him promoted at Sprint?",
+      "expected_answer": "While managing a consulting team in Chicago, Brett wrote regularly to the director who ran internal applications with usability complaints and suggestions about things that kept breaking. He could read the error messages and see broken PHP scripts and Perl files. After about a year of this, the director called him: 'Brett, nobody complains about our systems more than you do. That's why I think you need to come down to Texas and interview to be the manager of the group that runs them. The current guy just quit.' Brett interviewed and got the job. That's how he got to Houston as Director of IS/IT — 31 direct reports, with review season starting in a few weeks for people he didn't yet know.",
+      "expected_keywords": ["Sprint", "Chicago", "Houston", "PHP", "Perl", "Director of IS/IT", "31 direct reports", "complaints", "Texas"],
+      "expected_entities": ["Sprint"],
+      "source_chunk": null,
+      "notes": "Source: Sprint PDF chunks. Tests whether the unexpected promotion story is retrievable."
+    },
+    {
+      "id": "Q11",
+      "group": "B",
+      "brett_approved": true,
+      "question": "What is Brett's 'expert by Monday' approach, and where did it originate?",
+      "expected_answer": "More than once as a team lead, Brett handed a consultant a four-inch O'Reilly technical book and said 'Be an expert when you get off the plane.' He was asking them to do something he had already done to himself repeatedly: learn telephony and routing protocols at The Hill School by reading on Saturday mornings, learn project management by running the Tenneco project, and — when becoming Chief of Staff at Sprint — buy 'The Portable MBA in Finance and Accounting' at a bookstore and read it over the weekend. The pattern: when Brett needed to know something, he found a way to know it before anyone noticed he didn't. He only asked others to do what he already knew they could do because he had done it first.",
+      "expected_keywords": ["O'Reilly", "expert", "Saturday mornings", "Hill School", "Tenneco", "Portable MBA", "Chief of Staff", "Sprint", "self-taught"],
+      "expected_entities": ["The Hill School", "Sprint", "Tenneco"],
+      "source_chunk": null,
+      "notes": "Source: Sprint PDF chunks. Cross-employer narrative thread — tests retrieval across multiple time periods."
+    },
+    {
+      "id": "Q12",
+      "group": "C",
+      "brett_approved": true,
+      "question": "Who was Jeff Witten, and what was the nature of Brett's working relationship with him?",
+      "expected_answer": "Jeff Witten was a professor in the College of Technology who had spent years lobbying for an ERP system before moving into the central IT unit. He was sharp — Brett could tell him nothing about systems analysis and needed to explain nothing about the value of process management. What Jeff lacked was practical experience with two things Brett brought: customer-driven project governance and Critical Chain schedule buffer management. Once Jeff saw Brett knew where he was going with the PMO, he was more than happy to let him run with it. They had a friendly and efficient working relationship.",
+      "expected_keywords": ["Jeff Witten", "Purdue", "ERP", "PMO", "Critical Chain", "project governance", "College of Technology"],
+      "expected_entities": ["Jeff Witten", "Purdue"],
+      "source_chunk": null,
+      "notes": "Purdue-era working relationship. Tests named entity fidelity."
+    },
+    {
+      "id": "Q13",
+      "group": "C",
+      "brett_approved": true,
+      "question": "What is Critical Chain, and how did Brett apply it at Purdue?",
+      "expected_answer": "Critical Chain is a project management concept from a book of the same name. The core insight is that people let work expand to fill the time allotted and delay starting until the last possible moment — every step accumulates fake slack, hidden from the project manager behind resistance and excuses. Pulling that hidden slack out into shared, visible project buffers (or section buffers) is genuinely useful. Brett had become a fan of the book at Sprint and, as his project managers at Purdue became more skilled, they put it into practice. Along with customer-driven project governance, it was one of the two things Brett brought to Jeff Witten that Jeff lacked practical experience with.",
+      "expected_keywords": ["Critical Chain", "Purdue", "Sprint", "project buffers", "slack", "PMO", "Jeff Witten", "project management"],
+      "expected_entities": ["Purdue", "Jeff Witten"],
+      "source_chunk": null,
+      "notes": "Methodology question. Answer should include the mechanism (fake slack / buffers) not just the name."
+    },
+    {
+      "id": "Q14",
+      "group": "C",
+      "brett_approved": true,
+      "question": "How did Brett structure the SAP software selection process at Purdue, and what unusual thing did he do at the end?",
+      "expected_answer": "Brett led a group of 400 people to develop a full set of requirements for every module of the software, ran scripted demos, and scored every requirement. After crunching the numbers, a group of 30-plus senior stakeholders met to make the final decision — complicated by Oracle's mid-process announcement that it was acquiring PeopleSoft. After a two-hour discussion, the group chose SAP easily. Then Brett did something deliberate: he emphasized how hard the project would be, reminded the group that the grass would look greener when issues piled up, and asked each person to look their peers in the eye and commit out loud — to their peers, not just to Brett — that they would support the decision. One by one, unanimously, they did. Two years later, when the Finance module go/no-go vote came around, the Executive Steering Committee went around the table the same way. Nobody mentioned the earlier commitment. Brett believes the earlier exercise was the origin story.",
+      "expected_keywords": ["SAP", "Purdue", "Oracle", "PeopleSoft", "400 people", "commitment", "Finance module", "Executive Steering Committee", "go/no-go"],
+      "expected_entities": ["Purdue", "SAP", "Oracle", "PeopleSoft"],
+      "source_chunk": null,
+      "notes": "Leadership story with two-part structure. Tests whether the peer commitment ritual and the two-years-later payoff both survive extraction."
+    },
+    {
+      "id": "Q15",
+      "group": "C",
+      "brett_approved": true,
+      "question": "Who was John Shipley and what did Brett observe about him at Purdue?",
+      "expected_answer": "John Shipley was the Comptroller at Purdue and a key stakeholder on the SAP implementation. At the Executive Steering Committee for Finance module user acceptance testing, Shipley arrived absolutely prepared — a three-inch binder for every one of his areas: purchasing, accounting, finance, student loans, and more. Every item organized with tabs; he could speak to and answer any ad hoc question. Brett has never seen anyone do it that well. He acknowledges it was probably overkill, but frames it as exactly what you want from your Comptroller — someone who fanned the work out to every part of his organization, watched it come back in, and had the answer to any question.",
+      "expected_keywords": ["John Shipley", "Comptroller", "Purdue", "SAP", "binder", "Finance", "prepared", "UAT"],
+      "expected_entities": ["John Shipley", "Purdue"],
+      "source_chunk": null,
+      "notes": "Named entity + observational detail test."
+    },
+    {
+      "id": "Q16",
+      "group": "C",
+      "brett_approved": true,
+      "question": "What happened when John Shipley later interviewed at NIU?",
+      "expected_answer": "When Brett was CIO at Northern Illinois University and they were hiring a CFO, Shipley was one of the candidates. Brett thought he did a great job — classy, all the expertise in the world, someone NIU would have been very lucky to get. Shipley didn't get the job. People were intimidated. Brett frames it as a classic case of what happens when A players aren't the ones doing the hiring: A players insist on hiring other A players, but B players hire C players because A players make them nervous. Brett voted for Shipley and advocated for him. It didn't matter.",
+      "expected_keywords": ["John Shipley", "NIU", "Northern Illinois University", "CFO", "A players", "B players", "intimidated", "hiring"],
+      "expected_entities": ["John Shipley", "Northern Illinois University"],
+      "source_chunk": null,
+      "notes": "Cross-employer thread (Purdue → NIU). Tests whether the A/B/C player hiring framework is attributed and contextualized correctly."
+    },
+    {
+      "id": "Q17",
+      "group": "C",
+      "brett_approved": true,
+      "question": "What skills did Brett bring to Purdue from his earlier career, and which ones did he pick up there?",
+      "expected_answer": "Brought: budget management (had managed Sprint's $120M consulting division budget; at Purdue managed $50-60M IT budget), IT strategic planning (learned from Jon Shirley in the mid-1990s, augmented with Balanced Scorecard and strategy mapping), and compensation philosophy work (salary analysis, salary bands, compa-ratios, merit vs. market increases — originally done at Sprint). Gained: IT service management/ITIL (attended ITSMF USA conference in 2004, launched Purdue's first ITSM office, starting with incident, problem, and change) and first real exposure to cybersecurity in a large organization (inherited a 160-person infrastructure team, found a strong security group augmented by nationally-recognized research professors who instilled two principles: security is everybody's job, and security is a process not a project).",
+      "expected_keywords": ["Purdue", "Sprint", "$120M", "$50-60M", "ITIL", "ITSM", "Balanced Scorecard", "Jon Shirley", "cybersecurity", "salary bands", "compa-ratios"],
+      "expected_entities": ["Purdue", "Sprint", "Jon Shirley"],
+      "source_chunk": null,
+      "notes": "Skills inventory question. Tests whether cross-employer skill lineage is preserved."
+    },
+    {
+      "id": "Q18",
+      "group": "C",
+      "brett_approved": true,
+      "question": "What was Brett's first experience working with law enforcement, and where did it happen?",
+      "expected_answer": "At Purdue. Students who sent threatening emails to the President of the United States would generate visits from Secret Service agents who wanted access to emails and help identifying the people involved. Since Brett was running several of the email systems for the university, this became a recurring part of his role. He notes it was not his last experience working with law enforcement on cybersecurity issues.",
+      "expected_keywords": ["Purdue", "Secret Service", "law enforcement", "threatening emails", "President of the United States", "cybersecurity"],
+      "expected_entities": ["Purdue"],
+      "source_chunk": null,
+      "notes": "Law enforcement thread that connects forward to FBI at NIU. Both ends should be retrievable."
+    },
+    {
+      "id": "Q19",
+      "group": "C",
+      "brett_approved": true,
+      "question": "What were Brett's three roles at Purdue and when did each begin?",
+      "expected_answer": "Brett held three distinct roles at Purdue: Director of Organizational Effectiveness (August 2004 – August 2005), Deputy CIO only — the first person ever to hold that title at Purdue (August 2005 – June 2006), and Deputy CIO & AVP Infrastructure — after picking up the 160-person infrastructure team as an additional duty (June 2006 – April 2007).",
+      "expected_keywords": ["Purdue", "Director of Organizational Effectiveness", "Deputy CIO", "AVP Infrastructure", "2004", "2005", "2006", "2007", "first person"],
+      "expected_entities": ["Purdue"],
+      "source_chunk": null,
+      "notes": "Role/date accuracy test. All three titles and all four dates should appear."
+    },
+    {
+      "id": "Q20",
+      "group": "D",
+      "brett_approved": true,
+      "question": "How did Brett get hired at Emory, given that he was considered underqualified?",
+      "expected_answer": "The recruiter told Brett he was probably underqualified — the search committee wanted someone who had already been there and done that. Brett offered himself as a low-stakes third candidate ('good practice for me'). The recruiter laughed and kept him in mind. When the first search failed, Brett was invited into the second round and hired. It wasn't the first time he'd won as the underdog — his first teaching job in Cincinnati, he beat Ohio's reigning state Teacher of the Year for the physics position, which he only discovered after being hired.",
+      "expected_keywords": ["Emory", "underqualified", "recruiter", "underdog", "Teacher of the Year", "physics", "Cincinnati", "second round"],
+      "expected_entities": ["Emory"],
+      "source_chunk": null,
+      "notes": "Underdog pattern — connects Emory hiring to earlier teaching career. Both threads should be present."
+    },
+    {
+      "id": "Q21",
+      "group": "D",
+      "brett_approved": true,
+      "question": "What happened during the Emory reorganization, and why did it matter?",
+      "expected_answer": "Brett inherited two 160-person teams (networking/telecom and academic computing/helpdesk). He spent nine months studying before acting, then ran a three-month reorganization using a 30-person internal committee, outside consultants, and deep HR partnership. On moving day, just over 100 of the 320 staff had a new job or a new manager. It went extraordinarily well, made Brett's reputation at the university, led to conversations about changing how reorganizations were done university-wide, and caught the attention of the Provost and EVP for Finance.",
+      "expected_keywords": ["Emory", "reorganization", "160-person", "320 staff", "nine months", "30-person committee", "Provost", "EVP for Finance"],
+      "expected_entities": ["Emory"],
+      "source_chunk": null,
+      "notes": "Scale and outcome of reorg must both be present: 320 people affected, reputation consequence."
+    },
+    {
+      "id": "Q22",
+      "group": "D",
+      "brett_approved": true,
+      "question": "How did Brett's situation as a single father shape his time at Emory?",
+      "expected_answer": "Brett was a single father throughout his Emory years. His wife decided not to relocate from Indiana to Atlanta; divorce and a custody battle followed. Brett won custody — fathers win in only 4% of Indiana cases — and won five of six annual custody proceedings. He lost the sixth and immediately began looking for jobs near his daughters in Indiana, which led him to NIU — a move he describes as deliberate career suicide made without ambivalence. His operating rhythm at Emory: fully present with his daughters from arrival home to bedtime, then two hours of work on the couch nearly every night for approximately five years. Almost no one at work knew. His experience as a father to two daughters shaped his sensitivity to women in the workplace — equitable salaries, fair hiring, performance review equity, and women in IT.",
+      "expected_keywords": ["single father", "Emory", "custody", "Indiana", "NIU", "4%", "daughters", "career suicide", "women in IT", "salary equity"],
+      "expected_entities": ["Emory", "NIU", "Indiana"],
+      "source_chunk": null,
+      "notes": "Personal context with significant career impact. The 4% Indiana statistic and NIU connection must be present."
+    },
+    {
+      "id": "Q23",
+      "group": "E",
+      "brett_approved": true,
+      "question": "What happened with Brett's salary equity initiative at NIU, and why does it still bother him?",
+      "expected_answer": "Brett conducted a comprehensive salary equity analysis across his division — later described by a subsequent VP of HR as worth $500,000 of private consulting work. He offered to share or even conduct the analysis university-wide and had a plan to self-fund the corrections through efficiencies he was already generating. The work was largely scuttled due to a political rift between Brett and another member of the President's Cabinet — a person to whom HR reported, who was on the opposite side of a battle over whether to remove the President. The legitimate HR issues became a political hostage. Brett tried every available route over two years — reframing the proposal, changing the personnel involved, finding workarounds. He made partial progress. He was largely thwarted. Ten years later he still thinks about the people who were cheated out of their pay increases. His retrospective: he moved too slowly on relationship-building and too quickly on the subject matter, and wasn't prepared for fair pay to become a political football.",
+      "expected_keywords": ["NIU", "salary equity", "$500,000", "President's Cabinet", "political", "HR", "self-fund", "two years", "political football"],
+      "expected_entities": ["NIU", "Northern Illinois University"],
+      "source_chunk": null,
+      "notes": "Critical story — political defeat on a legitimate equity initiative. $500K valuation and retrospective lesson must both be present."
+    },
+    {
+      "id": "Q24",
+      "group": "F",
+      "brett_approved": true,
+      "question": "How did Brett become CISO at Neighborly, and what does the story illustrate about his approach?",
+      "expected_answer": "Within two months at Neighborly, Brett discovered credit card numbers written down and posted on bulletin boards — not PCI compliant. He went to his boss (the CTO) to request authority to pass basic security policies. The CTO said no. Brett built a coalition: secured agreement from the General Counsel and CFO that the company was definitively not PCI compliant. He returned to the CTO with a different conversation — not 'you should do this' but 'here is what the situation is, here is who agrees with me, and here is what happens to you personally when the breach comes. Or, make me CISO in name only, no extra pay, just let me pass some standard policies.' The CTO agreed. Next day Brett was CISO. The lesson Brett draws: find the path that lets the other person say yes without losing face.",
+      "expected_keywords": ["Neighborly", "CISO", "PCI", "credit cards", "CTO", "General Counsel", "CFO", "coalition", "losing face"],
+      "expected_entities": ["Neighborly"],
+      "source_chunk": null,
+      "notes": "CISO origin story. PCI mechanism and coalition-building tactic must be present."
+    },
+    {
+      "id": "Q25",
+      "group": "F",
+      "brett_approved": true,
+      "question": "What was the significance of the KKR sale at Neighborly?",
+      "expected_answer": "When Neighborly came up for PE sale to KKR (a $9B transaction), due diligence spent more time on cybersecurity than any other area of IT. Brett was the only person whose interview sessions generated follow-up commentary. The comment: the sale would have been impossible without the cybersecurity program Brett had built. Brett received a C-level exit bonus and retired — his second retirement.",
+      "expected_keywords": ["KKR", "Neighborly", "$9B", "due diligence", "cybersecurity", "exit bonus", "retirement", "second retirement", "impossible"],
+      "expected_entities": ["KKR", "Neighborly"],
+      "source_chunk": null,
+      "notes": "High-signal resume story. $9B transaction amount and 'impossible without' quote must be present."
+    },
+    {
+      "id": "Q26",
+      "group": "F",
+      "brett_approved": true,
+      "question": "How did the idea for ACUTE originate?",
+      "expected_answer": "Being the CISO himself (not just supporting or overseeing one) generated a practical question Brett hadn't had before: what do I actually do with these signals right now, while the attack is in progress? His original mental model was fingerprints — enough whorls and swoops make a positive ID. That led to using AI to process ATT&CK-coded signals to classify attacks in progress and predict the attacker's next steps. This became ACUTE.",
+      "expected_keywords": ["ACUTE", "CISO", "ATT&CK", "fingerprints", "signals", "AI", "classify", "predict", "attack", "Neighborly"],
+      "expected_entities": ["ACUTE"],
+      "source_chunk": null,
+      "notes": "ACUTE origin story — the fingerprint mental model must appear."
+    },
+    {
+      "id": "Q27",
+      "group": "G",
+      "brett_approved": true,
+      "question": "How does Brett describe himself when asked to introduce himself professionally?",
+      "expected_answer": "He describes himself as a former CIO and CISO with 20 years of C-level leadership running technology and security organizations at multibillion-dollar companies across healthcare, higher education, retail, and franchising. He has sat on President's Cabinets, facilitated a $9 billion private equity sale, cut a $28 million IT budget in half while improving services, and built security programs from scratch that passed KKR due diligence scrutiny. Nine of his former direct reports are now CIOs or C-suite executives. While pursuing his doctorate in AI in Rennes, France, he developed a custom AI model trained to classify cybersecurity attacks while they are in progress and predict the next steps the attacker will take. He describes himself as semi-retired but not done — looking for one more significant role where the work is genuinely hard, the stakes are high, and the people are good. His summary line: 'I build systems and people that scale.'",
+      "expected_keywords": ["CIO", "CISO", "20 years", "$9 billion", "$28 million", "KKR", "nine direct reports", "Rennes", "doctorate", "ACUTE", "systems and people that scale"],
+      "expected_entities": ["KKR", "Rennes"],
+      "source_chunk": null,
+      "notes": "Professional intro — multiple specific metrics must all be present. Also tests ACUTE framing."
+    },
+    {
+      "id": "Q28",
+      "group": "G",
+      "brett_approved": true,
+      "question": "What did Brett's last CEO say about him, and in what context?",
+      "expected_answer": "When Brett's CEO at Elementum (Nader) was interviewing one of Brett's closest friends and former colleagues (Marisa) for a role, he posed a question about Brett: 'He's awfully honest, isn't he?' Marisa's response was: 'Yes, he is.' Brett describes it as a 'deliciously ambiguous question' and real hardball for those playing at the highest levels — and Marisa's response as a good return of serve. Brett's COO at Elementum told him on his last day that he had learned a lot from him and hoped they might work together again, citing Brett's management style that wins the trust of those who work with him, his ability to manage complexity, and the ease with which he identifies and solves for missing pieces of any operational process.",
+      "expected_keywords": ["Elementum", "Nader", "Marisa", "honest", "awfully honest", "COO", "deliciously ambiguous", "complexity", "operational process"],
+      "expected_entities": ["Elementum", "Nader", "Marisa"],
+      "source_chunk": null,
+      "notes": "Recent employer story. Both the CEO quote and COO quote must be present; Nader and Marisa must be named."
+    },
+    {
+      "id": "Q29",
+      "group": "H",
+      "brett_approved": false,
+      "question": "Why did Brett become a physics teacher, and why did he choose Indian Hill specifically?",
+      "expected_answer": "Going through college, Brett had a great time with physics courses and it was either physics or English for his major — his physics teachers were wonderful, his liberal arts teachers were not. As he got further into his studies, he got a glimpse of what it would be like to be a research scientist: heads down in data processing, analysis, and simulations. Even though he loved the technology, it would have been isolating. With the help of a good career counselor at Purdue, he kept the physics and incorporated what he loved about his summer job coaching swimming — physics plus coaching equals high school teacher. As a science teacher graduating in 1990, there was no trouble finding a job. He chose the Indian Hill district in Cincinnati because they had sold a building a couple of years earlier and spent the money putting a computer lab in every building and wiring their schools together with a network. Since he had been a hobbyist with computers and programming since age 12, that was the school for him.",
+      "expected_keywords": ["Indian Hill", "physics", "Cincinnati", "Purdue", "swimming", "computer lab", "network", "1990", "age 12", "career counselor"],
+      "expected_entities": ["Indian Hill", "Cincinnati", "Purdue"],
+      "source_chunk": null,
+      "notes": "Source: Indian Hill PDF. Pending Brett review. Age 12 hobbyist detail and swimming coaching connection should both survive extraction."
+    },
+    {
+      "id": "Q30",
+      "group": "H",
+      "brett_approved": false,
+      "question": "Why did Brett leave teaching, and what does he say his plan had been before that?",
+      "expected_answer": "Brett was doing a lot with the school's technology — building software, running labs, beginning to teach Pascal to students. It caught him completely by surprise when this caused friction with another teacher who felt the computer work was her territory and felt threatened. After a couple of blowups in his third year, he made a decision: go back to school, get the CS credentials, and pursue a job doing more educational technology work. He had been programming since he was twelve but had no formal credentials. Notably, before that friction arose, his long-term plan had been to move to the middle of Indiana near where he grew up, teach his kids, coach swimming, buy a run-down old farmhouse and spend twenty years slowly rehabbing it — just lead a small but locally important life. That's not how it worked out.",
+      "expected_keywords": ["Indian Hill", "Pascal", "friction", "UVA", "CS credentials", "Indiana", "farmhouse", "swimming", "small but locally important"],
+      "expected_entities": ["Indian Hill"],
+      "source_chunk": null,
+      "notes": "Source: Indian Hill PDF. Pending Brett review. The 'small but locally important life' counterfactual is a distinctive phrase."
+    },
+    {
+      "id": "Q31",
+      "group": "H",
+      "brett_approved": false,
+      "question": "Who was Dr. Karl Feltman, and what are the four things Brett remembers about him?",
+      "expected_answer": "Dr. Karl Feltman was Brett's principal at Indian Hill — an icon of the community who had been principal for approximately twenty years. Brett barely interacted with him deeply — maybe ten substantial conversations in three years — yet several of those conversations made a lasting impression. The four: (1) The interview — Feltman asked whether kids want to be treated fairly. Brett answered in real time: 'Kids say they want to be treated fairly, but what they probably instinctively want is to be treated equally, and it's my job to treat them fairly even if it's unequal.' Feltman liked it; it became part of Brett's management philosophy — every policy needs an exception route. (2) 'Go be manipulative' — Feltman would tell faculty to go out and be manipulative, then explain: if you look it up in the dictionary, to manipulate means to handle with skill. He wanted teachers to handle students intentionally and skillfully. (3) The merit contract — after Brett's first year, Feltman awarded him a merit teaching contract (only ~5% of the district received one). The school board voted down all merit contracts over the summer so Brett never got the extra pay — Brett wonders whether Feltman knew this and gave it to him anyway as a free motivation. (4) 'Someday you're going to change your mind on that' — in Brett's second-year review, Feltman told him to get a master's in Education Administration and become a superintendent. Brett laughed. Feltman said: 'Someday, you're going to change your mind on that.' Brett has managed close to a billion dollars in operating budgets and thousands of people across multibillion-dollar companies. Feltman was right.",
+      "expected_keywords": ["Karl Feltman", "Indian Hill", "principal", "manipulate", "merit contract", "superintendent", "fairly vs equally", "5%"],
+      "expected_entities": ["Karl Feltman", "Indian Hill"],
+      "source_chunk": null,
+      "notes": "Source: Indian Hill PDF. Pending Brett review. Four distinct memory fragments — tests whether list-style narrative survives extraction."
+    },
+    {
+      "id": "Q32",
+      "group": "I",
+      "brett_approved": false,
+      "question": "What did Brett actually build at The Hill School, and what is he most proud of from that time?",
+      "expected_answer": "Brett built everything from scratch. He brought the Internet to The Hill by setting up his own ISP and running a dial-up modem pool. He networked the campus — 50 buildings, every classroom, faculty apartment, and dorm room. He replaced a telephone system so out of date it couldn't be given away to impoverished companies in Central America. He put in the first CD-ROM server for foreign language audio and video, the first RealAudio server for streaming music, the first web server, UseNet news, email, a student records system, alumni giving tracking, early WiFi in some locations, Cisco firewalls, and the first digital cameras. But what he is most proud of is not any of those things. It is the fact that he didn't know how to do most of it when he started, and he found a way anyway: every Saturday morning he drove into Philadelphia, found a Barnes & Noble, and spent hours reading about how to run an email server, manage modems, set up a web server, do cybersecurity — because he couldn't afford to buy the books. Then he drove home and implemented what he had read that morning. He did this for almost two straight years. Nobody handed him a roadmap. He made one, one Saturday at a time.",
+      "expected_keywords": ["Hill School", "ISP", "50 buildings", "Barnes & Noble", "Philadelphia", "Saturday mornings", "RealAudio", "CD-ROM", "WiFi", "Cisco", "modem pool"],
+      "expected_entities": ["The Hill School", "Philadelphia", "Barnes & Noble"],
+      "source_chunk": null,
+      "notes": "Source: Hill School PDF. Pending Brett review. Saturday morning Barnes & Noble ritual is the signature detail."
+    },
+    {
+      "id": "Q33",
+      "group": "I",
+      "brett_approved": false,
+      "question": "What was the strategic planning lesson Brett got from Jon Shirley at The Hill School, and what regret does it carry?",
+      "expected_answer": "After 147 years as an all-boys school, The Hill's trustees — including members of the Heinz family, an SVP of Imagineering from Disney, and Jon Shirley, former President of Microsoft — undertook a planning cycle that included whether to go co-ed. Jon Shirley and Brett sat down to build an IT strategic plan that would form one section of the larger school plan. Brett was 30 years old, sitting with a board member of Microsoft, learning how to evaluate technologies, how to decide what not to do, how to steer technology toward where an institution would be in five years, and how technology might even lead the school to places it couldn't reach on its own. The regret: he never maintained the relationship. Shirley was open to it, Brett believes. But Brett was too busy, too oblivious to the value of a professional network. He names it as one of the biggest career mistakes he ever made and the first clear signal of a professional networking blind spot he carried for decades.",
+      "expected_keywords": ["Jon Shirley", "Microsoft", "Hill School", "Heinz", "Disney", "Imagineering", "co-ed", "147 years", "networking", "regret", "30 years old"],
+      "expected_entities": ["Jon Shirley", "Microsoft", "The Hill School", "Disney"],
+      "source_chunk": null,
+      "notes": "Source: Hill School PDF. Pending Brett review. Heinz family and Disney SVP are distinctive details that confirm chunk fidelity."
+    },
+    {
+      "id": "Q34",
+      "group": "I",
+      "brett_approved": false,
+      "question": "Who is Len Sassaman, and how did Brett first introduce him to security?",
+      "expected_answer": "Len Sassaman was a student who was always hanging around the computer lab at The Hill School, part of Brett's student Tech Support Team, and took AP Computer Science from Brett. One day Brett was in the library running a password-cracking attempt against school email accounts — looking for weak passwords to inform a potential cybersecurity training program. Len came by with a homework question and then asked what Brett was working on. He found it fascinating. He noticed Brett wasn't working in Windows. Brett gave him a puzzle: here's an account on this machine, the only thing I'll tell you to type is the word 'man' — if you can get from there to someplace else, bring back what you figure out and we'll talk. Len figured it out, loved it, and came back. That was his introduction to Linux and to security. Len went on to become a noted cybersecurity expert and is considered a credible candidate for being the inventor of Bitcoin, though Brett personally doesn't believe that.",
+      "expected_keywords": ["Len Sassaman", "Hill School", "Bitcoin", "Linux", "password-cracking", "AP Computer Science", "Tech Support Team", "cybersecurity"],
+      "expected_entities": ["Len Sassaman", "The Hill School", "Bitcoin"],
+      "source_chunk": null,
+      "notes": "Source: Hill School PDF. Pending Brett review. Bitcoin connection is the highest-interest detail — must survive extraction."
+    },
+    {
+      "id": "Q35",
+      "group": "I",
+      "brett_approved": false,
+      "question": "What was Brett's first hire, and what happened to some of the students from his tech support team?",
+      "expected_answer": "Brett's first employee was the woman who watched over the six-computer room called the Computer Lab. Together they turned the group of boys who were always hanging around into a formal student Tech Support Team. Several of those students went on to careers in technology. One is running Identity Management for Carnegie Mellon today. Another was Len Sassaman.",
+      "expected_keywords": ["Hill School", "Tech Support Team", "Carnegie Mellon", "Identity Management", "Len Sassaman", "first employee", "Computer Lab"],
+      "expected_entities": ["The Hill School", "Carnegie Mellon", "Len Sassaman"],
+      "source_chunk": null,
+      "notes": "Source: Hill School PDF. Pending Brett review. Carnegie Mellon Identity Management outcome is a distinctive named result."
+    },
+    {
+      "id": "Q36",
+      "group": "J",
+      "brett_approved": false,
+      "question": "Where did Brett get his master's degree and what was his research?",
+      "expected_answer": "Brett earned an MS in Computer Science at the University of Virginia (UVA), 1993–1995. His advisor was Dr. Gabe Robbins, a young and prolific professor who got Brett a research assistantship covering tuition and paying a stipend — Brett notes with some amusement that he had a better standard of living as a grad student than he ever had as a schoolteacher. His research was in DNA sequence alignment: determining how species are related by the number of changes needed to transform one species' DNA sequence into another's. For a group of a hundred species, the problem is NP-complete. For a brief period, Brett's algorithm was the best-performing DNA sequence alignment program in the world — by a factor of three. In the end, a 3x improvement wasn't the critical breakthrough the field needed, and Brett decided educational technology was calling him.",
+      "expected_keywords": ["UVA", "University of Virginia", "Gabe Robbins", "DNA sequence alignment", "NP-complete", "MS Computer Science", "best in the world", "3x", "1993", "1995"],
+      "expected_entities": ["University of Virginia", "UVA", "Gabe Robbins"],
+      "source_chunk": null,
+      "notes": "Source: UVA Grad School PDF. Pending Brett review. 'Best in the world by a factor of three' is the signature claim."
+    },
+    {
+      "id": "Q37",
+      "group": "J",
+      "brett_approved": false,
+      "question": "What are Brett's two famous near-misses from his UVA years?",
+      "expected_answer": "Two. First: Dr. Randy Pausch was almost Brett's PhD advisor. Pausch's group was doing virtual reality work, coding in Python when it was barely two years old. It came down to Pausch and Gabe Robbins; Brett chose machine learning over virtual reality. Pausch went on to Carnegie Mellon and became world-famous for 'The Last Lecture' — delivered while dying of pancreatic cancer in his forties. Millions saw the video; he appeared on Oprah; the lecture became a bestselling book. Second: Brett's fellow grad student Brett Tjaden built a website as his master's project encoding the Six Degrees of Kevin Bacon game — the observation that any actor can be connected to Kevin Bacon through six or fewer degrees of separation. Tjaden's site introduced that game to the world and became famous. Brett's project was DNA sequence alignment. No one has ever heard of it. Such is life.",
+      "expected_keywords": ["Randy Pausch", "Last Lecture", "Carnegie Mellon", "Brett Tjaden", "Kevin Bacon", "Six Degrees", "virtual reality", "Python", "Oprah", "UVA"],
+      "expected_entities": ["Randy Pausch", "Brett Tjaden", "Carnegie Mellon", "UVA"],
+      "source_chunk": null,
+      "notes": "Source: UVA Grad School PDF. Pending Brett review. Both near-misses must be present: Pausch and Tjaden."
+    },
+    {
+      "id": "Q38",
+      "group": "K",
+      "brett_approved": false,
+      "question": "Is Brett a PhD?",
+      "expected_answer": "No. Brett is a doctoral candidate at Rennes School of Business / University of Rennes — the degree is in progress as of 2026. He has not yet completed it and should not be referred to as a PhD.",
+      "expected_keywords": ["Rennes", "doctoral candidate", "not PhD", "in progress", "2026"],
+      "expected_entities": ["Rennes School of Business", "University of Rennes"],
+      "source_chunk": null,
+      "notes": "Factual verification — the system must NOT hallucinate a completed PhD. Failure mode is a confident false positive."
+    },
+    {
+      "id": "Q39",
+      "group": "K",
+      "brett_approved": false,
+      "question": "Did Brett work at Cincinnati Public Schools?",
+      "expected_answer": "No. Brett taught at Indian Hill High School, which is located in Cincinnati. He never worked for Cincinnati Public Schools. Indian Hill is a separate, highly regarded suburban school district.",
+      "expected_keywords": ["Indian Hill", "Cincinnati Public Schools", "NOT", "separate district", "suburban"],
+      "expected_entities": ["Indian Hill", "Cincinnati Public Schools"],
+      "source_chunk": null,
+      "notes": "Data quality trap — the ai-resume experiences table currently has a row with company_name 'Cincinnati Public Schools' which is a pipeline extraction error. This test specifically probes whether the system gives the correct answer despite bad data in the table. High-priority factual guard."
+    },
+    {
+      "id": "Q40",
+      "group": "K",
+      "brett_approved": false,
+      "question": "What are Brett's two honest self-identified weaknesses?",
+      "expected_answer": "Two. First: his professional network is thinner than it should be. He was always too focused on the work in front of him and assumed good work would speak for itself. He let valuable relationships atrophy — most notably Jon Shirley (former President of Microsoft), who mentored him on strategic planning at age 29 and whom Brett never stayed in touch with. He names this as one of the genuine regrets of his career. Second: low tolerance for persistent chaos driven by bad management. At Elementum, he left after seven months when the CEO's operating style — making unauthorized commitments to clients, structural chaos that would not resolve — proved permanent. He brings structure to ambiguity, but he needs the ambiguity to eventually resolve.",
+      "expected_keywords": ["network", "Jon Shirley", "Elementum", "chaos", "seven months", "ambiguity", "regret", "weakness"],
+      "expected_entities": ["Jon Shirley", "Elementum"],
+      "source_chunk": null,
+      "notes": "Self-assessment question. Both weaknesses must be present; Elementum exit reason is the concrete anchor for the second."
+    },
+    {
+      "id": "Q41",
+      "group": "K",
+      "brett_approved": false,
+      "question": "Why did Brett leave Elementum?",
+      "expected_answer": "Brett left after seven months. The CEO kept making unauthorized commitments to the Sanofi client during the project — promises that conflicted with the work Brett's team was delivering. Brett raised it. The COO confirmed privately that the CEO's operating style would not change. Brett left rather than accommodate it. He walked away from unvested equity that may be worth tens of millions of dollars, or nothing — the value is genuinely uncertain. Brett does not second-guess the decision.",
+      "expected_keywords": ["Elementum", "seven months", "Sanofi", "CEO", "COO", "unauthorized commitments", "equity", "tens of millions"],
+      "expected_entities": ["Elementum", "Sanofi"],
+      "source_chunk": null,
+      "notes": "Short-tenure explanation. Sanofi client and CEO/COO distinction are the key facts. Equity walk-away is distinctive."
+    },
+    {
+      "id": "Q42",
+      "group": "K",
+      "brett_approved": false,
+      "question": "How many of Brett's former direct reports have gone on to become CIOs or C-suite executives?",
+      "expected_answer": "Nine, as of 2026. This is Brett's own count. It is one of the most defensible and meaningful metrics in his career story — not a round number, not inflated, his own honest accounting.",
+      "expected_keywords": ["nine", "direct reports", "CIO", "C-suite", "2026"],
+      "expected_entities": [],
+      "source_chunk": null,
+      "notes": "Specific metric test. The answer must be 'nine' — not 'ten' or 'about ten.' Precision matters here."
+    },
+    {
+      "id": "Q43",
+      "group": "K",
+      "brett_approved": false,
+      "question": "Is Brett a good fit for a hands-on software engineering or production DevOps role?",
+      "expected_answer": "No, and Brett would say so directly. He is a strategic technology executive. He codes in Python for research purposes (the ACUTE project) and understands cloud architecture at the design and oversight level, but he is not a hands-on production engineer and has not been for decades. He would be wasting the role and wasting the hiring manager's time.",
+      "expected_keywords": ["not hands-on", "strategic", "ACUTE", "Python", "research", "decades", "executive"],
+      "expected_entities": ["ACUTE"],
+      "source_chunk": null,
+      "notes": "Honest scoping question. System should not oversell Brett's hands-on technical current capability."
+    }
+  ]
+}
