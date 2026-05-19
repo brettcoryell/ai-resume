@@ -153,17 +153,36 @@ def fetch_biographical_thoughts(sb, verbose=False):
     """
     Fetch all thoughts that look like biographical career content —
     any thought mentioning Brett Coryell or tagged with career topics.
+    Also includes article-type thoughts that are explicitly tagged
+    ai-resume-source OR are in the known biographical article allowlist.
     Used by --extract mode.
     """
     page_size = 1000
     offset = 0
     all_thoughts = []
+    seen_ids = set()
 
     CAREER_TOPICS = {
         "career", "Career", "resume", "Resume", "biography", "biographical",
         "IT Leadership", "Cybersecurity", "career development", "leadership",
         "management", "ERM", "cybersecurity", "FBI collaboration",
         "ACUTE project", "Elementum", "management philosophy", "mentorship",
+    }
+
+    # Known biographical article chunks ingested from PDFs.
+    # These are article-type thoughts that contain early biographical content
+    # (Indian Hill 1990-1993 and The Hill School 1995-1998) and must always
+    # be included even if they don't match the name/topic filters above.
+    ARTICLE_ALLOWLIST = {
+        # Indian Hill 1990 - 1993.pdf
+        "05322769-8ec8-41fc-bfe2-4a284470f5e8",
+        "98657d36-9f5a-4566-95ab-734737f7d49c",
+        "ebb54ef1-dfc7-4de8-873c-fa078eab279b",
+        # The Hill School 1995 - 1998.pdf
+        "2fa2dad1-1822-4ce8-8811-ba677dc1aa3c",
+        "e00ab38f-cfa7-4d21-9704-fb4f57a9603b",
+        "cdb12703-2c3c-4632-bc05-738cc4203f39",
+        "f67cbd23-2656-4d6c-9e13-ec7a06803e79",
     }
 
     while True:
@@ -177,6 +196,31 @@ def fetch_biographical_thoughts(sb, verbose=False):
         for t in batch:
             meta = t.get("metadata") or {}
             content = t.get("content", "")
+            ttype = meta.get("type", "")
+            topics = set(meta.get("topics", []))
+            thought_id = t.get("id", "")
+
+            # Always include thoughts tagged ai-resume-source (canonical filter)
+            if "ai-resume-source" in topics:
+                if thought_id not in seen_ids:
+                    all_thoughts.append(t)
+                    seen_ids.add(thought_id)
+                continue
+
+            # Always include the known article allowlist
+            if thought_id in ARTICLE_ALLOWLIST:
+                if thought_id not in seen_ids:
+                    all_thoughts.append(t)
+                    seen_ids.add(thought_id)
+                continue
+
+            # For article-type thoughts: include if topics overlap with career topics
+            if ttype == "article":
+                if topics & CAREER_TOPICS:
+                    if thought_id not in seen_ids:
+                        all_thoughts.append(t)
+                        seen_ids.add(thought_id)
+                continue  # Don't fall through to observation/reference checks for articles
 
             # Skip non-career YouTube transcripts
             if meta.get("source_url") and "youtube" in str(meta.get("source_url", "")):
@@ -184,13 +228,16 @@ def fetch_biographical_thoughts(sb, verbose=False):
 
             # Include if mentions Brett by name
             if "Brett Coryell" in content or "Brett" in content[:50]:
-                all_thoughts.append(t)
+                if thought_id not in seen_ids:
+                    all_thoughts.append(t)
+                    seen_ids.add(thought_id)
                 continue
 
             # Include if topics overlap with career topics
-            topics = set(meta.get("topics", []))
             if topics & CAREER_TOPICS:
-                all_thoughts.append(t)
+                if thought_id not in seen_ids:
+                    all_thoughts.append(t)
+                    seen_ids.add(thought_id)
                 continue
 
         if len(batch) < page_size:
