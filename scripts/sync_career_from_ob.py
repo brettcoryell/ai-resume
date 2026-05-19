@@ -151,51 +151,13 @@ def fetch_career_structured_thoughts(sb, career_type=None, verbose=False):
 
 def fetch_biographical_thoughts(sb, verbose=False):
     """
-    Fetch all thoughts that look like biographical career content —
-    any thought mentioning Brett Coryell or tagged with career topics.
-    Also includes article-type thoughts that are explicitly tagged
-    ai-resume-source OR are in the known biographical article allowlist.
-    Used by --extract mode.
+    Fetch all OB thoughts tagged ai-resume-source.
+    This is the canonical filter — run cleanup_ai_resume_source_tag.py before
+    calling --extract to ensure the tag set is clean.
     """
     page_size = 1000
     offset = 0
     all_thoughts = []
-    seen_ids = set()
-
-    CAREER_TOPICS = {
-        "career", "Career", "resume", "Resume", "biography", "biographical",
-        "IT Leadership", "Cybersecurity", "career development", "leadership",
-        "management", "ERM", "cybersecurity", "FBI collaboration",
-        "ACUTE project", "Elementum", "management philosophy", "mentorship",
-    }
-
-    # Known biographical article chunks ingested from PDFs.
-    # These are article-type thoughts that contain early biographical content
-    # and must always be included even if they don't match the name/topic filters above.
-    # Full set as of 2026-05-19: Indian Hill, UVA Grad School, Hill School, Sprint.
-    ARTICLE_ALLOWLIST = {
-        # Indian Hill 1990 - 1993.pdf  (3 chunks)
-        "05322769-8ec8-41fc-bfe2-4a284470f5e8",
-        "98657d36-9f5a-4566-95ab-734737f7d49c",
-        "ebb54ef1-dfc7-4de8-873c-fa078eab279b",
-        # Grad school at UVA.pdf  (3 chunks)
-        "d4eba78b-cb12-43d4-920e-1456f8020cdc",
-        "0c6bfc40-146b-4dd3-a241-d6a14366c0f3",
-        "9d8e30ec-9a34-48fc-b8aa-28784abfb12c",
-        # The Hill School 1995 - 1998.pdf  (5 chunks)
-        "2fa2dad1-1822-4ce8-8811-ba677dc1aa3c",
-        "e00ab38f-cfa7-4d21-9704-fb4f57a9603b",
-        "cdb12703-2c3c-4632-bc05-738cc4203f39",
-        "b30ee685-66c9-42c3-9d45-c5134b9790c9",
-        "f67cbd23-2656-4d6c-9e13-ec7a06803e79",
-        # Sprint 1998 - 2003.pdf  (6 chunks)
-        "314c170d-b956-4eb5-af92-bb43a2c091ce",
-        "db523428-cc53-4a1a-bc1c-60c4bc62f750",
-        "bb571ab3-8e41-4d6b-b6e7-f604b68b4dd6",
-        "679c7f6d-139c-40e1-a188-767a068d9bf3",
-        "4fab3fec-796b-4868-b069-31e7cdcbe9a6",
-        "64092008-8a62-40a3-9d44-956ff0561d2b",
-    }
 
     while True:
         result = (
@@ -207,50 +169,8 @@ def fetch_biographical_thoughts(sb, verbose=False):
         batch = result.data or []
         for t in batch:
             meta = t.get("metadata") or {}
-            content = t.get("content", "")
-            ttype = meta.get("type", "")
-            topics = set(meta.get("topics", []))
-            thought_id = t.get("id", "")
-
-            # Always include thoughts tagged ai-resume-source (canonical filter)
-            if "ai-resume-source" in topics:
-                if thought_id not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(thought_id)
-                continue
-
-            # Always include the known article allowlist
-            if thought_id in ARTICLE_ALLOWLIST:
-                if thought_id not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(thought_id)
-                continue
-
-            # For article-type thoughts: include if topics overlap with career topics
-            if ttype == "article":
-                if topics & CAREER_TOPICS:
-                    if thought_id not in seen_ids:
-                        all_thoughts.append(t)
-                        seen_ids.add(thought_id)
-                continue  # Don't fall through to observation/reference checks for articles
-
-            # Skip non-career YouTube transcripts
-            if meta.get("source_url") and "youtube" in str(meta.get("source_url", "")):
-                continue
-
-            # Include if mentions Brett by name
-            if "Brett Coryell" in content or "Brett" in content[:50]:
-                if thought_id not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(thought_id)
-                continue
-
-            # Include if topics overlap with career topics
-            if topics & CAREER_TOPICS:
-                if thought_id not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(thought_id)
-                continue
+            if "ai-resume-source" in meta.get("topics", []):
+                all_thoughts.append(t)
 
         if len(batch) < page_size:
             break

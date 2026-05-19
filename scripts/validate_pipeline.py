@@ -124,30 +124,11 @@ def call_gemini(prompt, max_tokens=2048):
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
-ARTICLE_ALLOWLIST = {
-    "05322769-8ec8-41fc-bfe2-4a284470f5e8",
-    "98657d36-9f5a-4566-95ab-734737f7d49c",
-    "ebb54ef1-dfc7-4de8-873c-fa078eab279b",
-    "2fa2dad1-1822-4ce8-8811-ba677dc1aa3c",
-    "e00ab38f-cfa7-4d21-9704-fb4f57a9603b",
-    "cdb12703-2c3c-4632-bc05-738cc4203f39",
-    "f67cbd23-2656-4d6c-9e13-ec7a06803e79",
-}
-
-CAREER_TOPICS = {
-    "career", "Career", "resume", "Resume", "biography", "biographical",
-    "IT Leadership", "Cybersecurity", "career development", "leadership",
-    "management", "ERM", "cybersecurity", "FBI collaboration",
-    "ACUTE project", "Elementum", "management philosophy", "mentorship",
-}
-
-
 def load_ob_thoughts(sb, verbose=False):
-    """Load all in-scope OB thoughts (ai-resume-source tagged first, then fallback)."""
+    """Load all OB thoughts tagged ai-resume-source."""
     page_size = 1000
     offset = 0
     all_thoughts = []
-    seen_ids = set()
 
     if verbose:
         print("  Loading OB thoughts...")
@@ -162,44 +143,8 @@ def load_ob_thoughts(sb, verbose=False):
         batch = result.data or []
         for t in batch:
             meta = t.get("metadata") or {}
-            content = t.get("content", "")
-            ttype = meta.get("type", "")
-            topics = set(meta.get("topics", []))
-            tid = t.get("id", "")
-
-            if "ai-resume-source" in topics:
-                if tid not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(tid)
-                continue
-
-            if tid in ARTICLE_ALLOWLIST:
-                if tid not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(tid)
-                continue
-
-            if ttype == "article":
-                if topics & CAREER_TOPICS:
-                    if tid not in seen_ids:
-                        all_thoughts.append(t)
-                        seen_ids.add(tid)
-                continue
-
-            if meta.get("source_url") and "youtube" in str(meta.get("source_url", "")):
-                continue
-
-            if "Brett Coryell" in content or "Brett" in content[:50]:
-                if tid not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(tid)
-                continue
-
-            if topics & CAREER_TOPICS:
-                if tid not in seen_ids:
-                    all_thoughts.append(t)
-                    seen_ids.add(tid)
-                continue
+            if "ai-resume-source" in meta.get("topics", []):
+                all_thoughts.append(t)
 
         if len(batch) < page_size:
             break
