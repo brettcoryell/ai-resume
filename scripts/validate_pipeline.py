@@ -159,7 +159,11 @@ def load_ai_resume_tables(sb, verbose=False):
     """Load all ai-resume career tables. Returns dict of table_name → list of rows."""
     tables = {
         "candidate_profile": "id, name, elevator_pitch, career_narrative, looking_for, not_looking_for, ob_thought_id",
-        "experiences": "id, company_name, title, bullet_points, why_joined, why_left, actual_contributions, proudest_achievement, challenges_faced, lessons_learned, ob_thought_id",
+        "employers": "id, company_name, industry, ob_thought_id",
+        "roles": "id, employer_id, title, why_joined, why_left, actual_contributions, proudest_achievement, manager_would_say, reports_would_say, ob_thought_id",
+        "accomplishments": "id, role_id, content, ob_thought_id",
+        "people": "id, name, general_note, ob_thought_id",
+        "stories": "id, title, situation, task, action, result, ob_thought_id",
         "skills": "id, skill_name, category, honest_notes, evidence, ob_thought_id",
         "gaps_weaknesses": "id, description, why_its_a_gap, ob_thought_id",
         "faq_responses": "id, question, answer, ob_thought_id",
@@ -184,7 +188,8 @@ def build_ai_resume_text_dump(ai_resume_data):
     for tbl, rows in ai_resume_data.items():
         for row in rows:
             for key, val in row.items():
-                if key in ("id", "ob_thought_id", "candidate_id"):
+                if key in ("id", "ob_thought_id", "candidate_id", "employer_id", "role_id",
+                           "person_id", "story_id"):
                     continue
                 if isinstance(val, str) and val:
                     parts.append(val)
@@ -435,7 +440,11 @@ def run_test_1b(ai_resume_data, ob_thoughts, skip_llm=False, verbose=False):
     ob_content_blob = "\n\n".join(t.get("content", "") for t in ob_thoughts)
 
     tables_to_check = {
-        "experiences": "company_name",
+        "employers": "company_name",
+        "roles": "title",
+        "accomplishments": "content",
+        "people": "name",
+        "stories": "title",
         "skills": "skill_name",
         "gaps_weaknesses": "description",
         "faq_responses": "question",
