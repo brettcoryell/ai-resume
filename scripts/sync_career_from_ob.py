@@ -210,7 +210,10 @@ _EXTRACT_RULES = """CRITICAL RULES:
 - Dates use YYYY-MM format; use best estimates from context clues
 - Company name for Brett's high school is "Indian Hill High School" (not "Cincinnati Public Schools")
 - stint_index is 1 for the first time at a company, 2 for a return stint
-- Output ONLY valid JSON — no markdown, no backticks, no commentary"""
+- Output ONLY valid JSON — no markdown, no backticks, no commentary
+- Each thought in the corpus has a full UUID in its header like [Thought abc12345-... — ...]. For source_thought_id,
+  copy the full UUID exactly as shown in the header for the thought that is the PRIMARY source for that item.
+  If an item draws from multiple thoughts, pick the one with the most relevant/specific content."""
 
 EXTRACT_SYSTEM_PASS1 = f"""You are extracting career profile and work history from biographical interview notes about Brett Coryell.
 {_EXTRACT_RULES}
@@ -231,6 +234,7 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
       "stint_index": 1,
       "industry": "Industry sector",
       "display_order": 1,
+      "source_thought_id": "full-uuid-of-primary-source-thought",
       "roles": [
         {{
           "title": "Most senior title held",
@@ -266,6 +270,7 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
     {{
       "name": "Full Name",
       "general_note": "Who this person is and their overall significance to Brett's career",
+      "source_thought_id": "full-uuid-of-primary-source-thought",
       "engagements": [
         {{
           "employer_name": "Company Name where we worked together (null if no company context)",
@@ -297,6 +302,7 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
       "action": "What Brett did — specific actions taken",
       "result": "What happened — outcomes with metrics if possible",
       "tags": ["tag1", "tag2"],
+      "source_thought_id": "full-uuid-of-primary-source-thought",
       "primary_employer": "Company Name where story primarily occurred (null if none)",
       "primary_role_title": "Brett's role title during this story (null if none)",
       "role_links": [
@@ -324,7 +330,8 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
     {{
       "skill_name": "Specific skill name",
       "category": "strong",
-      "honest_notes": "Private candid note — where this is strong or where it has limits"
+      "honest_notes": "Private candid note — where this is strong or where it has limits",
+      "source_thought_id": "full-uuid-of-primary-source-thought"
     }}
   ],
   "gaps": [
@@ -332,14 +339,16 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
       "gap_type": "skill",
       "description": "Short description of the gap",
       "why_its_a_gap": "Honest explanation",
-      "interest_in_learning": true
+      "interest_in_learning": true,
+      "source_thought_id": "full-uuid-of-primary-source-thought"
     }}
   ],
   "ai_instructions": [
     {{
       "instruction_type": "honesty",
       "priority": 10,
-      "instruction": "Specific instruction for how the AI should respond about Brett"
+      "instruction": "Specific instruction for how the AI should respond about Brett",
+      "source_thought_id": "full-uuid-of-primary-source-thought"
     }}
   ],
   "faq_responses": [
@@ -347,7 +356,8 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
       "question": "Tell me about yourself",
       "answer": "Complete pre-written answer — latest version verbatim",
       "is_common_question": true,
-      "display_order": 1
+      "display_order": 1,
+      "source_thought_id": "full-uuid-of-primary-source-thought"
     }}
   ]
 }}"""
@@ -355,7 +365,7 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
 
 # ── Extract upsert helpers ────────────────────────────────────────────────────
 
-def upsert_employer(sb, candidate_id, company_name, stint_index, industry, display_order, dry_run):
+def upsert_employer(sb, candidate_id, company_name, stint_index, industry, display_order, dry_run, ob_thought_id=None):
     label = f"{company_name} (stint {stint_index})"
     if dry_run:
         print(f"  [DRY RUN] employer: {label}")
@@ -376,6 +386,8 @@ def upsert_employer(sb, candidate_id, company_name, stint_index, industry, displ
     }
     if industry:
         row["industry"] = industry
+    if ob_thought_id:
+        row["ob_thought_id"] = ob_thought_id
     if existing.data:
         eid = existing.data[0]["id"]
         sb.table("employers").update(row).eq("id", eid).execute()
@@ -388,7 +400,7 @@ def upsert_employer(sb, candidate_id, company_name, stint_index, industry, displ
         return eid
 
 
-def upsert_role(sb, employer_id, role_data, dry_run):
+def upsert_role(sb, employer_id, role_data, dry_run, ob_thought_id=None):
     title = role_data.get("title", "Unknown")
     label = title
     row = {k: v for k, v in {
@@ -405,6 +417,7 @@ def upsert_role(sb, employer_id, role_data, dry_run):
         "proudest_achievement": role_data.get("proudest_achievement") or None,
         "manager_would_say": role_data.get("manager_would_say") or None,
         "reports_would_say": role_data.get("reports_would_say") or None,
+        "ob_thought_id": ob_thought_id or None,
     }.items() if v is not None}
 
     if dry_run:
@@ -429,7 +442,7 @@ def upsert_role(sb, employer_id, role_data, dry_run):
         return rid
 
 
-def replace_accomplishments(sb, role_id, accomplishments, dry_run):
+def replace_accomplishments(sb, role_id, accomplishments, dry_run, ob_thought_id=None):
     if dry_run:
         print(f"      [DRY RUN] {len(accomplishments)} accomplishments")
         return
@@ -437,12 +450,13 @@ def replace_accomplishments(sb, role_id, accomplishments, dry_run):
     if not accomplishments:
         return
     rows = [
-        {
+        {k: v for k, v in {
             "role_id": role_id,
             "content": a.get("content", ""),
             "has_metric": bool(a.get("has_metric", False)),
             "display_order": a.get("display_order", i + 1),
-        }
+            "ob_thought_id": ob_thought_id or None,
+        }.items() if v is not None}
         for i, a in enumerate(accomplishments)
         if a.get("content")
     ]
@@ -451,13 +465,15 @@ def replace_accomplishments(sb, role_id, accomplishments, dry_run):
         print(f"      ✓ {len(rows)} accomplishments")
 
 
-def upsert_person(sb, candidate_id, name, general_note, dry_run):
+def upsert_person(sb, candidate_id, name, general_note, dry_run, ob_thought_id=None):
     if dry_run:
         print(f"  [DRY RUN] person: {name}")
         return None
     row = {"candidate_id": candidate_id, "name": name}
     if general_note:
         row["general_note"] = general_note
+    if ob_thought_id:
+        row["ob_thought_id"] = ob_thought_id
     existing = (
         sb.table("people")
         .select("id")
@@ -503,7 +519,7 @@ def replace_person_engagements(sb, person_id, engagements, employer_map, role_ma
         print(f"    ✓ {len(rows)} engagements")
 
 
-def upsert_story(sb, candidate_id, story_data, employer_map, role_map, dry_run):
+def upsert_story(sb, candidate_id, story_data, employer_map, role_map, dry_run, ob_thought_id=None):
     title = story_data.get("title", "Untitled")
     prim_emp = story_data.get("primary_employer")
     prim_role = story_data.get("primary_role_title")
@@ -520,6 +536,7 @@ def upsert_story(sb, candidate_id, story_data, employer_map, role_map, dry_run):
         "tags": story_data.get("tags") or None,
         "primary_employer_id": primary_employer_id,
         "primary_role_id": primary_role_id,
+        "ob_thought_id": ob_thought_id or None,
     }.items() if v is not None}
 
     if dry_run:
@@ -762,7 +779,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
     for t in thoughts:
         meta = t.get("metadata") or {}
         header = (
-            f"[Thought — {meta.get('type', 'unknown')} | "
+            f"[Thought {t['id']} — {meta.get('type', 'unknown')} | "
             f"Topics: {', '.join(meta.get('topics', []))} | "
             f"{t.get('created_at','')[:10]}]"
         )
@@ -819,6 +836,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
 
     for emp in extracted.get("employers", []):
         company = emp.get("company_name", "Unknown")
+        emp_ob_id = emp.get("source_thought_id") or None
         eid = upsert_employer(
             sb, candidate_id,
             company_name=company,
@@ -826,13 +844,14 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
             industry=emp.get("industry"),
             display_order=emp.get("display_order"),
             dry_run=dry_run,
+            ob_thought_id=emp_ob_id,
         )
         employer_map[company] = eid
 
         for role in emp.get("roles", []):
-            rid = upsert_role(sb, eid, role, dry_run)
+            rid = upsert_role(sb, eid, role, dry_run, ob_thought_id=emp_ob_id)
             role_map[(company, role.get("title", ""))] = rid
-            replace_accomplishments(sb, rid, role.get("accomplishments", []), dry_run)
+            replace_accomplishments(sb, rid, role.get("accomplishments", []), dry_run, ob_thought_id=emp_ob_id)
     print()
 
     # ── people + engagements ──────────────────────────────────────────────────
@@ -841,7 +860,8 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         name = person.get("name", "")
         if not name:
             continue
-        pid = upsert_person(sb, candidate_id, name, person.get("general_note"), dry_run)
+        pid = upsert_person(sb, candidate_id, name, person.get("general_note"), dry_run,
+                            ob_thought_id=person.get("source_thought_id") or None)
         replace_person_engagements(
             sb, pid, person.get("engagements", []), employer_map, role_map, dry_run
         )
@@ -852,7 +872,8 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
     for story in extracted.get("stories", []):
         if not story.get("title"):
             continue
-        upsert_story(sb, candidate_id, story, employer_map, role_map, dry_run)
+        upsert_story(sb, candidate_id, story, employer_map, role_map, dry_run,
+                     ob_thought_id=story.get("source_thought_id") or None)
     print()
 
     # ── skills ────────────────────────────────────────────────────────────────
@@ -863,13 +884,13 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         cat = sk.get("category", "moderate")
         if cat not in VALID_SKILL_CATS:
             cat = "moderate"
-        row = {
+        row = {k: v for k, v in {
             "candidate_id": candidate_id,
             "skill_name": sk.get("skill_name", "Unknown"),
             "category": cat,
             "honest_notes": sk.get("honest_notes") or None,
-        }
-        row = {k: v for k, v in row.items() if v is not None}
+            "ob_thought_id": sk.get("source_thought_id") or None,
+        }.items() if v is not None}
         label = f"{row['skill_name']} ({cat})"
         if dry_run:
             print(f"  [DRY RUN] {label}")
@@ -898,13 +919,14 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         gap_type = gap.get("gap_type", "skill")
         if gap_type not in VALID_GAP_TYPES:
             gap_type = "skill"
-        row = {
+        row = {k: v for k, v in {
             "candidate_id": candidate_id,
             "description": desc,
             "why_its_a_gap": gap.get("why_its_a_gap") or None,
             "gap_type": gap_type,
             "interest_in_learning": bool(gap.get("interest_in_learning", False)),
-        }
+            "ob_thought_id": gap.get("source_thought_id") or None,
+        }.items() if v is not None}
         if dry_run:
             print(f"  [DRY RUN] {desc[:60]}")
             continue
@@ -932,12 +954,13 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         instr_type = instr.get("instruction_type", "other")
         if instr_type not in VALID_INSTR_TYPES:
             instr_type = "other"
-        row = {
+        row = {k: v for k, v in {
             "candidate_id": candidate_id,
             "instruction": text,
             "instruction_type": instr_type,
             "priority": int(instr.get("priority", 0)),
-        }
+            "ob_thought_id": instr.get("source_thought_id") or None,
+        }.items() if v is not None}
         if dry_run:
             print(f"  [DRY RUN] [{instr_type}] {text[:60]}")
             continue
@@ -964,13 +987,14 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         answer = faq.get("answer", "")
         if not question or not answer:
             continue
-        row = {
+        row = {k: v for k, v in {
             "candidate_id": candidate_id,
             "question": question,
             "answer": answer,
             "is_common_question": bool(faq.get("is_common_question", True)),
             "display_order": int(faq.get("display_order", 99)),
-        }
+            "ob_thought_id": faq.get("source_thought_id") or None,
+        }.items() if v is not None}
         if dry_run:
             print(f"  [DRY RUN] Q: {question[:70]}")
             continue
@@ -1035,12 +1059,26 @@ def print_stats(sb):
 SYNC_TYPES = ["profile", "skill", "gap", "faq", "instruction"]
 
 
+def wipe_extracted_tables(sb):
+    """Delete all rows from extracted career tables (child tables first to respect FK constraints)."""
+    order = [
+        "story_roles", "accomplishments", "people_engagements",
+        "stories", "roles", "people", "employers",
+        "skills", "gaps_weaknesses", "faq_responses", "ai_instructions",
+    ]
+    for tbl in order:
+        sb.table(tbl).delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
+        print(f"  ✓ Wiped {tbl}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sync career data from OB thoughts to ai-resume tables"
     )
     parser.add_argument("--extract", action="store_true",
                         help="Full extract via Claude from ai-resume-source thoughts")
+    parser.add_argument("--wipe", action="store_true",
+                        help="Wipe all extracted career tables before running --extract")
     parser.add_argument("--passes", default=None,
                         help="Comma-separated pass IDs to run (default: all). Options: 1,2a,2b,3")
     parser.add_argument("--type", choices=SYNC_TYPES,
@@ -1068,6 +1106,10 @@ def main():
     print(f"{'='*60}\n")
 
     if args.extract:
+        if args.wipe and not args.dry_run:
+            print("── Wiping extracted tables ──────────────────────────────")
+            wipe_extracted_tables(sb)
+            print()
         anthropic_client = get_anthropic()
         passes = [p.strip() for p in args.passes.split(",")] if args.passes else None
         run_extract(sb, anthropic_client, args.dry_run, args.verbose, passes=passes)

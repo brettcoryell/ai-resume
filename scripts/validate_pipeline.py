@@ -339,20 +339,30 @@ def string_search_in_dump(term, dump_text):
 
 # ── Test implementations ──────────────────────────────────────────────────────
 
-def run_test_1a(ob_thoughts, ai_resume_text, skip_llm=False, verbose=False):
+def run_test_1a(ob_thoughts, ai_resume_text, skip_llm=False, verbose=False, ob_ids_in_use=None):
     """
     Forward pass: each in-scope OB thought should be represented in ai-resume.
     Returns (pass_count, fail_count, exceptions).
+    ob_ids_in_use: set of ob_thought_id values populated in the ai-resume tables.
+    If a thought's UUID appears there directly, it passes without further checking.
     """
     print("\n── Test 1A: Forward pass (OB → ai-resume) ──────────────────")
     passes = 0
     fails = 0
     exceptions = []
+    ob_ids_in_use = ob_ids_in_use or set()
 
     for t in ob_thoughts:
         tid = t.get("id", "unknown")
         content = t.get("content", "")
         if not content.strip():
+            continue
+
+        # Fast path: if this thought's UUID is directly cited as a source in any row, it passes.
+        if tid in ob_ids_in_use:
+            passes += 1
+            if verbose:
+                print(f"  {tid[:8]}... uuid_attribution=pass")
             continue
 
         # Deterministic: extract proper nouns and check if any appear in ai-resume
@@ -798,10 +808,19 @@ def main():
     }
     all_exceptions = []
 
+    # Build the set of ob_thought_ids cited in any ai-resume row (for Test 1A fast path)
+    ob_ids_in_use = {
+        str(row["ob_thought_id"])
+        for rows in ai_resume_data.values()
+        for row in rows
+        if row.get("ob_thought_id")
+    }
+
     # Test 1A
     if args.test in (None, "1a"):
         p, f, excs = run_test_1a(ob_thoughts, ai_resume_text,
-                                  skip_llm=args.skip_llm, verbose=args.verbose)
+                                  skip_llm=args.skip_llm, verbose=args.verbose,
+                                  ob_ids_in_use=ob_ids_in_use)
         report["test_1a"] = {"pass": p, "fail": f, "exceptions": excs}
         all_exceptions.extend(excs)
 
