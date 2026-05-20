@@ -2,14 +2,13 @@
 """
 validate_pipeline.py — OB → ai-resume pipeline validation runner.
 
-Runs Tests 1A, 1B, 2, and 3. Tests 4 and 5 are stubbed (pending schema redesign
-and qa_dataset.json from the parallel Coda session).
-
 Tests:
-  1A  Forward pass   — Every in-scope OB thought is represented in ai-resume tables
-  1B  Reverse pass   — Every ai-resume record can be traced to an OB source
-  2   Named entities — Entities from OB appear in ai-resume
-  3   Keyword union  — Significant terms not lost in the OB→ai-resume extraction
+  1A  Forward pass        — Every in-scope OB thought is represented in ai-resume tables
+  1B  Reverse pass        — Every ai-resume record can be traced to an OB source
+  2   Named entities      — Entities from OB appear in ai-resume
+  3   Keyword union       — Significant terms not lost in the OB→ai-resume extraction
+  4   Multi-context cover — Recurring themes (3+ OB chunks) synthesize across career
+  5   Q&A accuracy        — Known-answer questions graded against expected answers
 
 LLM judges:
   Both Claude Sonnet and Gemini Pro are used independently for each LLM check.
@@ -723,22 +722,270 @@ def run_test_3(ob_thoughts, ai_resume_data, skip_llm=False, verbose=False):
 
 # ── Stub tests for future implementation ──────────────────────────────────────
 
-def run_test_4_stub():
-    """Test 4 — Schema integrity. Deferred until schema redesign complete."""
-    print("\n── Test 4: Schema integrity (DEFERRED) ─────────────────────")
-    print("  Skipped — pending schema redesign")
-    return {"status": "deferred", "reason": "Schema redesign pending"}
+def _query_edge_function(message, session_id=None):
+    """Call the ai-resume chat Edge Function. Returns response text."""
+    try:
+        import requests
+    except ImportError:
+        raise RuntimeError("requests not installed — pip3 install requests")
+    url = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+    if not url:
+        raise RuntimeError("SUPABASE_URL not set")
+    anon_key = (
+        os.getenv("VITE_SUPABASE_ANON_KEY")
+        or os.getenv("SUPABASE_ANON_KEY")
+        or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5YnR0Zmpld3Vub2tldnh3dHFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMjQzOTMsImV4cCI6MjA2MTcwMDM5M30.ab6uh0pxe-WMNf6JBfNaGJLmXTM_OJjqiL5bIVQbmRM"
+    )
+    sid = session_id or f"validation-{uuid.uuid4().hex[:8]}"
+    resp = requests.post(
+        f"{url}/functions/v1/chat",
+        headers={"Authorization": f"Bearer {anon_key}", "apikey": anon_key, "Content-Type": "application/json"},
+        json={"message": message, "sessionId": sid},
+        timeout=45,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+    data = resp.json()
+    return data.get("message") or data.get("answer") or ""
 
 
-def run_test_5_stub():
-    """Test 5 — Q&A accuracy. Deferred until qa_dataset.json is available."""
-    print("\n── Test 5: Q&A accuracy (DEFERRED) ─────────────────────────")
+def _grade_llm(prompt):
+    """Call Claude and Gemini independently; return (claude_grade, gemini_grade). Grades: pass/partial/fail/error."""
+    def parse_grade(raw):
+        raw = raw.strip().upper()
+        if "PASS" in raw:
+            return "pass"
+        if "PARTIAL" in raw:
+            return "partial"
+        if "FAIL" in raw:
+            return "fail"
+        return "fail"
+
+    claude_grade = gemini_grade = None
+    try:
+        claude_grade = parse_grade(call_claude(prompt, max_tokens=10))
+    except Exception as e:
+        claude_grade = f"error: {e}"
+    try:
+        gemini_grade = parse_grade(call_gemini(prompt, max_tokens=10))
+    except Exception as e:
+        gemini_grade = f"error: {e}"
+    return claude_grade, gemini_grade
+
+
+def run_test_4(ob_thoughts, ai_resume_data, skip_llm=False, verbose=False):
+    """
+    Multi-context theme coverage: recurring themes (3+ OB chunks) should synthesize
+    across the career in ai-resume responses.
+    """
+    print("\n── Test 4: Multi-context theme coverage ─────────────────────")
+
+    from collections import Counter
+    topic_counts = Counter()
+    for t in ob_thoughts:
+        meta = t.get("metadata") or {}
+        for topic in meta.get("topics", []):
+            topic_counts[topic] += 1
+
+    SKIP_TAGS = {"ai-resume-source", "career", "brett-coryell", "interview", "biographical"}
+    recurring = sorted(
+        [topic for topic, count in topic_counts.items()
+         if count >= 3 and topic not in SKIP_TAGS],
+        key=lambda t: -topic_counts[t]
+    )
+
+    TOPIC_QUERIES = {
+        "management": "Tell me about Brett's management philosophy and how it shows up across his career",
+        "ITIL": "Tell me about Brett's experience with ITIL and IT service management across his career",
+        "itsm": "Tell me about Brett's IT service management work across his career",
+        "cybersecurity": "Tell me about Brett's cybersecurity work and how it evolved across his career",
+        "IT": "Tell me about Brett's information technology leadership across his career",
+        "leadership": "Tell me about Brett's leadership style and how it developed across his career",
+        "people-development": "Tell me about Brett's approach to developing people across his career",
+        "it-governance": "Tell me about Brett's IT governance work across his career",
+        "budget-management": "Tell me about Brett's experience managing IT budgets across his career",
+        "private-equity": "Tell me about Brett's experience with private equity across his career",
+        "higher-education": "Tell me about Brett's work in higher education IT across his career",
+    }
+
+    ai_resume_text = build_ai_resume_text_dump(ai_resume_data)
+    passes = fails = 0
+    exceptions = []
+
+    themes_to_check = recurring[:12]
+    print(f"  Recurring themes (3+ OB chunks): {len(recurring)}, checking top {len(themes_to_check)}")
+
+    for topic in themes_to_check:
+        query = TOPIC_QUERIES.get(topic, f"Tell me about Brett's experience with {topic.replace('-', ' ')} across his career")
+        count = topic_counts[topic]
+
+        if skip_llm:
+            term = topic.replace("-", " ").lower()
+            det_found = term in ai_resume_text.lower()
+            det_verdict = "pass" if det_found else "fail"
+            if verbose:
+                print(f"  {topic} ({count} chunks): det={det_verdict}")
+            if det_verdict == "pass":
+                passes += 1
+            else:
+                fails += 1
+                exceptions.append({
+                    "test": "4", "theme": topic, "ob_chunk_count": count,
+                    "failure_mode": "theme_absent_from_ai_resume",
+                })
+        else:
+            try:
+                response = _query_edge_function(query)
+            except Exception as e:
+                print(f"  ERROR on theme '{topic}': {e}")
+                fails += 1
+                exceptions.append({"test": "4", "theme": topic, "ob_chunk_count": count,
+                                    "failure_mode": "edge_function_error", "error": str(e)})
+                continue
+
+            grade_prompt = f"""A user asked an AI about Brett Coryell's career.
+
+QUESTION: {query}
+
+AI RESPONSE:
+{response[:3000]}
+
+Does this response demonstrate multi-context awareness of the theme "{topic.replace('-', ' ')}" across Brett's career?
+Does it cite at least 2 specific career instances or employers?
+
+Answer with exactly one word: PASS, PARTIAL, or FAIL.
+PASS = multi-context awareness shown, 2+ specific career instances cited
+PARTIAL = theme mentioned but only 1 context or too generic
+FAIL = theme absent, wrong, or completely generic"""
+
+            claude_grade, gemini_grade = _grade_llm(grade_prompt)
+            verdicts = [v for v in [claude_grade, gemini_grade] if v and not v.startswith("error")]
+            passed = any(v == "pass" for v in verdicts)
+
+            if verbose:
+                print(f"  {topic} ({count} chunks): claude={claude_grade}, gemini={gemini_grade}")
+
+            if passed:
+                passes += 1
+            else:
+                fails += 1
+                exceptions.append({
+                    "test": "4", "theme": topic, "ob_chunk_count": count,
+                    "query": query, "response_preview": response[:200],
+                    "claude_grade": claude_grade, "gemini_grade": gemini_grade,
+                    "failure_mode": "multi_context_fail",
+                })
+
+    print(f"  Pass: {passes}  Fail: {fails}  (of {passes + fails} themes checked)")
+    return passes, fails, exceptions
+
+
+def run_test_5(skip_llm=False, verbose=False):
+    """
+    Known-answer Q&A accuracy using the live chat Edge Function.
+    Deterministic: check expected_keywords and expected_entities in response.
+    LLM (full mode): grade response against expected_answer.
+    """
+    print("\n── Test 5: Q&A accuracy ─────────────────────────────────────")
+
     qa_path = Path(__file__).parent.parent / "validation" / "qa_dataset.json"
-    if qa_path.exists():
-        print(f"  qa_dataset.json found — but Test 5 not yet implemented (pending schema redesign)")
-    else:
-        print(f"  Skipped — qa_dataset.json not yet available at {qa_path}")
-    return {"status": "deferred", "reason": "qa_dataset.json not ready; schema redesign pending"}
+    if not qa_path.exists():
+        print(f"  Skipped — qa_dataset.json not found")
+        return 0, 0, []
+
+    with open(qa_path) as f:
+        raw = json.load(f)
+    pairs = raw if isinstance(raw, list) else raw.get("pairs", [])
+    approved = [q for q in pairs if q.get("brett_approved")]
+    print(f"  Loaded {len(approved)} Brett-approved Q&A pairs")
+
+    passes = fails = partials = 0
+    exceptions = []
+    session_id = f"val5-{uuid.uuid4().hex[:6]}"
+
+    for i, qa in enumerate(approved):
+        question = qa.get("question", "")
+        expected_answer = qa.get("expected_answer", "")
+        expected_keywords = [kw.lower() for kw in qa.get("expected_keywords", [])]
+        expected_entities = qa.get("expected_entities", [])
+        group = qa.get("group", "?")
+
+        try:
+            response = _query_edge_function(question, session_id=f"{session_id}-{i}")
+        except Exception as e:
+            print(f"  ERROR Q{group}: {e}")
+            fails += 1
+            exceptions.append({"test": "5", "question": question[:100], "group": group,
+                                "failure_mode": "edge_function_error", "error": str(e)})
+            continue
+
+        resp_lower = response.lower()
+        kw_hits = sum(1 for kw in expected_keywords if kw in resp_lower)
+        kw_rate = kw_hits / len(expected_keywords) if expected_keywords else 1.0
+        ent_hits = sum(1 for ent in expected_entities if ent.lower() in resp_lower)
+        ent_rate = ent_hits / len(expected_entities) if expected_entities else 1.0
+        det_verdict = "pass" if (kw_rate >= 0.7 and ent_rate >= 0.5) else "fail"
+
+        if skip_llm:
+            final = det_verdict
+            claude_grade = gemini_grade = None
+        else:
+            grade_prompt = f"""Grade an AI response about Brett Coryell's career.
+
+QUESTION: {question}
+
+EXPECTED ANSWER (key facts that should appear):
+{expected_answer[:1500]}
+
+AI RESPONSE:
+{response[:2000]}
+
+Does the AI response contain the key facts and named entities from the expected answer?
+Answer with exactly one word: PASS, PARTIAL, or FAIL.
+PASS = main facts and key entities present, no major omissions
+PARTIAL = main point addressed but 1-2 key entities or details missing
+FAIL = response is wrong, generic, or missing key facts"""
+
+            claude_grade, gemini_grade = _grade_llm(grade_prompt)
+            all_v = [v for v in [det_verdict, claude_grade, gemini_grade] if v and not v.startswith("error")]
+            if any(v == "pass" for v in all_v):
+                final = "pass"
+            elif any(v == "partial" for v in all_v):
+                final = "partial"
+            else:
+                final = "fail"
+
+        if verbose:
+            print(f"  [{i+1}/{len(approved)}] Q{group}: kw={kw_rate:.0%} det={det_verdict}"
+                  + (f" claude={claude_grade} gemini={gemini_grade}" if not skip_llm else "")
+                  + f" → {final.upper()}")
+
+        if final == "pass":
+            passes += 1
+        else:
+            if final == "partial":
+                partials += 1
+            else:
+                fails += 1
+            exceptions.append({
+                "test": "5",
+                "question": question[:100],
+                "group": group,
+                "response_preview": response[:300],
+                "kw_hit_rate": round(kw_rate, 2),
+                "entity_hit_rate": round(ent_rate, 2),
+                "det_verdict": det_verdict,
+                "claude_grade": claude_grade if not skip_llm else None,
+                "gemini_grade": gemini_grade if not skip_llm else None,
+                "failure_mode": final,
+                "missed_keywords": [kw for kw in expected_keywords if kw not in resp_lower],
+                "missed_entities": [e for e in expected_entities if e.lower() not in resp_lower],
+            })
+
+    pass_rate = passes / len(approved) if approved else 0
+    print(f"  Pass: {passes}  Partial: {partials}  Fail: {fails}  ({pass_rate:.0%} pass rate)"
+          + ("  [90% threshold]" if approved else ""))
+    return passes, fails, exceptions
 
 
 # ── Output writers ────────────────────────────────────────────────────────────
@@ -767,7 +1014,7 @@ def main():
     )
     parser.add_argument("--skip-llm", action="store_true",
                         help="Run deterministic checks only (no Claude/Gemini calls)")
-    parser.add_argument("--test", choices=["1a", "1b", "2", "3"],
+    parser.add_argument("--test", choices=["1a", "1b", "2", "3", "4", "5"],
                         help="Run a single test instead of all")
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
@@ -849,10 +1096,18 @@ def main():
         }
         all_exceptions.extend(excs)
 
-    # Deferred tests
-    if args.test is None:
-        report["test_4"] = run_test_4_stub()
-        report["test_5"] = run_test_5_stub()
+    # Test 4
+    if args.test in (None, "4"):
+        p, f, excs = run_test_4(ob_thoughts, ai_resume_data,
+                                skip_llm=args.skip_llm, verbose=args.verbose)
+        report["test_4"] = {"pass": p, "fail": f, "exceptions": excs}
+        all_exceptions.extend(excs)
+
+    # Test 5
+    if args.test in (None, "5"):
+        p, f, excs = run_test_5(skip_llm=args.skip_llm, verbose=args.verbose)
+        report["test_5"] = {"pass": p, "fail": f, "exceptions": excs}
+        all_exceptions.extend(excs)
 
     # Summary
     elapsed = (datetime.now(timezone.utc) - started).total_seconds()
@@ -862,6 +1117,13 @@ def main():
     print(f"  Test 1B: {report['test_1b'].get('pass',0)} pass / {report['test_1b'].get('fail',0)} fail")
     print(f"  Test 2:  {report['test_2'].get('entities_found',0)} found / {report['test_2'].get('entities_missing',0)} missing")
     print(f"  Test 3:  {len(report['test_3'].get('ob_only_terms',[]))} OB-only / {len(report['test_3'].get('ai_resume_only_terms',[]))} ai-resume-only")
+    if "test_4" in report:
+        print(f"  Test 4:  {report['test_4'].get('pass',0)} pass / {report['test_4'].get('fail',0)} fail")
+    if "test_5" in report:
+        t5 = report["test_5"]
+        total5 = t5.get("pass", 0) + t5.get("fail", 0)
+        rate5 = f"{t5['pass']/total5:.0%}" if total5 else "n/a"
+        print(f"  Test 5:  {t5.get('pass',0)} pass / {t5.get('fail',0)} fail  ({rate5})")
     total_exceptions = len(all_exceptions)
     print(f"  Total exceptions: {total_exceptions}")
     print(f"{'='*60}")
