@@ -1009,18 +1009,26 @@ def _claude_extract_thought(anthropic_client, thought, idx=None, total=None):
         return None
 
 
-def run_extract_per_thought(sb, anthropic_client, dry_run, verbose):
+def run_extract_per_thought(sb, anthropic_client, dry_run, verbose, thought_ids=None):
     """
     Per-thought extraction: call Claude once per OB thought with a cached system prompt.
-    Always wipes extracted tables first. Use for full resyncs.
+    Full mode (no --thought-ids): wipes extracted tables first. Use for full resyncs.
+    Targeted mode (--thought-ids): skips the wipe and processes only the specified thoughts.
     """
-    if not dry_run:
-        print("── Wiping extracted tables ──────────────────────────────")
-        wipe_extracted_tables(sb)
-        print()
+    if thought_ids:
+        print(f"── Targeted extraction: {len(thought_ids)} thought(s) — skipping wipe ──")
+    else:
+        if not dry_run:
+            print("── Wiping extracted tables ──────────────────────────────")
+            wipe_extracted_tables(sb)
+            print()
 
     print("Fetching biographical thoughts from OB...")
     thoughts = fetch_biographical_thoughts(sb, verbose=verbose)
+    if thought_ids:
+        id_set = set(thought_ids)
+        thoughts = [t for t in thoughts if t["id"] in id_set]
+        print(f"Filtered to {len(thoughts)} targeted thought(s)\n")
     total = len(thoughts)
     print(f"Found {total} biographical thoughts\n")
     if not thoughts:
@@ -1547,6 +1555,8 @@ def main():
                         help="Comma-separated pass IDs to run (default: all). Options: 1,2a,2b,3")
     parser.add_argument("--type", choices=SYNC_TYPES,
                         help="Sync only this structured type (default: all)")
+    parser.add_argument("--thought-ids", default=None,
+                        help="Comma-separated OB thought UUIDs. With --per-thought: skip wipe and process only these.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--verbose", "-v", action="store_true")
     parser.add_argument("--stats", action="store_true")
@@ -1576,7 +1586,8 @@ def main():
 
     if args.per_thought:
         anthropic_client = get_anthropic()
-        run_extract_per_thought(sb, anthropic_client, args.dry_run, args.verbose)
+        thought_ids = [t.strip() for t in args.thought_ids.split(",")] if args.thought_ids else None
+        run_extract_per_thought(sb, anthropic_client, args.dry_run, args.verbose, thought_ids=thought_ids)
     elif args.extract:
         if args.wipe and not args.dry_run:
             print("── Wiping extracted tables ──────────────────────────────")

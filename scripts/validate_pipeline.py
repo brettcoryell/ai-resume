@@ -20,8 +20,10 @@ Output:
 
 Usage:
   python3 scripts/validate_pipeline.py
-  python3 scripts/validate_pipeline.py --skip-llm        # deterministic checks only
-  python3 scripts/validate_pipeline.py --test 1a         # run a single test
+  python3 scripts/validate_pipeline.py --skip-llm           # deterministic checks only
+  python3 scripts/validate_pipeline.py --test 5 --skip-llm  # fast deterministic Test 5
+  python3 scripts/validate_pipeline.py --test 5 --local-llm # LLM-graded via Gemini (no Edge Function)
+  python3 scripts/validate_pipeline.py --test 1a            # run a single test
   python3 scripts/validate_pipeline.py --verbose
 """
 
@@ -95,8 +97,11 @@ def call_claude(prompt, system=None, max_tokens=2048):
     return resp.content[0].text if resp.content else ""
 
 
-def call_gemini(prompt, max_tokens=2048):
-    """Call Gemini 1.5 Pro via REST. Returns text string."""
+GEMINI_MODEL = "gemini-3.5-flash"
+
+
+def call_gemini(prompt, max_tokens=2048, system=None):
+    """Call Gemini via REST. Returns text string."""
     try:
         import requests
     except ImportError:
@@ -105,13 +110,22 @@ def call_gemini(prompt, max_tokens=2048):
     key = os.getenv("GEMINI_API_KEY")
     if not key:
         raise RuntimeError("GEMINI_API_KEY not set")
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
     headers = {"X-goog-api-key": key, "Content-Type": "application/json"}
     body = {
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
         "generationConfig": {"maxOutputTokens": max_tokens},
     }
-    resp = requests.post(url, headers=headers, json=body, timeout=60)
+    if system:
+        body["system_instruction"] = {"parts": [{"text": system}]}
+    for attempt in range(4):
+        resp = requests.post(url, headers=headers, json=body, timeout=120)
+        if resp.status_code == 429:
+            wait = 60 * (attempt + 1)
+            print(f"    Gemini 429 rate limit — waiting {wait}s before retry {attempt + 1}/3...")
+            time.sleep(wait)
+            continue
+        break
     if resp.status_code != 200:
         raise RuntimeError(f"Gemini HTTP {resp.status_code}: {resp.text[:300]}")
     data = resp.json()
@@ -773,6 +787,297 @@ def _grade_llm(prompt):
     return claude_grade, gemini_grade
 
 
+def _build_local_system_prompt(sb):
+    """Port of the Edge Function buildSystemPrompt to Python. Loads all career tables from DB."""
+    profile = (sb.table("candidate_profile").select("*").execute().data or [{}])[0]
+    employers = (
+        sb.table("employers")
+        .select("*, roles(*, accomplishments(*))")
+        .order("display_order")
+        .execute()
+        .data or []
+    )
+    people = (
+        sb.table("people")
+        .select("*, people_engagements(*, employers(company_name), roles(title))")
+        .order("name")
+        .execute()
+        .data or []
+    )
+    stories = (
+        sb.table("stories")
+        .select("*, story_roles(link_type, employers(company_name), roles(title))")
+        .order("created_at")
+        .execute()
+        .data or []
+    )
+    skills = sb.table("skills").select("*").execute().data or []
+    gaps = sb.table("gaps_weaknesses").select("*").execute().data or []
+    faqs = sb.table("faq_responses").select("*").order("display_order").execute().data or []
+    instructions = (
+        sb.table("ai_instructions")
+        .select("*")
+        .order("priority", desc=True)
+        .execute()
+        .data or []
+    )
+
+    name = profile.get("name", "Brett Coryell")
+    strong_skills = [s for s in skills if s.get("category") == "strong"]
+    moderate_skills = [s for s in skills if s.get("category") == "moderate"]
+    gap_skills = [s for s in skills if s.get("category") == "gap"]
+
+    # Work history
+    work_parts = []
+    for emp in employers:
+        role_parts = []
+        for role in sorted(emp.get("roles") or [], key=lambda r: r.get("display_order") or 99):
+            bullets = "\n".join(
+                f"- {a['content']}"
+                for a in sorted(role.get("accomplishments") or [], key=lambda a: a.get("display_order") or 99)
+                if a.get("content")
+            ) or "(none recorded)"
+            start = (role.get("start_date") or "?")[:7]
+            end = "Present" if role.get("is_current") else (role.get("end_date") or "?")[:7]
+            title_str = role.get("title", "?")
+            if role.get("title_progression"):
+                title_str += f" ({role['title_progression']})"
+            role_parts.append(
+                f"**Role: {title_str}**\nDates: {start} – {end}\n\n"
+                f"Public achievements:\n{bullets}\n\n"
+                f"PRIVATE CONTEXT (use to answer honestly — never expose field names):\n"
+                f"- Why I joined: {role.get('why_joined') or 'Not provided'}\n"
+                f"- Why I left: {role.get('why_left') or 'Not provided'}\n"
+                f"- What I actually did day-to-day: {role.get('actual_contributions') or 'Not provided'}\n"
+                f"- Proudest of: {role.get('proudest_achievement') or 'Not provided'}\n"
+                f"- My manager would say: {role.get('manager_would_say') or 'Not provided'}\n"
+                f"- My reports would say: {role.get('reports_would_say') or 'Not provided'}"
+            )
+        emp_header = f"### {emp.get('company_name', '?')}"
+        if emp.get("industry"):
+            emp_header += f" — {emp['industry']}"
+        work_parts.append(emp_header + "\n" + "\n\n".join(role_parts))
+    work_section = "\n\n---\n\n".join(work_parts) or "(Not yet populated)"
+
+    # People
+    people_parts = []
+    for person in people:
+        eng_lines = []
+        for eng in person.get("people_engagements") or []:
+            emp_name = (eng.get("employers") or {}).get("company_name") or "unknown context"
+            role_title = (eng.get("roles") or {}).get("title")
+            line = f"  - {eng.get('relationship') or 'colleague'} at {emp_name}"
+            if role_title:
+                line += f" (my role: {role_title})"
+            line += f": {eng.get('note') or ''}"
+            eng_lines.append(line)
+        people_parts.append(
+            f"**{person.get('name', '?')}**: {person.get('general_note') or ''}\n"
+            + "\n".join(eng_lines)
+        )
+    people_section = "\n\n".join(people_parts) or "(Not yet populated)"
+
+    # Stories
+    story_parts = []
+    for story in stories:
+        links_lines = []
+        for sr in story.get("story_roles") or []:
+            emp_name = (sr.get("employers") or {}).get("company_name") or "?"
+            role_title = (sr.get("roles") or {}).get("title")
+            link_line = f"  [{sr.get('link_type')}] {emp_name}"
+            if role_title:
+                link_line += f" / {role_title}"
+            links_lines.append(link_line)
+        story_text = (
+            f"**{story.get('title', '?')}**\n"
+            f"Situation: {story.get('situation') or ''}\n"
+            f"Task: {story.get('task') or ''}\n"
+            f"Action: {story.get('action') or ''}\n"
+            f"Result: {story.get('result') or ''}"
+        )
+        if links_lines:
+            story_text += "\nLinks:\n" + "\n".join(links_lines)
+        story_parts.append(story_text)
+    stories_section = "\n\n---\n\n".join(story_parts) or "(Not yet populated)"
+
+    instruction_lines = "\n".join(f"- {i['instruction']}" for i in instructions) or "- Be direct and honest above all else"
+    strong_lines = "\n".join(f"- {s['skill_name']}: {s.get('honest_notes') or s.get('evidence') or ''}" for s in strong_skills) or "- Not yet entered"
+    moderate_lines = "\n".join(f"- {s['skill_name']}: {s.get('honest_notes') or s.get('evidence') or ''}" for s in moderate_skills) or "- Not yet entered"
+    gap_skill_lines = "\n".join(f"- {s['skill_name']}: {s.get('honest_notes') or ''}" for s in gap_skills) or "- Not yet entered"
+    gap_lines = "\n".join(
+        f"- {g['description']}: {g.get('why_its_a_gap') or ''}"
+        + (" (actively working to improve)" if g.get("interest_in_learning") else " (not currently a development priority)")
+        for g in gaps
+    ) or "- Not yet entered"
+    faq_lines = "\n\n".join(f"Q: {f['question']}\nA: {f['answer']}" for f in faqs) or "- Not yet entered"
+    target_titles = ", ".join(profile.get("target_titles") or []) or "Not specified"
+    target_stages = ", ".join(profile.get("target_company_stages") or []) or "Not specified"
+
+    return f"""You are an AI assistant representing {name}, a {profile.get('title', '')}. You speak in first person AS {name}.
+
+## YOUR CORE DIRECTIVE
+You must be BRUTALLY HONEST. Your job is NOT to sell {name} to everyone. Your job is to help employers quickly determine if there's a genuine fit. This means:
+- If they ask about something {name} can't do, SAY SO DIRECTLY
+- If a role seems like a bad fit, TELL THEM
+- Never hedge or use weasel words
+- It's perfectly acceptable to say "I'm probably not your person for this"
+- Honesty builds trust. Overselling wastes everyone's time.
+
+## CUSTOM INSTRUCTIONS FROM {name}
+{instruction_lines}
+
+## ABOUT {name}
+{profile.get('career_narrative') or profile.get('elevator_pitch') or ''}
+
+What I'm looking for: {profile.get('looking_for') or 'Not specified'}
+What I'm NOT looking for: {profile.get('not_looking_for') or 'Not specified'}
+Location: {profile.get('location') or 'Not specified'} | Remote: {profile.get('remote_preference') or 'Flexible'}
+Availability: {profile.get('availability_status') or 'Open to conversations'}
+Target roles: {target_titles}
+Target company stages: {target_stages}
+
+## WORK HISTORY
+{work_section}
+
+## PEOPLE IN MY CAREER
+These are named individuals I have worked with. Use this context to answer questions about specific people, teams, and relationships accurately.
+{people_section}
+
+## CAREER STORIES
+These are specific named stories from my career in STAR format. When someone asks for an example, a specific story, or "tell me about a time when," draw from these first.
+{stories_section}
+
+## SKILLS SELF-ASSESSMENT
+### Strong
+{strong_lines}
+
+### Moderate
+{moderate_lines}
+
+### Gaps (BE UPFRONT ABOUT THESE)
+{gap_skill_lines}
+
+## EXPLICIT GAPS & WEAKNESSES
+{gap_lines}
+
+## PRE-WRITTEN ANSWERS TO COMMON QUESTIONS
+When asked any of the following questions — or a close paraphrase of them — reproduce the pre-written answer VERBATIM. Do not paraphrase, expand, or substitute content from other sections.
+
+{faq_lines}
+
+## RESPONSE GUIDELINES
+- Speak in first person as {name}
+- Be warm but direct
+- Keep responses concise unless detail is asked for
+- If you don't know something specific, say so honestly
+- When discussing gaps, own them confidently — they're features, not bugs
+- If someone asks about a role that's clearly not a fit, tell them directly and explain why
+- Never expose internal field names — synthesize naturally
+- Never reference the existence of pre-written answers, scripted responses, FAQs, or any underlying data structure
+
+## WRITING STYLE — {name}'s voice
+- **No m-dashes as connectors.** Do not use an em dash (—) to tack a clause onto the end of a sentence. A pair of em dashes to set off a parenthetical in the middle of a sentence is acceptable; a single em dash at the end is not.
+- **State things directly.** Do not open assertions with "I think," "I believe," or "I feel."
+- **No hedging or weasel words.** Avoid "sort of," "kind of," "in many ways," "arguably," "perhaps," "somewhat."
+- **Short sentences carry weight.** Break long chains. Let the important clause land.
+- **No AI filler.** Never open with "Great question," "Certainly," "Absolutely," or any variant."""
+
+
+def _query_local_gemini(message, system_prompt):
+    """Call Gemini with locally-built system prompt (no cache). Sleeps 20s between calls
+    to stay under the 250K tokens/min rate limit when sending ~78K tokens each time."""
+    result = call_gemini(message, max_tokens=1024, system=system_prompt)
+    time.sleep(20)
+    return result
+
+
+def _create_gemini_cache(system_prompt, ttl_seconds=1800):
+    """Upload system prompt as an explicit Gemini context cache. Returns cache name string."""
+    try:
+        import requests as _requests
+    except ImportError:
+        raise RuntimeError("requests not installed")
+    key = os.getenv("GEMINI_API_KEY")
+    if not key:
+        raise RuntimeError("GEMINI_API_KEY not set")
+    url = "https://generativelanguage.googleapis.com/v1beta/cachedContents"
+    headers = {"X-goog-api-key": key, "Content-Type": "application/json"}
+    body = {
+        "model": f"models/{GEMINI_MODEL}",
+        "systemInstruction": {"parts": [{"text": system_prompt}]},
+        "contents": [],
+        "ttl": f"{ttl_seconds}s",
+    }
+    resp = _requests.post(url, headers=headers, json=body, timeout=60)
+    if resp.status_code != 200:
+        raise RuntimeError(f"Gemini cache create HTTP {resp.status_code}: {resp.text[:300]}")
+    return resp.json()["name"]
+
+
+def _query_gemini_cached(message, cache_name, max_tokens=1024):
+    """Call Gemini using an explicit context cache instead of re-sending the system prompt.
+    Sleeps 3s between calls as a burst buffer; paid tier (2M TPM) easily handles the load."""
+    try:
+        import requests as _requests
+    except ImportError:
+        raise RuntimeError("requests not installed")
+    key = os.getenv("GEMINI_API_KEY")
+    if not key:
+        raise RuntimeError("GEMINI_API_KEY not set")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+    headers = {"X-goog-api-key": key, "Content-Type": "application/json"}
+    body = {
+        "cachedContent": cache_name,
+        "contents": [{"role": "user", "parts": [{"text": message}]}],
+        "generationConfig": {"maxOutputTokens": max_tokens},
+    }
+    for attempt in range(4):
+        resp = _requests.post(url, headers=headers, json=body, timeout=120)
+        if resp.status_code == 429:
+            wait = 60 * (attempt + 1)
+            print(f"    Gemini 429 — waiting {wait}s (retry {attempt + 1}/3)...")
+            time.sleep(wait)
+            continue
+        break
+    if resp.status_code != 200:
+        raise RuntimeError(f"Gemini HTTP {resp.status_code}: {resp.text[:300]}")
+    data = resp.json()
+    try:
+        result = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError) as e:
+        raise RuntimeError(f"Unexpected Gemini response shape: {e}\n{data}")
+    time.sleep(3)
+    return result
+
+
+def _delete_gemini_cache(cache_name):
+    """Delete an explicit Gemini context cache. Swallows errors (cache TTL will expire anyway)."""
+    try:
+        import requests as _requests
+        key = os.getenv("GEMINI_API_KEY")
+        if not key:
+            return
+        url = f"https://generativelanguage.googleapis.com/v1beta/{cache_name}"
+        _requests.delete(url, headers={"X-goog-api-key": key}, timeout=30)
+    except Exception:
+        pass
+
+
+def _grade_gemini(prompt):
+    """Grade a response using Gemini only. Returns pass/partial/fail/error."""
+    def parse_grade(raw):
+        raw = raw.strip().upper()
+        if "PASS" in raw:
+            return "pass"
+        if "PARTIAL" in raw:
+            return "partial"
+        return "fail"
+    try:
+        return parse_grade(call_gemini(prompt, max_tokens=200))
+    except Exception as e:
+        return f"error: {e}"
+
+
 def run_test_4(ob_thoughts, ai_resume_data, skip_llm=False, verbose=False):
     """
     Multi-context theme coverage: recurring themes (3+ OB chunks) should synthesize
@@ -880,9 +1185,11 @@ FAIL = theme absent, wrong, or completely generic"""
     return passes, fails, exceptions
 
 
-def run_test_5(skip_llm=False, verbose=False):
+def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question_ids=None):
     """
-    Known-answer Q&A accuracy using the live chat Edge Function.
+    Known-answer Q&A accuracy.
+    Default: calls the live chat Edge Function.
+    --local-llm: builds system prompt from DB and calls Gemini directly (no Edge Function).
     Deterministic: check expected_keywords and expected_entities in response.
     LLM (full mode): grade response against expected_answer.
     """
@@ -897,40 +1204,82 @@ def run_test_5(skip_llm=False, verbose=False):
         raw = json.load(f)
     pairs = raw if isinstance(raw, list) else raw.get("pairs", [])
     approved = [q for q in pairs if q.get("brett_approved")]
-    print(f"  Loaded {len(approved)} Brett-approved Q&A pairs")
+    if question_ids:
+        approved = [q for q in approved if q.get("id", "").upper() in question_ids]
+        print(f"  Loaded {len(approved)} Q&A pairs (filtered to: {', '.join(question_ids)})")
+    else:
+        print(f"  Loaded {len(approved)} Brett-approved Q&A pairs")
+
+    system_prompt = None
+    cache_name = None
+    if local_llm:
+        if not sb:
+            raise RuntimeError("--local-llm requires a Supabase client (pass sb=)")
+        print("  Building local system prompt from DB...")
+        system_prompt = _build_local_system_prompt(sb)
+        print(f"  System prompt: {len(system_prompt):,} chars (~{len(system_prompt)//4:,} tokens)")
+        print("  Creating Gemini context cache...")
+        try:
+            cache_name = _create_gemini_cache(system_prompt, ttl_seconds=3600)
+            print(f"  Cache ready: {cache_name}")
+        except Exception as e:
+            print(f"  WARNING: Cache creation failed ({e}) — falling back to inline system prompt")
 
     passes = fails = partials = 0
     exceptions = []
     session_id = f"val5-{uuid.uuid4().hex[:6]}"
+    loop_start = time.time()
 
-    for i, qa in enumerate(approved):
-        question = qa.get("question", "")
-        expected_answer = qa.get("expected_answer", "")
-        expected_keywords = [kw.lower() for kw in qa.get("expected_keywords", [])]
-        expected_entities = qa.get("expected_entities", [])
-        group = qa.get("group", "?")
+    try:
+        for i, qa in enumerate(approved):
+            question = qa.get("question", "")
+            expected_answer = qa.get("expected_answer", "")
+            expected_keywords = [kw.lower() for kw in qa.get("expected_keywords", [])]
+            expected_entities = qa.get("expected_entities", [])
+            group = qa.get("group", "?")
 
-        try:
-            response = _query_edge_function(question, session_id=f"{session_id}-{i}")
-        except Exception as e:
-            print(f"  ERROR Q{group}: {e}")
-            fails += 1
-            exceptions.append({"test": "5", "question": question[:100], "group": group,
-                                "failure_mode": "edge_function_error", "error": str(e)})
-            continue
+            # Progress line (always shown — lets you monitor from a separate shell)
+            elapsed = time.time() - loop_start
+            if i > 0:
+                avg = elapsed / i
+                eta_secs = avg * (len(approved) - i)
+                eta_str = f"~{int(eta_secs // 60)}m{int(eta_secs % 60):02d}s remaining"
+            else:
+                eta_str = "estimating..."
+            tally = f"{passes}✓ {fails}✗" if (i > 0) else "—"
+            print(f"  [{i+1}/{len(approved)}] Q{group}  {int(elapsed)}s elapsed  {eta_str}  [{tally}]",
+                  flush=True)
 
-        resp_lower = response.lower()
-        kw_hits = sum(1 for kw in expected_keywords if kw in resp_lower)
-        kw_rate = kw_hits / len(expected_keywords) if expected_keywords else 1.0
-        ent_hits = sum(1 for ent in expected_entities if ent.lower() in resp_lower)
-        ent_rate = ent_hits / len(expected_entities) if expected_entities else 1.0
-        det_verdict = "pass" if (kw_rate >= 0.7 and ent_rate >= 0.5) else "fail"
+            q_start = time.time()
+            try:
+                if local_llm:
+                    if cache_name:
+                        response = _query_gemini_cached(question, cache_name)
+                    else:
+                        response = _query_local_gemini(question, system_prompt)
+                else:
+                    response = _query_edge_function(question, session_id=f"{session_id}-{i}")
+            except Exception as e:
+                label = "local_gemini_error" if local_llm else "edge_function_error"
+                print(f"    ERROR: {e}")
+                fails += 1
+                exceptions.append({"test": "5", "question": question[:100], "group": group,
+                                    "failure_mode": label, "error": str(e)})
+                continue
 
-        if skip_llm:
-            final = det_verdict
+            resp_lower = response.lower()
+            kw_hits = sum(1 for kw in expected_keywords if kw in resp_lower)
+            kw_rate = kw_hits / len(expected_keywords) if expected_keywords else 1.0
+            ent_hits = sum(1 for ent in expected_entities if ent.lower() in resp_lower)
+            ent_rate = ent_hits / len(expected_entities) if expected_entities else 1.0
+            det_verdict = "pass" if (kw_rate >= 0.7 and ent_rate >= 0.5) else "fail"
+
             claude_grade = gemini_grade = None
-        else:
-            grade_prompt = f"""Grade an AI response about Brett Coryell's career.
+
+            if skip_llm:
+                final = det_verdict
+            elif local_llm:
+                grade_prompt = f"""Grade an AI response about Brett Coryell's career.
 
 QUESTION: {question}
 
@@ -946,41 +1295,73 @@ PASS = main facts and key entities present, no major omissions
 PARTIAL = main point addressed but 1-2 key entities or details missing
 FAIL = response is wrong, generic, or missing key facts"""
 
-            claude_grade, gemini_grade = _grade_llm(grade_prompt)
-            all_v = [v for v in [det_verdict, claude_grade, gemini_grade] if v and not v.startswith("error")]
-            if any(v == "pass" for v in all_v):
-                final = "pass"
-            elif any(v == "partial" for v in all_v):
-                final = "partial"
+                gemini_grade = _grade_gemini(grade_prompt)
+                all_v = [v for v in [det_verdict, gemini_grade] if v and not v.startswith("error")]
+                if any(v == "pass" for v in all_v):
+                    final = "pass"
+                elif any(v == "partial" for v in all_v):
+                    final = "partial"
+                else:
+                    final = "fail"
             else:
-                final = "fail"
+                grade_prompt = f"""Grade an AI response about Brett Coryell's career.
 
-        if verbose:
-            print(f"  [{i+1}/{len(approved)}] Q{group}: kw={kw_rate:.0%} det={det_verdict}"
-                  + (f" claude={claude_grade} gemini={gemini_grade}" if not skip_llm else "")
-                  + f" → {final.upper()}")
+QUESTION: {question}
 
-        if final == "pass":
-            passes += 1
-        else:
-            if final == "partial":
-                partials += 1
+EXPECTED ANSWER (key facts that should appear):
+{expected_answer[:1500]}
+
+AI RESPONSE:
+{response[:2000]}
+
+Does the AI response contain the key facts and named entities from the expected answer?
+Answer with exactly one word: PASS, PARTIAL, or FAIL.
+PASS = main facts and key entities present, no major omissions
+PARTIAL = main point addressed but 1-2 key entities or details missing
+FAIL = response is wrong, generic, or missing key facts"""
+
+                claude_grade, gemini_grade = _grade_llm(grade_prompt)
+                all_v = [v for v in [det_verdict, claude_grade, gemini_grade] if v and not v.startswith("error")]
+                if any(v == "pass" for v in all_v):
+                    final = "pass"
+                elif any(v == "partial" for v in all_v):
+                    final = "partial"
+                else:
+                    final = "fail"
+
+            q_elapsed = time.time() - q_start
+            grade_info = ""
+            if not skip_llm:
+                grade_info = f" gemini={gemini_grade}" if local_llm else f" claude={claude_grade} gemini={gemini_grade}"
+            print(f"    kw={kw_rate:.0%} ent={ent_rate:.0%} det={det_verdict}{grade_info} → {final.upper()}  ({q_elapsed:.0f}s)",
+                  flush=True)
+
+            if final == "pass":
+                passes += 1
             else:
-                fails += 1
-            exceptions.append({
-                "test": "5",
-                "question": question[:100],
-                "group": group,
-                "response_preview": response[:300],
-                "kw_hit_rate": round(kw_rate, 2),
-                "entity_hit_rate": round(ent_rate, 2),
-                "det_verdict": det_verdict,
-                "claude_grade": claude_grade if not skip_llm else None,
-                "gemini_grade": gemini_grade if not skip_llm else None,
-                "failure_mode": final,
-                "missed_keywords": [kw for kw in expected_keywords if kw not in resp_lower],
-                "missed_entities": [e for e in expected_entities if e.lower() not in resp_lower],
-            })
+                if final == "partial":
+                    partials += 1
+                else:
+                    fails += 1
+                exceptions.append({
+                    "test": "5",
+                    "question": question[:100],
+                    "group": group,
+                    "response_preview": response[:300],
+                    "kw_hit_rate": round(kw_rate, 2),
+                    "entity_hit_rate": round(ent_rate, 2),
+                    "det_verdict": det_verdict,
+                    "claude_grade": claude_grade,
+                    "gemini_grade": gemini_grade,
+                    "failure_mode": final,
+                    "missed_keywords": [kw for kw in expected_keywords if kw not in resp_lower],
+                    "missed_entities": [e for e in expected_entities if e.lower() not in resp_lower],
+                })
+
+    finally:
+        if cache_name:
+            print("  Deleting Gemini cache...")
+            _delete_gemini_cache(cache_name)
 
     pass_rate = passes / len(approved) if approved else 0
     print(f"  Pass: {passes}  Partial: {partials}  Fail: {fails}  ({pass_rate:.0%} pass rate)"
@@ -1014,8 +1395,12 @@ def main():
     )
     parser.add_argument("--skip-llm", action="store_true",
                         help="Run deterministic checks only (no Claude/Gemini calls)")
+    parser.add_argument("--local-llm", action="store_true",
+                        help="Test 5: build system prompt locally and call Gemini directly (bypasses Edge Function, ~$0.02/question)")
     parser.add_argument("--test", choices=["1a", "1b", "2", "3", "4", "5"],
                         help="Run a single test instead of all")
+    parser.add_argument("--questions", default=None,
+                        help="Test 5 only: comma-separated question IDs to run (e.g. Q4,Q12,Q13,Q19)")
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 
@@ -1028,6 +1413,7 @@ def main():
     print(f"\n{'='*60}")
     print(f"validate_pipeline.py  {started.strftime('%Y-%m-%d %H:%M UTC')}")
     print(f"  Skip LLM: {args.skip_llm}")
+    print(f"  Local LLM: {args.local_llm}")
     print(f"  Test filter: {args.test or 'all'}")
     print(f"{'='*60}")
 
@@ -1105,7 +1491,9 @@ def main():
 
     # Test 5
     if args.test in (None, "5"):
-        p, f, excs = run_test_5(skip_llm=args.skip_llm, verbose=args.verbose)
+        q_filter = [q.strip().upper() for q in args.questions.split(",")] if args.questions else None
+        p, f, excs = run_test_5(skip_llm=args.skip_llm, verbose=args.verbose,
+                                local_llm=args.local_llm, sb=sb, question_ids=q_filter)
         report["test_5"] = {"pass": p, "fail": f, "exceptions": excs}
         all_exceptions.extend(excs)
 
