@@ -23,6 +23,7 @@ Usage:
   python3 scripts/validate_pipeline.py --skip-llm           # deterministic checks only
   python3 scripts/validate_pipeline.py --test 5 --skip-llm  # fast deterministic Test 5
   python3 scripts/validate_pipeline.py --test 5 --local-llm # LLM-graded via Gemini (no Edge Function)
+  python3 scripts/validate_pipeline.py --test 5 --use-blob  # Test 5 using raw OB blob (run build_blob.py first)
   python3 scripts/validate_pipeline.py --test 1a            # run a single test
   python3 scripts/validate_pipeline.py --verbose
 """
@@ -764,7 +765,9 @@ def _query_edge_function(message, session_id=None):
 
 
 def _grade_llm(prompt):
-    """Call Claude and Gemini independently; return (claude_grade, gemini_grade). Grades: pass/partial/fail/error."""
+    """Call Claude and Gemini independently in parallel; return (claude_grade, gemini_grade)."""
+    import concurrent.futures
+
     def parse_grade(raw):
         raw = raw.strip().upper()
         if "PASS" in raw:
@@ -775,15 +778,26 @@ def _grade_llm(prompt):
             return "fail"
         return "fail"
 
-    claude_grade = gemini_grade = None
-    try:
-        claude_grade = parse_grade(call_claude(prompt, max_tokens=10))
-    except Exception as e:
-        claude_grade = f"error: {e}"
-    try:
-        gemini_grade = parse_grade(call_gemini(prompt, max_tokens=10))
-    except Exception as e:
-        gemini_grade = f"error: {e}"
+    def grade_claude():
+        try:
+            return parse_grade(call_claude(prompt, max_tokens=10))
+        except Exception as e:
+            return f"error: {e}"
+
+    def grade_gemini():
+        try:
+            # Use 1024 tokens — Gemini 3.5 Flash uses reasoning tokens before output,
+            # so 200 was too tight and caused MAX_TOKENS with empty content blocks.
+            return parse_grade(call_gemini(prompt, max_tokens=1024))
+        except Exception as e:
+            return f"error: {e}"
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+        f_claude = ex.submit(grade_claude)
+        f_gemini = ex.submit(grade_gemini)
+        claude_grade = f_claude.result()
+        gemini_grade = f_gemini.result()
+
     return claude_grade, gemini_grade
 
 
@@ -983,6 +997,63 @@ When asked any of the following questions — or a close paraphrase of them — 
 - **No AI filler.** Never open with "Great question," "Certainly," "Absolutely," or any variant."""
 
 
+def _build_blob_system_prompt(blob_content, sb):
+    """
+    Build a system prompt using the raw OB narrative blob as career context,
+    instead of the structured-table assembly in _build_local_system_prompt.
+
+    The persona and behavioral instructions still come from DB (small, accurate,
+    no information loss). The career content is the raw blob.
+    """
+    profile = (sb.table("candidate_profile").select("*").execute().data or [{}])[0]
+    instructions = (
+        sb.table("ai_instructions")
+        .select("*")
+        .order("priority", desc=True)
+        .execute()
+        .data or []
+    )
+
+    name = profile.get("name", "Brett Coryell")
+    instruction_lines = (
+        "\n".join(f"- {i['instruction']}" for i in instructions)
+        or "- Be direct and honest above all else"
+    )
+
+    return f"""You are an AI assistant representing {name}, a {profile.get('title', '')}. You speak in first person AS {name}.
+
+## YOUR CORE DIRECTIVE
+You must be BRUTALLY HONEST. Your job is NOT to sell {name} to everyone. Your job is to help employers quickly determine if there's a genuine fit. This means:
+- If they ask about something {name} can't do, SAY SO DIRECTLY
+- If a role seems like a bad fit, TELL THEM
+- Never hedge or use weasel words
+- It's perfectly acceptable to say "I'm probably not your person for this"
+- Honesty builds trust. Overselling wastes everyone's time.
+
+## CUSTOM INSTRUCTIONS FROM {name}
+{instruction_lines}
+
+--- CAREER CONTEXT ---
+{blob_content}
+--- END CAREER CONTEXT ---
+
+## RESPONSE GUIDELINES
+- Speak in first person as {name}
+- Be warm but direct
+- Keep responses concise unless detail is asked for
+- If you don't know something specific, say so honestly
+- When discussing gaps, own them confidently — they're features, not bugs
+- If someone asks about a role that's clearly not a fit, tell them directly and explain why
+- Never expose internal field names or data structure — synthesize naturally
+
+## WRITING STYLE — {name}'s voice
+- **No m-dashes as connectors.** Do not use an em dash (—) to tack a clause onto the end of a sentence. A pair of em dashes to set off a parenthetical in the middle of a sentence is acceptable; a single em dash at the end is not.
+- **State things directly.** Do not open assertions with "I think," "I believe," or "I feel."
+- **No hedging or weasel words.** Avoid "sort of," "kind of," "in many ways," "arguably," "perhaps," "somewhat."
+- **Short sentences carry weight.** Break long chains. Let the important clause land.
+- **No AI filler.** Never open with "Great question," "Certainly," "Absolutely," or any variant."""
+
+
 def _query_local_gemini(message, system_prompt):
     """Call Gemini with locally-built system prompt (no cache). Sleeps 20s between calls
     to stay under the 250K tokens/min rate limit when sending ~78K tokens each time."""
@@ -1073,7 +1144,8 @@ def _grade_gemini(prompt):
             return "partial"
         return "fail"
     try:
-        return parse_grade(call_gemini(prompt, max_tokens=200))
+        # 1024 tokens — Gemini 3.5 Flash needs headroom for reasoning tokens before output.
+        return parse_grade(call_gemini(prompt, max_tokens=1024))
     except Exception as e:
         return f"error: {e}"
 
@@ -1185,11 +1257,13 @@ FAIL = theme absent, wrong, or completely generic"""
     return passes, fails, exceptions
 
 
-def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question_ids=None):
+def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question_ids=None,
+               use_blob=False):
     """
     Known-answer Q&A accuracy.
     Default: calls the live chat Edge Function.
-    --local-llm: builds system prompt from DB and calls Gemini directly (no Edge Function).
+    --local-llm: builds system prompt from DB tables and calls Gemini directly (no Edge Function).
+    --use-blob: loads validation/career_blob.txt as career context and calls Gemini directly.
     Deterministic: check expected_keywords and expected_entities in response.
     LLM (full mode): grade response against expected_answer.
     """
@@ -1212,7 +1286,27 @@ def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question
 
     system_prompt = None
     cache_name = None
-    if local_llm:
+    if use_blob:
+        if not sb:
+            raise RuntimeError("--use-blob requires a Supabase client (pass sb=)")
+        blob_path = Path(__file__).parent.parent / "validation" / "career_blob.txt"
+        if not blob_path.exists():
+            print(f"  ERROR: career_blob.txt not found.")
+            print(f"  Run first: python3 scripts/build_blob.py --dry-run")
+            return 0, 0, []
+        print(f"  Loading blob from validation/career_blob.txt...")
+        blob_content = blob_path.read_text()
+        print(f"  Blob: {len(blob_content):,} chars (~{len(blob_content)//4:,} tokens)")
+        print("  Building blob system prompt (persona + raw OB narrative)...")
+        system_prompt = _build_blob_system_prompt(blob_content, sb)
+        print(f"  System prompt: {len(system_prompt):,} chars (~{len(system_prompt)//4:,} tokens)")
+        print("  Creating Gemini context cache...")
+        try:
+            cache_name = _create_gemini_cache(system_prompt, ttl_seconds=3600)
+            print(f"  Cache ready: {cache_name}")
+        except Exception as e:
+            print(f"  WARNING: Cache creation failed ({e}) — falling back to inline system prompt")
+    elif local_llm:
         if not sb:
             raise RuntimeError("--local-llm requires a Supabase client (pass sb=)")
         print("  Building local system prompt from DB...")
@@ -1252,7 +1346,7 @@ def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question
 
             q_start = time.time()
             try:
-                if local_llm:
+                if local_llm or use_blob:
                     if cache_name:
                         response = _query_gemini_cached(question, cache_name)
                     else:
@@ -1260,7 +1354,7 @@ def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question
                 else:
                     response = _query_edge_function(question, session_id=f"{session_id}-{i}")
             except Exception as e:
-                label = "local_gemini_error" if local_llm else "edge_function_error"
+                label = "local_gemini_error" if (local_llm or use_blob) else "edge_function_error"
                 print(f"    ERROR: {e}")
                 fails += 1
                 exceptions.append({"test": "5", "question": question[:100], "group": group,
@@ -1278,7 +1372,7 @@ def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question
 
             if skip_llm:
                 final = det_verdict
-            elif local_llm:
+            elif local_llm or use_blob:
                 grade_prompt = f"""Grade an AI response about Brett Coryell's career.
 
 QUESTION: {question}
@@ -1332,7 +1426,7 @@ FAIL = response is wrong, generic, or missing key facts"""
             q_elapsed = time.time() - q_start
             grade_info = ""
             if not skip_llm:
-                grade_info = f" gemini={gemini_grade}" if local_llm else f" claude={claude_grade} gemini={gemini_grade}"
+                grade_info = f" gemini={gemini_grade}" if (local_llm or use_blob) else f" claude={claude_grade} gemini={gemini_grade}"
             print(f"    kw={kw_rate:.0%} ent={ent_rate:.0%} det={det_verdict}{grade_info} → {final.upper()}  ({q_elapsed:.0f}s)",
                   flush=True)
 
@@ -1396,7 +1490,9 @@ def main():
     parser.add_argument("--skip-llm", action="store_true",
                         help="Run deterministic checks only (no Claude/Gemini calls)")
     parser.add_argument("--local-llm", action="store_true",
-                        help="Test 5: build system prompt locally and call Gemini directly (bypasses Edge Function, ~$0.02/question)")
+                        help="Test 5: build system prompt locally from DB tables and call Gemini directly (bypasses Edge Function, ~$0.02/question)")
+    parser.add_argument("--use-blob", action="store_true",
+                        help="Test 5: use validation/career_blob.txt as career context instead of structured tables (run build_blob.py --dry-run first)")
     parser.add_argument("--test", choices=["1a", "1b", "2", "3", "4", "5"],
                         help="Run a single test instead of all")
     parser.add_argument("--questions", default=None,
@@ -1414,6 +1510,7 @@ def main():
     print(f"validate_pipeline.py  {started.strftime('%Y-%m-%d %H:%M UTC')}")
     print(f"  Skip LLM: {args.skip_llm}")
     print(f"  Local LLM: {args.local_llm}")
+    print(f"  Use blob: {args.use_blob}")
     print(f"  Test filter: {args.test or 'all'}")
     print(f"{'='*60}")
 
@@ -1493,7 +1590,8 @@ def main():
     if args.test in (None, "5"):
         q_filter = [q.strip().upper() for q in args.questions.split(",")] if args.questions else None
         p, f, excs = run_test_5(skip_llm=args.skip_llm, verbose=args.verbose,
-                                local_llm=args.local_llm, sb=sb, question_ids=q_filter)
+                                local_llm=args.local_llm, sb=sb, question_ids=q_filter,
+                                use_blob=args.use_blob)
         report["test_5"] = {"pass": p, "fail": f, "exceptions": excs}
         all_exceptions.extend(excs)
 
