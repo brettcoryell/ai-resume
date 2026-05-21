@@ -18,6 +18,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // Debounce: if a blob was built in the last 30 seconds, skip this call.
+    // Prevents a batch tag operation (e.g. cleanup script) from triggering
+    // dozens of redundant rebuilds — the first one wins.
+    const DEBOUNCE_SECONDS = 30;
+    const { data: latest } = await supabase
+      .from('career_blob')
+      .select('built_at, build_version')
+      .order('built_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (latest?.built_at) {
+      const ageSeconds = (Date.now() - new Date(latest.built_at).getTime()) / 1000;
+      if (ageSeconds < DEBOUNCE_SECONDS) {
+        console.log(`rebuild-blob: debounced (last build ${ageSeconds.toFixed(1)}s ago, version=${latest.build_version})`);
+        return new Response(
+          JSON.stringify({ ok: true, skipped: true, reason: 'debounced', last_build_version: latest.build_version }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     const thoughts = await fetchTaggedThoughts(supabase);
 
     if (thoughts.length === 0) {
