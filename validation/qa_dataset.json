@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "version": "1.2",
-    "updated": "2026-05-20",
-    "total_pairs": 44,
+    "version": "1.3",
+    "updated": "2026-05-30",
+    "total_pairs": 54,
     "brett_approved_count": 44,
-    "coda_additions_pending_review": 0,
+    "coda_additions_pending_review": 10,
     "source_spec": "wiki/notes/Project-AI-Resume-Validation.md",
     "groups": {
       "A": "Career Philosophy and Through-Line (Q1-Q5)",
@@ -17,7 +17,10 @@
       "H": "Indian Hill 1990-1993 (Q29-Q31)",
       "I": "The Hill School 1995-1998 (Q32-Q35)",
       "J": "UVA Graduate School 1993-1995 (Q36-Q37)",
-      "K": "Factual Verification and Honest Self-Assessment (Q38-Q43)"
+      "K": "Factual Verification and Honest Self-Assessment (Q38-Q43)",
+      "L": "Elementum Detail (Q44-Q45)",
+      "M": "Post-Neighborly Arc and ACUTE (Q46-Q48)",
+      "N": "Security and Leadership Stories (Q49-Q53)"
     }
   },
   "pairs": [
@@ -1027,6 +1030,230 @@
       ],
       "source_chunk": null,
       "notes": "Honest scoping question. System should not oversell Brett's hands-on technical current capability."
+    },
+    {
+      "id": "Q44",
+      "group": "L",
+      "brett_approved": true,
+      "question": "What did Brett actually build and accomplish during his seven months at Elementum?",
+      "expected_answer": "Brett built a delivery organization essentially from scratch. When he arrived, his team was a part-time project manager and a handful of architects. Over seven months he assembled a full delivery organization: full-time project managers, solution architects, technical architects, forward-deployed engineers using AI coding tools including Cursor, and a Deloitte consulting contingent. He diagnosed chronic understaffing as the root problem in his third week and pushed hard to fix it. The projects included replacing ServiceNow with an AI ITSM system and replacing Coupa for procure-to-pay at Sanofi, one of the largest pharmaceutical companies in the world. One moment he is particularly proud of: he told the Sanofi sponsor directly that capabilities Elementum had sold weren't fully built yet — nobody from their side had said it out loud. Once named, the relationship became more honest.",
+      "expected_keywords": [
+        "part-time",
+        "Cursor",
+        "Deloitte",
+        "understaffed",
+        "Sanofi sponsor",
+        "capabilities"
+      ],
+      "expected_entities": [
+        "Elementum",
+        "Sanofi",
+        "Deloitte"
+      ],
+      "source_chunk": "61b454b7-6c77-44fa-83ac-6ba6f41489b1",
+      "notes": "Tests Elementum accomplishments independent of the departure story. Part-time PM at arrival and Cursor/Deloitte detail confirm the right chunk is being retrieved. Sanofi sponsor candor moment is the signature story."
+    },
+    {
+      "id": "Q45",
+      "group": "L",
+      "brett_approved": true,
+      "question": "How did Brett come to join Elementum, and what is his history with Karen?",
+      "expected_answer": "Karen is a long-time colleague from Emory who voted against hiring Brett because she thought he would be too nice to make hard changes — she was proven wrong. He gave her the ITSM Office when he reorganized, read her accurately and designed the organization around what he saw in her. Years later he had to RIF her in a budget reduction; the relationship held and she remained a fan. She eventually landed at Elementum. While Brett was still in France, enrolled in his doctoral program in Rennes, Karen reached out and they arranged to meet in Paris — Brett took the train from Rennes. At the time the Elementum product was not developed enough for the kind of engagement she had in mind, so Brett said not yet and went back to Rennes. Two years later, when the Sanofi deal had closed and the need was urgent, she called again. This time Brett said yes.",
+      "expected_keywords": [
+        "Karen",
+        "voted against",
+        "ITSM",
+        "Paris",
+        "train",
+        "Rennes",
+        "not yet",
+        "Sanofi"
+      ],
+      "expected_entities": [
+        "Karen",
+        "Emory",
+        "Elementum",
+        "Paris",
+        "Rennes"
+      ],
+      "source_chunk": "5871f307-f20e-468f-a369-f2db1a79bf9a",
+      "notes": "Tests the origin story of the Elementum engagement. 'Voted against', 'ITSM', 'train from Rennes', and 'not yet' are the signature details. Confirms the Karen/Emory/Paris/Rennes thread is retrievable."
+    },
+    {
+      "id": "Q46",
+      "group": "M",
+      "brett_approved": true,
+      "question": "What was Brett doing between leaving Neighborly in 2021 and joining Elementum in 2025?",
+      "expected_answer": "After leaving Neighborly at the end of 2021, Brett spent about six months as primary caregiver for his father, who passed away in mid-2022. He took the summer to grieve and think about next steps. In the fall of 2022 he enrolled in a doctoral program in AI at the University of Rennes in France and lived there for about a year. After returning to the US in 2023, he settled in Denver near his younger daughter, took several consulting and executive coaching engagements, and spent roughly two years independently developing and refining ACUTE until he was convinced it was genuinely novel and effective. He wrapped that work in early 2025 and joined Elementum in the fall at Karen's invitation.",
+      "expected_keywords": [
+        "caregiver",
+        "father",
+        "Rennes",
+        "Denver",
+        "daughter",
+        "ACUTE",
+        "consulting",
+        "2022"
+      ],
+      "expected_entities": [
+        "Neighborly",
+        "Elementum",
+        "Rennes",
+        "Denver"
+      ],
+      "source_chunk": "c35eb91b-2c2f-4e25-aac9-44c1459f7a9a",
+      "notes": "Covers the 2021-2025 gap that has no prior test coverage. Caregiver, Denver, and the two-year ACUTE development period are the key facts. Important for explaining the gap years to a recruiter."
+    },
+    {
+      "id": "Q47",
+      "group": "M",
+      "brett_approved": true,
+      "question": "What does ACUTE actually do, and what has it demonstrated technically?",
+      "expected_answer": "ACUTE takes signals from cybersecurity tools and predicts what an attacker will do next. Security teams face enormous volumes of signals — most are benign noise from normal activity — and alert fatigue makes it hard to recognize when an actual attack is in progress. Attackers move slowly through most intrusion stages then suddenly accelerate into data extraction or encryption. ACUTE helps security teams get ahead by predicting the attacker's next moves from seeing only the first half of an attack sequence. Brett stress-tested it against noise: at 90% noise — nine out of ten signals being meaningless — ACUTE correctly identified the full attack with 90% accuracy after seeing only half of it.",
+      "expected_keywords": [
+        "alert fatigue",
+        "noise",
+        "predict",
+        "90%",
+        "half",
+        "attacker"
+      ],
+      "expected_entities": [
+        "ACUTE"
+      ],
+      "source_chunk": "47a3a6a9-209f-4cfa-ad91-89d23abb5bb7",
+      "notes": "Q26 covers the ACUTE origin story (fingerprint mental model, Neighborly CISO). This question tests the technical description and the 90/90 stress-test result — new content from the May 30 Ariel session. Alert fatigue and the 90% figure are the signature details."
+    },
+    {
+      "id": "Q48",
+      "group": "M",
+      "brett_approved": true,
+      "question": "What state was Northern Illinois University's IT division in when Brett arrived, and what did he do in his first weeks?",
+      "expected_answer": "When Brett arrived, NIU's IT division had no project management, no ITSM, no private IP addresses, no cybersecurity program, no inventory of other IT departments on campus, no governance, no capital equipment refresh process, and no budget reports. The previous head of IT had retired and been living in Arizona for over a year — Brett's direct reports had never been in the same room with their boss at the same time. In his first weeks, Brett announced staff meetings, monthly all-manager gatherings, a PMO, ITIL training, distributed budget authority, an org chart review, and a salary equity review. He also launched Beverages with Brett — every two weeks at a local bar, anyone from IT was welcome to come and talk about whatever was on their mind.",
+      "expected_keywords": [
+        "Arizona",
+        "Beverages with Brett",
+        "ITIL",
+        "salary equity",
+        "PMO",
+        "no ITSM"
+      ],
+      "expected_entities": [
+        "NIU",
+        "Northern Illinois University"
+      ],
+      "source_chunk": "5a205993-f246-4226-a61a-2ecc3972e4fa",
+      "notes": "Tests what Brett walked into at NIU — important context for the NIU turnaround story. Arizona detail and 'Beverages with Brett' confirm the right chunk. Complements Q22B (why he chose NIU) and Q23 (salary equity)."
+    },
+    {
+      "id": "Q49",
+      "group": "N",
+      "brett_approved": true,
+      "question": "Did Brett work with the FBI during his career, and if so, where and what happened?",
+      "expected_answer": "Brett worked with the FBI twice at Neighborly. The first time, an FBI agent called to report that investigators had followed a foreign cybercriminal into the desktop computer of one of Neighborly's franchisees. Before engaging, Brett independently verified the agent's identity — a good CISO should not simply trust that someone claiming to be FBI actually is. The remediation was straightforward: full machine wipe, virus scans, firewall log review, backup restoration, and enrolling the franchisee in corporate cybersecurity training. The second time Brett initiated: bots were hammering a public franchise locator website with form stuffing. He traced the traffic: routed through Russia, through Laos, through an old URL previously associated with the British military, to a fake local ISP account. Brett deployed Cloudflare globally across the entire Neighborly network and shared the intelligence with his FBI contact. Four months later the agent sent a message: 'Thanks for the lead.'",
+      "expected_keywords": [
+        "FBI",
+        "franchisee",
+        "verify",
+        "form stuffing",
+        "Russia",
+        "Laos",
+        "Cloudflare",
+        "thanks for the lead"
+      ],
+      "expected_entities": [
+        "FBI",
+        "Neighborly"
+      ],
+      "source_chunk": "c6714d68-21ac-4ebb-8275-43d7ca2b91c6",
+      "notes": "Completes the law enforcement thread (Secret Service at Purdue per Q18, NSA at NIU per Q50). Russia/Laos routing and the four-month callback are the signature details. Verifying identity independently before cooperating is a CISO credibility note."
+    },
+    {
+      "id": "Q50",
+      "group": "N",
+      "brett_approved": true,
+      "question": "Did Brett ever have an encounter with the NSA, and what were the circumstances?",
+      "expected_answer": "Early in his time at NIU, Brett was called to a same-day meeting with President Baker. Two visitors arrived: one FBI agent with a proper embossed card, and a second person introduced by first name only — called Bob — whose business card was printed on paper barely thicker than copier stock with no organization, no title, no contact information, just an icon of a globe. They asked about security threats universities face, what firewall work Brett was doing, and traffic from foreign actors including China. Brett believes they were already in his networks — following cybercriminals he had no defenses against — and were essentially telling him to get his act together. He never saw Bob from the World again.",
+      "expected_keywords": [
+        "Bob",
+        "globe",
+        "no title",
+        "China",
+        "President Baker",
+        "networks",
+        "FBI"
+      ],
+      "expected_entities": [
+        "NIU",
+        "NSA"
+      ],
+      "source_chunk": "7352c952-70b9-4104-96a2-afdb2250e224",
+      "notes": "Completes the law enforcement thread. 'Bob from the World' and the business card with a globe icon are the signature details. Answer should convey that Brett believes the NSA was already in his networks and the meeting was an indirect warning."
+    },
+    {
+      "id": "Q51",
+      "group": "N",
+      "brett_approved": true,
+      "question": "What was the Happy Meal presentation at Emory, and what was Brett trying to accomplish with it?",
+      "expected_answer": "After the Emory reorganization, Brett's teams were doing improving work but receiving no visible recognition from above. He built a 100-slide presentation designed to show his 300-plus person organization what they looked like from the outside — one or two highlights from every manager and supervisor group, with stats and recent successes called out. Then the payoff: everything Emory IT provides — phones, internet, TV, payroll systems, course management, purchasing, desktop support, and a call center for seven hospitals — costs about the price of a McDonald's Happy Meal, per person, per day. People talked about it for years afterward. The point was not to demonstrate efficiency — it was to manufacture the experience of Brett's own pride in the division so the team could see themselves through his eyes.",
+      "expected_keywords": [
+        "Happy Meal",
+        "100 slides",
+        "per person",
+        "per day",
+        "hospitals",
+        "pride",
+        "McDonald's"
+      ],
+      "expected_entities": [
+        "Emory"
+      ],
+      "source_chunk": "c66e8512-24b0-43f9-a480-b9e4554fc0d3",
+      "notes": "Leadership communication story — tests whether the Happy Meal framing, 100 slides, and seven hospitals details all survive. The key insight is that the point was not efficiency metrics but manufacturing a shared emotional experience."
+    },
+    {
+      "id": "Q52",
+      "group": "N",
+      "brett_approved": true,
+      "question": "How did Brett navigate the 2008 financial crisis at Emory, and what did he learn about budget management?",
+      "expected_answer": "Emory eventually lost a billion dollars from its endowment when the market crashed and everyone had to cut. Brett distributed budget ownership down to directors and managers, had them validate their own budgets and identify where to cut. The key maneuver belonged to Rich: he negotiated that mandatory inflationary software maintenance increases and capital equipment refresh needs could be funded if cuts were made elsewhere — getting more money for mandatory expenses in an era when most budgets were flat or declining. The trust Rich's finance team had built over years allowed them to do internal budget transfers that were, frankly, a little out of bounds — Finance's attitude was essentially 'don't tell your mother.' The lesson Brett took away: transparency and delivery earn institutional trust, and institutional trust is a form of currency that Finance will let you spend.",
+      "expected_keywords": [
+        "billion",
+        "endowment",
+        "Rich",
+        "software maintenance",
+        "capital equipment",
+        "don't tell your mother",
+        "distribute"
+      ],
+      "expected_entities": [
+        "Emory"
+      ],
+      "source_chunk": "370323e2-26f4-4dfc-a1bc-f0c3329c8b01",
+      "notes": "Tests financial management credibility under pressure. 'Don't tell your mother' is the signature phrase. Rich and the mechanism (mandatory-cost funding in exchange for discretionary cuts) must be present."
+    },
+    {
+      "id": "Q53",
+      "group": "N",
+      "brett_approved": true,
+      "question": "What happened when the SAP implementation at Purdue ran into serious problems with the student module?",
+      "expected_answer": "The student module functionality wasn't matching what SAP had shown in scripted demos — the functionality simply was not going to be ready in time. Brett represented the CIO in a meeting with the president of SAP North America, accompanied by a regional campus president as executive sponsor. The message: Purdue would replace SAP and sue if the situation wasn't resolved. Brett heard apologies but nothing specific — no count of people assigned, no root cause identified, no evidence of staffing reallocation. Without specific remedies from someone with authority to direct them, there was no reason to believe the future would differ from the past. Purdue eventually delayed the student module implementation, settled out of court with SAP, added $8 million to the project budget, and switched to a mixed environment: HR and Finance remained in SAP, and the student system moved to Banner.",
+      "expected_keywords": [
+        "SAP North America",
+        "student module",
+        "demos",
+        "sue",
+        "8 million",
+        "Banner",
+        "HR",
+        "Finance"
+      ],
+      "expected_entities": [
+        "Purdue",
+        "SAP"
+      ],
+      "source_chunk": "15d1ad05-c418-4a55-b4ba-4d3416e54dce",
+      "notes": "Tests whether the SAP confrontation story is retrievable distinct from the SAP selection story (Q14). SAP North America, the lawsuit threat, $8M, and Banner are the signature facts. The distinction between saying sorry vs. providing specific remedies is Brett's signature candor point."
     }
   ]
 }
