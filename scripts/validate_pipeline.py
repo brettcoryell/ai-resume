@@ -180,7 +180,6 @@ def load_ai_resume_tables(sb, verbose=False):
         "stories": "id, title, situation, task, action, result, ob_thought_id",
         "skills": "id, skill_name, category, honest_notes, evidence, ob_thought_id",
         "gaps_weaknesses": "id, description, why_its_a_gap, ob_thought_id",
-        "faq_responses": "id, question, answer, ob_thought_id",
         "ai_instructions": "id, instruction, ob_thought_id",
     }
     data = {}
@@ -471,7 +470,6 @@ def run_test_1b(ai_resume_data, ob_thoughts, skip_llm=False, verbose=False):
         "stories": "title",
         "skills": "skill_name",
         "gaps_weaknesses": "description",
-        "faq_responses": "question",
         "ai_instructions": "instruction",
     }
 
@@ -827,7 +825,6 @@ def _build_local_system_prompt(sb):
     )
     skills = sb.table("skills").select("*").execute().data or []
     gaps = sb.table("gaps_weaknesses").select("*").execute().data or []
-    faqs = sb.table("faq_responses").select("*").order("display_order").execute().data or []
     instructions = (
         sb.table("ai_instructions")
         .select("*")
@@ -923,7 +920,6 @@ def _build_local_system_prompt(sb):
         + (" (actively working to improve)" if g.get("interest_in_learning") else " (not currently a development priority)")
         for g in gaps
     ) or "- Not yet entered"
-    faq_lines = "\n\n".join(f"Q: {f['question']}\nA: {f['answer']}" for f in faqs) or "- Not yet entered"
     target_titles = ", ".join(profile.get("target_titles") or []) or "Not specified"
     target_stages = ", ".join(profile.get("target_company_stages") or []) or "Not specified"
 
@@ -973,11 +969,6 @@ These are specific named stories from my career in STAR format. When someone ask
 
 ## EXPLICIT GAPS & WEAKNESSES
 {gap_lines}
-
-## PRE-WRITTEN ANSWERS TO COMMON QUESTIONS
-When asked any of the following questions — or a close paraphrase of them — reproduce the pre-written answer VERBATIM. Do not paraphrase, expand, or substitute content from other sections.
-
-{faq_lines}
 
 ## RESPONSE GUIDELINES
 - Speak in first person as {name}

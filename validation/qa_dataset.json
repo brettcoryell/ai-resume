@@ -2,8 +2,8 @@
   "_meta": {
     "version": "1.2",
     "updated": "2026-05-20",
-    "total_pairs": 43,
-    "brett_approved_count": 43,
+    "total_pairs": 44,
+    "brett_approved_count": 44,
     "coda_additions_pending_review": 0,
     "source_spec": "wiki/notes/Project-AI-Resume-Validation.md",
     "groups": {
@@ -202,8 +202,7 @@
       "expected_keywords": [
         "Tenneco",
         "Y2K",
-        "$18M",
-        "Paranet",
+        "18 million",
         "Paul Matker",
         "25,000 tasks",
         "260 sites",
@@ -500,24 +499,43 @@
       "group": "D",
       "brett_approved": true,
       "question": "How did Brett's situation as a single father shape his time at Emory?",
-      "expected_answer": "Brett was a single father throughout his Emory years. His wife decided not to relocate from Indiana to Atlanta; divorce and a custody battle followed. Brett won custody \u2014 fathers win in only 4% of Indiana cases \u2014 and won five of six annual custody proceedings. He lost the sixth and immediately began looking for jobs near his daughters in Indiana, which led him to NIU \u2014 a move he describes as deliberate career suicide made without ambivalence. His operating rhythm at Emory: fully present with his daughters from arrival home to bedtime, then two hours of work on the couch nearly every night for approximately five years. Almost no one at work knew. His experience as a father to two daughters shaped his sensitivity to women in the workplace \u2014 equitable salaries, fair hiring, performance review equity, and women in IT.",
+      "expected_answer": "Almost no one at Emory knew Brett was a single father. He ran a 320-person IT organization while raising two daughters in Atlanta with no family support network. His operating rhythm was simple and non-negotiable: fully present with his daughters from the moment he got home until they went to bed, then two hours of work on the couch nearly every night for approximately five years.",
       "expected_keywords": [
         "single father",
         "Emory",
-        "custody",
-        "Indiana",
-        "NIU",
-        "4%",
         "daughters",
-        "career suicide"
+        "320",
+        "no one knew",
+        "couch"
+      ],
+      "expected_entities": [
+        "Emory"
+      ],
+      "source_chunk": null,
+      "notes": "Tests the operating-rhythm story, not the custody/NIU narrative. That context explains why he left Emory but isn't the preferred public answer."
+    },
+    {
+      "id": "Q22B",
+      "group": "D",
+      "brett_approved": true,
+      "question": "Why would Brett leave a prestigious school like Emory to go to a lower-ranked university like NIU?",
+      "expected_answer": "Because his daughters were there. Brett lost a custody proceeding in Indiana and the moment that decision came down, he started looking for jobs in the region. He knew exactly what he was giving up — Emory is a top-25 university with a $6 billion endowment. NIU was ranked in the 300s. He called it career suicide and made the decision anyway, without ambivalence, because he wanted to be close enough to drive to every tuba concert and school play and weekend art fair. It wasn't a professional decision. It was a values decision. And NIU turned out to be a harder proving ground than Emory in many ways — he cut the IT budget in half over four years while expanding services, across roughly 100 separate initiatives, with the state of Illinois stopping funding for public universities entirely during his tenure.",
+      "expected_keywords": [
+        "daughters",
+        "tuba concert",
+        "career suicide",
+        "values decision",
+        "without ambivalence",
+        "$6 billion",
+        "half",
+        "100"
       ],
       "expected_entities": [
         "Emory",
-        "NIU",
-        "Indiana"
+        "NIU"
       ],
       "source_chunk": null,
-      "notes": "Personal context with significant career impact. The 4% Indiana statistic and NIU connection must be present. Women-in-IT and salary equity belong to Q23, not here."
+      "notes": "Tests the custody/NIU departure story and the NIU-as-harder-proving-ground reframe. 'Tuba concert' and 'values decision' are the signature phrases. Source: ff9d40a9 + NIU budget thoughts."
     },
     {
       "id": "Q23",

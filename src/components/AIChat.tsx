@@ -17,7 +17,7 @@ interface AIChatProps {
 // Stable session ID for this browser tab
 const SESSION_ID = crypto.randomUUID();
 
-// Exact FAQ question keys — must match faq_responses.question in the DB
+// Suggested questions shown as buttons on the chat empty state
 const DEFAULT_QUESTIONS = [
   "Tell me about yourself",
   "What's your biggest weakness?",

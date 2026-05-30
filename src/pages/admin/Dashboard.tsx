@@ -5,12 +5,11 @@ import { supabase } from "@/lib/supabase";
 interface Stats {
   experiences: number;
   skills: number;
-  faqs: number;
 }
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<Stats>({ experiences: 0, skills: 0, faqs: 0 });
+  const [stats, setStats] = useState<Stats>({ experiences: 0, skills: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,16 +21,14 @@ const Dashboard = () => {
       }
 
       // Load counts in parallel
-      const [expRes, skillRes, faqRes] = await Promise.all([
+      const [expRes, skillRes] = await Promise.all([
         supabase.from("experiences").select("id", { count: "exact", head: true }),
         supabase.from("skills").select("id", { count: "exact", head: true }),
-        supabase.from("faq").select("id", { count: "exact", head: true }),
       ]);
 
       setStats({
         experiences: expRes.count ?? 0,
         skills: skillRes.count ?? 0,
-        faqs: faqRes.count ?? 0,
       });
       setLoading(false);
     };
@@ -49,7 +46,6 @@ const Dashboard = () => {
     { label: "Experience", to: "/admin/experience" },
     { label: "Skills", to: "/admin/skills" },
     { label: "Gaps & Weaknesses", to: "/admin/gaps" },
-    { label: "FAQ", to: "/admin/faq" },
     { label: "AI Instructions", to: "/admin/ai-instructions" },
   ];
 
@@ -87,13 +83,13 @@ const Dashboard = () => {
         <p className="text-muted-foreground mb-8">Welcome back.</p>
 
         {loading ? (
-          <div className="grid grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
               <div key={i} className="animate-pulse h-24 bg-card border border-border rounded-2xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             <div className="p-6 bg-card border border-border rounded-2xl">
               <p className="text-3xl font-serif text-foreground mb-1">{stats.experiences}</p>
               <p className="text-sm text-muted-foreground">Experiences</p>
@@ -101,10 +97,6 @@ const Dashboard = () => {
             <div className="p-6 bg-card border border-border rounded-2xl">
               <p className="text-3xl font-serif text-foreground mb-1">{stats.skills}</p>
               <p className="text-sm text-muted-foreground">Skills</p>
-            </div>
-            <div className="p-6 bg-card border border-border rounded-2xl">
-              <p className="text-3xl font-serif text-foreground mb-1">{stats.faqs}</p>
-              <p className="text-sm text-muted-foreground">FAQ entries</p>
             </div>
           </div>
         )}

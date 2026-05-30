@@ -15,7 +15,6 @@ MODE 1 — STRUCTURED SYNC (default)
     career-profile     → candidate_profile fields
     career-skill       → skills
     career-gap         → gaps_weaknesses
-    career-faq         → faq_responses
     career-instruction → ai_instructions
 
 MODE 2 — EXTRACT (--extract)
@@ -317,14 +316,12 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
   ]
 }}"""
 
-EXTRACT_SYSTEM_PASS3 = f"""You are extracting skills, gaps, AI instructions, and FAQ responses from biographical interview notes about Brett Coryell.
+EXTRACT_SYSTEM_PASS3 = f"""You are extracting skills, gaps, and AI instructions from biographical interview notes about Brett Coryell.
 {_EXTRACT_RULES}
 - Skills: extract 25-35 specific discrete skills. category MUST be exactly "strong", "moderate", or "gap".
   Never use "developing", "advanced", or any other category value.
   Use "gap" only for genuine acknowledged weaknesses.
 - Gaps: gap_type MUST be exactly one of: "skill", "experience", "environment", "role_type"
-- For faq_responses: if multiple versions of an answer exist (v1, v2, REVISED, etc.), use the most recent version only.
-
 OUTPUT SCHEMA (output ONLY this JSON, nothing else):
 {{
   "skills": [
@@ -349,15 +346,6 @@ OUTPUT SCHEMA (output ONLY this JSON, nothing else):
       "instruction_type": "honesty",
       "priority": 10,
       "instruction": "Specific instruction for how the AI should respond about Brett",
-      "source_thought_id": "full-uuid-of-primary-source-thought"
-    }}
-  ],
-  "faq_responses": [
-    {{
-      "question": "Tell me about yourself",
-      "answer": "Complete pre-written answer — latest version verbatim",
-      "is_common_question": true,
-      "display_order": 1,
       "source_thought_id": "full-uuid-of-primary-source-thought"
     }}
   ]
@@ -463,15 +451,6 @@ OUTPUT SCHEMA — return a JSON object (all sections optional, use [] if empty):
       "instruction_type": "honesty|tone|boundaries|other",
       "priority": 10,
       "instruction": "Specific instruction for how AI should respond about Brett",
-      "source_thought_id": "COPY-UUID-FROM-THOUGHT-HEADER"
-    }}
-  ],
-  "faq_responses": [
-    {{
-      "question": "Interview question",
-      "answer": "Complete pre-written answer verbatim",
-      "is_common_question": true,
-      "display_order": 1,
       "source_thought_id": "COPY-UUID-FROM-THOUGHT-HEADER"
     }}
   ]
@@ -890,28 +869,6 @@ def sync_gaps(sb, thoughts, profile, dry_run, verbose):
     return len(items)
 
 
-def sync_faqs(sb, thoughts, profile, dry_run, verbose):
-    items = [t for t in thoughts if t["metadata"].get("type") == "career-faq"]
-    if not items:
-        if verbose: print("  No career-faq thoughts")
-        return 0
-    for t in items:
-        m = t["metadata"]
-        q = m.get("question", "")
-        if not q:
-            print(f"  WARNING: career-faq thought {t['id']} has no question — skipping")
-            continue
-        row = {k: v for k, v in {
-            "candidate_id": profile["id"],
-            "ob_thought_id": t["id"],
-            "question": q,
-            "answer": t["content"].strip(),
-            "display_order": int(m.get("display_order", 99)),
-            "is_common_question": bool(m.get("is_common_question", False)),
-        }.items() if v is not None}
-        _upsert_by_ob_id(sb, "faq_responses", row, t["id"], dry_run, q[:60])
-    return len(items)
-
 
 def sync_instructions(sb, thoughts, profile, dry_run, verbose):
     items = [t for t in thoughts if t["metadata"].get("type") == "career-instruction"]
@@ -1045,7 +1002,7 @@ def run_extract_per_thought(sb, anthropic_client, dry_run, verbose, thought_ids=
         "thoughts_ok": 0, "errors": 0,
         "employers": 0, "roles": 0, "accomplishments": 0,
         "people": 0, "stories": 0, "skills": 0,
-        "gaps": 0, "instructions": 0, "faqs": 0,
+        "gaps": 0, "instructions": 0,
     }
 
     VALID_SKILL_CATS = {"strong", "moderate", "gap"}
@@ -1188,41 +1145,13 @@ def run_extract_per_thought(sb, anthropic_client, dry_run, verbose, thought_ids=
                     sb.table("ai_instructions").insert(row).execute()
             stats["instructions"] += 1
 
-        # ── faq_responses ─────────────────────────────────────────────────
-        for faq in data.get("faq_responses", []):
-            question = faq.get("question", "")
-            answer = faq.get("answer", "")
-            if not question or not answer:
-                continue
-            row = {k: v for k, v in {
-                "candidate_id": candidate_id,
-                "question": question,
-                "answer": answer,
-                "is_common_question": bool(faq.get("is_common_question", True)),
-                "display_order": int(faq.get("display_order", 99)),
-                "ob_thought_id": ob_id,
-            }.items() if v is not None}
-            if not dry_run:
-                existing = (
-                    sb.table("faq_responses").select("id")
-                    .eq("candidate_id", candidate_id)
-                    .eq("question", question)
-                    .execute()
-                )
-                if existing.data:
-                    sb.table("faq_responses").update(row).eq("id", existing.data[0]["id"]).execute()
-                else:
-                    sb.table("faq_responses").insert(row).execute()
-            stats["faqs"] += 1
-
     print(f"\n── Per-thought extraction summary ───────────────────────────")
     print(f"  thoughts: {stats['thoughts_ok']} ok / {stats['errors']} errors")
     print(f"  employers: {stats['employers']}  roles: {stats['roles']}  "
           f"accomplishments: {stats['accomplishments']}")
     print(f"  people: {stats['people']}  stories: {stats['stories']}  "
           f"skills: {stats['skills']}")
-    print(f"  gaps: {stats['gaps']}  instructions: {stats['instructions']}  "
-          f"faqs: {stats['faqs']}")
+    print(f"  gaps: {stats['gaps']}  instructions: {stats['instructions']}")
     print()
 
 
@@ -1233,7 +1162,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
     """
     passes: list of pass IDs to run, e.g. ["1", "2a", "2b", "3"].
     Defaults to all passes. Use a subset to resume after partial failure.
-    Pass IDs: 1=work history, 2a=people, 2b=stories, 3=skills/gaps/faqs
+    Pass IDs: 1=work history, 2a=people, 2b=stories, 3=skills/gaps/instructions
     """
     if passes is None:
         passes = ALL_PASSES
@@ -1269,7 +1198,7 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
     if "2b" in passes:
         p2b = _claude_extract(anthropic_client, EXTRACT_SYSTEM_PASS2B, corpus, "Pass 2b: stories")
     if "3" in passes:
-        p3 = _claude_extract(anthropic_client, EXTRACT_SYSTEM_PASS3, corpus, "Pass 3: skills + gaps + faqs")
+        p3 = _claude_extract(anthropic_client, EXTRACT_SYSTEM_PASS3, corpus, "Pass 3: skills + gaps + instructions")
 
     extracted = {
         "profile":        (p1 or {}).get("profile", {}),
@@ -1279,7 +1208,6 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
         "skills":         (p3 or {}).get("skills", []),
         "gaps":           (p3 or {}).get("gaps", []),
         "ai_instructions":(p3 or {}).get("ai_instructions", []),
-        "faq_responses":  (p3 or {}).get("faq_responses", []),
     }
 
     print("\nPasses complete. Writing to career tables...\n")
@@ -1449,40 +1377,6 @@ def run_extract(sb, anthropic_client, dry_run, verbose, passes=None):
             print(f"  ✓ Inserted: {text[:60]}")
     print()
 
-    # ── faq_responses ─────────────────────────────────────────────────────────
-    faqs = extracted.get("faq_responses", [])
-    print(f"── faq_responses ({len(faqs)}) ────────────────────────────────────")
-    for faq in faqs:
-        question = faq.get("question", "")
-        answer = faq.get("answer", "")
-        if not question or not answer:
-            continue
-        row = {k: v for k, v in {
-            "candidate_id": candidate_id,
-            "question": question,
-            "answer": answer,
-            "is_common_question": bool(faq.get("is_common_question", True)),
-            "display_order": int(faq.get("display_order", 99)),
-            "ob_thought_id": faq.get("source_thought_id") or None,
-        }.items() if v is not None}
-        if dry_run:
-            print(f"  [DRY RUN] Q: {question[:70]}")
-            continue
-        existing = (
-            sb.table("faq_responses")
-            .select("id")
-            .eq("candidate_id", candidate_id)
-            .eq("question", question)
-            .execute()
-        )
-        if existing.data:
-            sb.table("faq_responses").update(row).eq("id", existing.data[0]["id"]).execute()
-            print(f"  ✓ Updated: {question[:70]}")
-        else:
-            sb.table("faq_responses").insert(row).execute()
-            print(f"  ✓ Inserted: {question[:70]}")
-    print()
-
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 
@@ -1491,7 +1385,7 @@ def print_stats(sb):
     tables = [
         "candidate_profile", "employers", "roles", "accomplishments",
         "people", "people_engagements", "stories", "story_roles",
-        "skills", "gaps_weaknesses", "faq_responses", "ai_instructions",
+        "skills", "gaps_weaknesses", "ai_instructions",
     ]
     for tbl in tables:
         try:
@@ -1526,7 +1420,7 @@ def print_stats(sb):
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-SYNC_TYPES = ["profile", "skill", "gap", "faq", "instruction"]
+SYNC_TYPES = ["profile", "skill", "gap", "instruction"]
 
 
 def wipe_extracted_tables(sb):
@@ -1534,7 +1428,7 @@ def wipe_extracted_tables(sb):
     order = [
         "story_roles", "accomplishments", "people_engagements",
         "stories", "roles", "people", "employers",
-        "skills", "gaps_weaknesses", "faq_responses", "ai_instructions",
+        "skills", "gaps_weaknesses", "ai_instructions",
     ]
     for tbl in order:
         sb.table(tbl).delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
@@ -1617,10 +1511,6 @@ def main():
         if run_all or args.type == "gap":
             print("── career-gap ──────────────────────────────────────────")
             sync_gaps(sb, thoughts, profile, args.dry_run, args.verbose)
-            print()
-        if run_all or args.type == "faq":
-            print("── career-faq ──────────────────────────────────────────")
-            sync_faqs(sb, thoughts, profile, args.dry_run, args.verbose)
             print()
         if run_all or args.type == "instruction":
             print("── career-instruction ──────────────────────────────────")
