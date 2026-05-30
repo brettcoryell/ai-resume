@@ -21,9 +21,11 @@ Output:
 Usage:
   python3 scripts/validate_pipeline.py
   python3 scripts/validate_pipeline.py --skip-llm           # deterministic checks only
-  python3 scripts/validate_pipeline.py --test 5 --skip-llm  # fast deterministic Test 5
-  python3 scripts/validate_pipeline.py --test 5 --local-llm # LLM-graded via Gemini (no Edge Function)
-  python3 scripts/validate_pipeline.py --test 5 --use-blob  # Test 5 using raw OB blob (run build_blob.py first)
+  python3 scripts/validate_pipeline.py --test 5 --skip-llm           # fast deterministic Test 5
+  python3 scripts/validate_pipeline.py --test 5 --local-llm          # LLM-graded via Gemini (no Edge Function)
+  python3 scripts/validate_pipeline.py --test 5 --use-blob           # Test 5 using raw OB blob (run build_blob.py first)
+  python3 scripts/validate_pipeline.py --test 5 --workers 8          # parallel edge-function mode (default, ~2min for 54q)
+  python3 scripts/validate_pipeline.py --test 5 --workers 1          # sequential (debugging / rate-limit safety)
   python3 scripts/validate_pipeline.py --test 1a            # run a single test
   python3 scripts/validate_pipeline.py --verbose
 """
@@ -35,6 +37,7 @@ import argparse
 import re
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -1248,8 +1251,114 @@ FAIL = theme absent, wrong, or completely generic"""
     return passes, fails, exceptions
 
 
+def _run_one_qa(i, qa, session_id, local_llm, use_blob, cache_name, system_prompt, skip_llm):
+    """Process a single Q&A pair. Thread-safe — safe to call from a thread pool."""
+    question = qa.get("question", "")
+    expected_answer = qa.get("expected_answer", "")
+    expected_keywords = [kw.lower() for kw in qa.get("expected_keywords", [])]
+    expected_entities = qa.get("expected_entities", [])
+    group = qa.get("group", "?")
+    qa_id = qa.get("id", f"Q{i+1}")
+
+    print(f"  [{qa_id}] Q{group}  starting...", flush=True)
+    q_start = time.time()
+
+    try:
+        if local_llm or use_blob:
+            if cache_name:
+                response = _query_gemini_cached(question, cache_name)
+            else:
+                response = _query_local_gemini(question, system_prompt)
+        else:
+            response = _query_edge_function(question, session_id=f"{session_id}-{i}")
+    except Exception as e:
+        q_elapsed = time.time() - q_start
+        label = "local_gemini_error" if (local_llm or use_blob) else "edge_function_error"
+        print(f"  [{qa_id}] ERROR: {e}  ({q_elapsed:.0f}s)", flush=True)
+        return {
+            "index": i, "qa_id": qa_id, "group": group, "final": "error",
+            "exception": {
+                "test": "5", "question": question[:100], "group": group,
+                "failure_mode": label, "error": str(e),
+            }
+        }
+
+    resp_lower = response.lower()
+    kw_hits = sum(1 for kw in expected_keywords if kw in resp_lower)
+    kw_rate = kw_hits / len(expected_keywords) if expected_keywords else 1.0
+    ent_hits = sum(1 for ent in expected_entities if ent.lower() in resp_lower)
+    ent_rate = ent_hits / len(expected_entities) if expected_entities else 1.0
+    det_verdict = "pass" if (kw_rate >= 0.7 and ent_rate >= 0.5) else "fail"
+
+    claude_grade = gemini_grade = None
+
+    grade_prompt = f"""Grade an AI response about Brett Coryell's career.
+
+QUESTION: {question}
+
+EXPECTED ANSWER (key facts that should appear):
+{expected_answer[:1500]}
+
+AI RESPONSE:
+{response[:2000]}
+
+Does the AI response contain the key facts and named entities from the expected answer?
+Answer with exactly one word: PASS, PARTIAL, or FAIL.
+PASS = main facts and key entities present, no major omissions
+PARTIAL = main point addressed but 1-2 key entities or details missing
+FAIL = response is wrong, generic, or missing key facts"""
+
+    if skip_llm:
+        final = det_verdict
+    elif local_llm or use_blob:
+        gemini_grade = _grade_gemini(grade_prompt)
+        all_v = [v for v in [det_verdict, gemini_grade] if v and not v.startswith("error")]
+        if any(v == "pass" for v in all_v):
+            final = "pass"
+        elif any(v == "partial" for v in all_v):
+            final = "partial"
+        else:
+            final = "fail"
+    else:
+        claude_grade, gemini_grade = _grade_llm(grade_prompt)
+        all_v = [v for v in [det_verdict, claude_grade, gemini_grade] if v and not v.startswith("error")]
+        if any(v == "pass" for v in all_v):
+            final = "pass"
+        elif any(v == "partial" for v in all_v):
+            final = "partial"
+        else:
+            final = "fail"
+
+    q_elapsed = time.time() - q_start
+    grade_info = ""
+    if not skip_llm:
+        grade_info = (f" gemini={gemini_grade}" if (local_llm or use_blob)
+                      else f" claude={claude_grade} gemini={gemini_grade}")
+    print(f"  [{qa_id}] kw={kw_rate:.0%} ent={ent_rate:.0%} det={det_verdict}{grade_info} → {final.upper()}  ({q_elapsed:.0f}s)",
+          flush=True)
+
+    result = {
+        "index": i, "qa_id": qa_id, "group": group, "final": final,
+        "exception": None,
+    }
+    if final != "pass":
+        result["exception"] = {
+            "test": "5", "question": question[:100], "group": group,
+            "response_preview": response[:300],
+            "kw_hit_rate": round(kw_rate, 2),
+            "entity_hit_rate": round(ent_rate, 2),
+            "det_verdict": det_verdict,
+            "claude_grade": claude_grade,
+            "gemini_grade": gemini_grade,
+            "failure_mode": final,
+            "missed_keywords": [kw for kw in expected_keywords if kw not in resp_lower],
+            "missed_entities": [e for e in expected_entities if e.lower() not in resp_lower],
+        }
+    return result
+
+
 def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question_ids=None,
-               use_blob=False):
+               use_blob=False, workers=8):
     """
     Known-answer Q&A accuracy.
     Default: calls the live chat Edge Function.
@@ -1315,133 +1424,68 @@ def run_test_5(skip_llm=False, verbose=False, local_llm=False, sb=None, question
     session_id = f"val5-{uuid.uuid4().hex[:6]}"
     loop_start = time.time()
 
+    effective_workers = workers if (not local_llm and not use_blob) else 1
+    if effective_workers > 1:
+        print(f"  Running {len(approved)} questions with {effective_workers} parallel workers...", flush=True)
+
     try:
-        for i, qa in enumerate(approved):
-            question = qa.get("question", "")
-            expected_answer = qa.get("expected_answer", "")
-            expected_keywords = [kw.lower() for kw in qa.get("expected_keywords", [])]
-            expected_entities = qa.get("expected_entities", [])
-            group = qa.get("group", "?")
-
-            # Progress line (always shown — lets you monitor from a separate shell)
-            elapsed = time.time() - loop_start
-            if i > 0:
-                avg = elapsed / i
-                eta_secs = avg * (len(approved) - i)
-                eta_str = f"~{int(eta_secs // 60)}m{int(eta_secs % 60):02d}s remaining"
-            else:
-                eta_str = "estimating..."
-            tally = f"{passes}✓ {fails}✗" if (i > 0) else "—"
-            print(f"  [{i+1}/{len(approved)}] Q{group}  {int(elapsed)}s elapsed  {eta_str}  [{tally}]",
-                  flush=True)
-
-            q_start = time.time()
-            try:
-                if local_llm or use_blob:
-                    if cache_name:
-                        response = _query_gemini_cached(question, cache_name)
-                    else:
-                        response = _query_local_gemini(question, system_prompt)
+        if effective_workers > 1:
+            results = [None] * len(approved)
+            with ThreadPoolExecutor(max_workers=effective_workers) as executor:
+                futures = {
+                    executor.submit(_run_one_qa, i, qa, session_id,
+                                    local_llm, use_blob, cache_name, system_prompt, skip_llm): i
+                    for i, qa in enumerate(approved)
+                }
+                for future in as_completed(futures):
+                    result = future.result()
+                    results[result["index"]] = result
+        else:
+            # Sequential path (used for local-llm / use-blob modes)
+            results = []
+            for i, qa in enumerate(approved):
+                elapsed = time.time() - loop_start
+                if i > 0:
+                    avg = elapsed / i
+                    eta_secs = avg * (len(approved) - i)
+                    eta_str = f"~{int(eta_secs // 60)}m{int(eta_secs % 60):02d}s remaining"
                 else:
-                    response = _query_edge_function(question, session_id=f"{session_id}-{i}")
-            except Exception as e:
-                label = "local_gemini_error" if (local_llm or use_blob) else "edge_function_error"
-                print(f"    ERROR: {e}")
-                fails += 1
-                exceptions.append({"test": "5", "question": question[:100], "group": group,
-                                    "failure_mode": label, "error": str(e)})
-                continue
-
-            resp_lower = response.lower()
-            kw_hits = sum(1 for kw in expected_keywords if kw in resp_lower)
-            kw_rate = kw_hits / len(expected_keywords) if expected_keywords else 1.0
-            ent_hits = sum(1 for ent in expected_entities if ent.lower() in resp_lower)
-            ent_rate = ent_hits / len(expected_entities) if expected_entities else 1.0
-            det_verdict = "pass" if (kw_rate >= 0.7 and ent_rate >= 0.5) else "fail"
-
-            claude_grade = gemini_grade = None
-
-            if skip_llm:
-                final = det_verdict
-            elif local_llm or use_blob:
-                grade_prompt = f"""Grade an AI response about Brett Coryell's career.
-
-QUESTION: {question}
-
-EXPECTED ANSWER (key facts that should appear):
-{expected_answer[:1500]}
-
-AI RESPONSE:
-{response[:2000]}
-
-Does the AI response contain the key facts and named entities from the expected answer?
-Answer with exactly one word: PASS, PARTIAL, or FAIL.
-PASS = main facts and key entities present, no major omissions
-PARTIAL = main point addressed but 1-2 key entities or details missing
-FAIL = response is wrong, generic, or missing key facts"""
-
-                gemini_grade = _grade_gemini(grade_prompt)
-                all_v = [v for v in [det_verdict, gemini_grade] if v and not v.startswith("error")]
-                if any(v == "pass" for v in all_v):
-                    final = "pass"
-                elif any(v == "partial" for v in all_v):
-                    final = "partial"
-                else:
-                    final = "fail"
-            else:
-                grade_prompt = f"""Grade an AI response about Brett Coryell's career.
-
-QUESTION: {question}
-
-EXPECTED ANSWER (key facts that should appear):
-{expected_answer[:1500]}
-
-AI RESPONSE:
-{response[:2000]}
-
-Does the AI response contain the key facts and named entities from the expected answer?
-Answer with exactly one word: PASS, PARTIAL, or FAIL.
-PASS = main facts and key entities present, no major omissions
-PARTIAL = main point addressed but 1-2 key entities or details missing
-FAIL = response is wrong, generic, or missing key facts"""
-
-                claude_grade, gemini_grade = _grade_llm(grade_prompt)
-                all_v = [v for v in [det_verdict, claude_grade, gemini_grade] if v and not v.startswith("error")]
-                if any(v == "pass" for v in all_v):
-                    final = "pass"
-                elif any(v == "partial" for v in all_v):
-                    final = "partial"
-                else:
-                    final = "fail"
-
-            q_elapsed = time.time() - q_start
-            grade_info = ""
-            if not skip_llm:
-                grade_info = f" gemini={gemini_grade}" if (local_llm or use_blob) else f" claude={claude_grade} gemini={gemini_grade}"
-            print(f"    kw={kw_rate:.0%} ent={ent_rate:.0%} det={det_verdict}{grade_info} → {final.upper()}  ({q_elapsed:.0f}s)",
-                  flush=True)
-
-            if final == "pass":
-                passes += 1
-            else:
-                if final == "partial":
+                    eta_str = "estimating..."
+                tally = f"{passes}✓ {fails}✗" if (i > 0) else "—"
+                print(f"  [{i+1}/{len(approved)}] Q{qa.get('group','?')}  {int(elapsed)}s elapsed  {eta_str}  [{tally}]",
+                      flush=True)
+                result = _run_one_qa(i, qa, session_id, local_llm, use_blob,
+                                     cache_name, system_prompt, skip_llm)
+                results.append(result)
+                if result["final"] == "pass":
+                    passes += 1
+                elif result["final"] == "partial":
                     partials += 1
                 else:
                     fails += 1
-                exceptions.append({
-                    "test": "5",
-                    "question": question[:100],
-                    "group": group,
-                    "response_preview": response[:300],
-                    "kw_hit_rate": round(kw_rate, 2),
-                    "entity_hit_rate": round(ent_rate, 2),
-                    "det_verdict": det_verdict,
-                    "claude_grade": claude_grade,
-                    "gemini_grade": gemini_grade,
-                    "failure_mode": final,
-                    "missed_keywords": [kw for kw in expected_keywords if kw not in resp_lower],
-                    "missed_entities": [e for e in expected_entities if e.lower() not in resp_lower],
-                })
+
+        # Aggregate
+        passes = sum(1 for r in results if r and r["final"] == "pass")
+        partials = sum(1 for r in results if r and r["final"] == "partial")
+        fails = sum(1 for r in results if r and r["final"] in ("fail", "error"))
+        exceptions = [r["exception"] for r in results if r and r.get("exception")]
+
+        elapsed_total = time.time() - loop_start
+        print(f"  Completed in {elapsed_total:.1f}s  ({effective_workers} worker{'s' if effective_workers > 1 else ''})",
+              flush=True)
+
+        # Per-question timing summary
+        timings = [(r["qa_id"], r.get("q_elapsed", 0), r["final"])
+                   for r in results if r and "q_elapsed" in r]
+        if timings:
+            times = [t for _, t, _ in timings]
+            mean_t = sum(times) / len(times)
+            print(f"\n  Timing  mean={mean_t:.1f}s  min={min(times):.1f}s  max={max(times):.1f}s  "
+                  f"total-serial={sum(times):.1f}s  wall={elapsed_total:.1f}s", flush=True)
+            slow = sorted(timings, key=lambda x: -x[1])[:8]
+            print(f"  Slowest questions:", flush=True)
+            for qa_id, t, final in slow:
+                print(f"    {qa_id:<6} {t:5.1f}s  {final}", flush=True)
 
     finally:
         if cache_name:
@@ -1488,8 +1532,14 @@ def main():
                         help="Run a single test instead of all")
     parser.add_argument("--questions", default=None,
                         help="Test 5 only: comma-separated question IDs to run (e.g. Q4,Q12,Q13,Q19)")
+    parser.add_argument("--workers", type=int, default=8,
+                        help="Test 5: number of parallel workers for edge-function mode (default 8; use 1 for sequential)")
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
+
+    # Force line-buffered stdout so output appears immediately when run via pipe or background process
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(line_buffering=True)
 
     env_path = find_and_load_env()
     print(f"Env: {env_path}")
@@ -1502,6 +1552,7 @@ def main():
     print(f"  Skip LLM: {args.skip_llm}")
     print(f"  Local LLM: {args.local_llm}")
     print(f"  Use blob: {args.use_blob}")
+    print(f"  Workers: {args.workers}")
     print(f"  Test filter: {args.test or 'all'}")
     print(f"{'='*60}")
 
@@ -1582,7 +1633,7 @@ def main():
         q_filter = [q.strip().upper() for q in args.questions.split(",")] if args.questions else None
         p, f, excs = run_test_5(skip_llm=args.skip_llm, verbose=args.verbose,
                                 local_llm=args.local_llm, sb=sb, question_ids=q_filter,
-                                use_blob=args.use_blob)
+                                use_blob=args.use_blob, workers=args.workers)
         report["test_5"] = {"pass": p, "fail": f, "exceptions": excs}
         all_exceptions.extend(excs)
 
