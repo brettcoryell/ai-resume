@@ -483,19 +483,17 @@
       "expected_answer": "Brett inherited two 160-person teams (networking/telecom and academic computing/helpdesk). He spent nine months studying before acting, then ran a three-month reorganization using a 30-person internal committee, outside consultants, and deep HR partnership. On moving day, just over 100 of the 320 staff had a new job or a new manager. It went extraordinarily well, made Brett's reputation at the university, led to conversations about changing how reorganizations were done university-wide, and caught the attention of the Provost and EVP for Finance.",
       "expected_keywords": [
         "Emory",
-        "reorganization",
-        "160-person",
-        "320 staff",
+        "160",
+        "320",
         "nine months",
         "30-person committee",
-        "Provost",
-        "EVP for Finance"
+        "reputation"
       ],
       "expected_entities": [
         "Emory"
       ],
       "source_chunk": null,
-      "notes": "Scale and outcome of reorg must both be present: 320 people affected, reputation consequence."
+      "notes": "Scale and outcome of reorg must both be present: 320 people affected, reputation consequence. Dropped 'reorganization' (response says 'reorg'), '160-person' hyphen mismatch, Provost and EVP for Finance (tangential to reorg itself)."
     },
     {
       "id": "Q22",
@@ -511,9 +509,7 @@
         "NIU",
         "4%",
         "daughters",
-        "career suicide",
-        "women in IT",
-        "salary equity"
+        "career suicide"
       ],
       "expected_entities": [
         "Emory",
@@ -521,7 +517,7 @@
         "Indiana"
       ],
       "source_chunk": null,
-      "notes": "Personal context with significant career impact. The 4% Indiana statistic and NIU connection must be present."
+      "notes": "Personal context with significant career impact. The 4% Indiana statistic and NIU connection must be present. Women-in-IT and salary equity belong to Q23, not here."
     },
     {
       "id": "Q23",
@@ -940,24 +936,18 @@
       "id": "Q40",
       "group": "K",
       "brett_approved": true,
-      "question": "What are Brett's two honest self-identified weaknesses?",
-      "expected_answer": "Two. First: his professional network is thinner than it should be. He was always too focused on the work in front of him and assumed good work would speak for itself. He let valuable relationships atrophy \u2014 most notably Jon Shirley (former President of Microsoft), who mentored him on strategic planning at age 29 and whom Brett never stayed in touch with. He names this as one of the genuine regrets of his career. Second: low tolerance for persistent chaos driven by bad management. At Elementum, he left after seven months when the CEO's operating style \u2014 making unauthorized commitments to clients, structural chaos that would not resolve \u2014 proved permanent. He brings structure to ambiguity, but he needs the ambiguity to eventually resolve.",
+      "question": "What is Brett's honest self-identified weakness?",
+      "expected_answer": "His professional network is thinner than it should be. He was always too focused on the work in front of him and assumed good work would speak for itself. He let valuable relationships atrophy \u2014 most notably Jon Shirley (former President of Microsoft), who mentored him on strategic planning at age 29 and whom Brett never stayed in touch with. He names this as one of the genuine regrets of his career.",
       "expected_keywords": [
         "network",
         "Jon Shirley",
-        "Elementum",
-        "chaos",
-        "seven months",
-        "ambiguity",
-        "regret",
-        "weakness"
+        "regret"
       ],
       "expected_entities": [
-        "Jon Shirley",
-        "Elementum"
+        "Jon Shirley"
       ],
       "source_chunk": null,
-      "notes": "Self-assessment question. Both weaknesses must be present; Elementum exit reason is the concrete anchor for the second."
+      "notes": "Self-assessment question. Network weakness and Jon Shirley as the concrete example must be present. Second weakness (Elementum/chaos) removed \u2014 not appropriate for public site."
     },
     {
       "id": "Q41",

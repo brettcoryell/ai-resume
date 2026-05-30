@@ -1,0 +1,125 @@
+[
+  {
+    "test": "5",
+    "question": "What was the Tenneco Y2K project, and how did Brett end up running it?",
+    "group": "B",
+    "response_preview": "The Tenneco story is one of my favorites, because it captures something I've done repeatedly throughout my career: say yes first, figure it out second.\n\nTenneco was a Fortune 250 manufacturing conglomerate. When I joined Sprint's consulting arm fresh out of new hire orientation, my first assignment ",
+    "kw_hit_rate": 0.67,
+    "entity_hit_rate": 0.33,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "$18m",
+      "paranet",
+      "paul matker"
+    ],
+    "missed_entities": [
+      "Paranet",
+      "Paul Matker"
+    ]
+  },
+  {
+    "test": "5",
+    "question": "Who was John Shipley and what did Brett observe about him at Purdue?",
+    "group": "C",
+    "response_preview": "John Shipley was a CFO candidate we interviewed at Northern Illinois University, not Purdue, though the story connects directly to the ERP work at Purdue.\n\nHe came in and interviewed for the CFO role at NIU. I thought he was exceptional. Classy, deeply expert, the kind of person who would have made ",
+    "kw_hit_rate": 0.62,
+    "entity_hit_rate": 1.0,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "comptroller",
+      "sap",
+      "finance"
+    ],
+    "missed_entities": []
+  },
+  {
+    "test": "5",
+    "question": "How did Brett's situation as a single father shape his time at Emory?",
+    "group": "D",
+    "response_preview": "Almost no one at Emory knew I was a single father. I ran a 320-person IT organization at one of the most prestigious academic medical centers in the country while raising two daughters in a city where I had no family support network whatsoever.\n\nThe operating rhythm I developed was simple and relent",
+    "kw_hit_rate": 0.4,
+    "entity_hit_rate": 0.67,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "custody",
+      "niu",
+      "4%",
+      "career suicide",
+      "women in it",
+      "salary equity"
+    ],
+    "missed_entities": [
+      "NIU"
+    ]
+  },
+  {
+    "test": "5",
+    "question": "What was the significance of the KKR sale at Neighborly?",
+    "group": "F",
+    "response_preview": "The KKR sale was a $9 billion private equity transaction, and cybersecurity ended up being the most scrutinized area of IT in the entire due diligence process.\n\nHere's what made it significant for me personally: I had walked into Neighborly two years earlier and found credit card numbers written on ",
+    "kw_hit_rate": 0.56,
+    "entity_hit_rate": 1.0,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "$9b",
+      "exit bonus",
+      "retirement",
+      "second retirement"
+    ],
+    "missed_entities": []
+  },
+  {
+    "test": "5",
+    "question": "Why did Brett leave Elementum?",
+    "group": "K",
+    "response_preview": "The short version: I left because the CEO was making promises to our client and changing scope without telling me, which made delivery management impossible.\n\nI had gone to Elementum specifically to mature their delivery methodology and bring some discipline to a situation that had gotten ahead of t",
+    "kw_hit_rate": 0.62,
+    "entity_hit_rate": 1.0,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "unauthorized commitments",
+      "equity",
+      "tens of millions"
+    ],
+    "missed_entities": []
+  },
+  {
+    "test": "5",
+    "question": "Is Brett a good fit for a hands-on software engineering or production DevOps role?",
+    "group": "K",
+    "response_preview": "No. I'm not your person for that.\n\nI can read code, I understand how systems are architected, and I've worked closely enough with engineering teams to have real conversations about what they're building. I built the secure CI/CD pipeline at Neighborly alongside our enterprise architect. I know what ",
+    "kw_hit_rate": 0.0,
+    "entity_hit_rate": 0.0,
+    "det_verdict": "fail",
+    "claude_grade": "partial",
+    "gemini_grade": "partial",
+    "failure_mode": "partial",
+    "missed_keywords": [
+      "not hands-on",
+      "strategic",
+      "acute",
+      "python",
+      "research",
+      "decades",
+      "executive"
+    ],
+    "missed_entities": [
+      "ACUTE"
+    ]
+  }
+]
