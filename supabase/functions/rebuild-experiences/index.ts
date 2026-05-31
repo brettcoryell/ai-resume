@@ -23,7 +23,7 @@ Return a JSON array of all career entries. Each entry must exactly match this sc
 CRITICAL RULES — DATES:
 - Use the exact month stated in the content. If a month is given, use it. If only a year is given, use YYYY-01-01.
 - Elementum: start_date = 2025-09-01, end_date = 2026-04-01, is_current = false
-- Rennes / University of Rennes doctoral program: start_date = 2022-07-01, end_date = 2023-09-01, is_current = false
+- University of Rennes doctoral program: start_date = 2022-07-01, end_date = 2023-09-01, is_current = false. There is ONE Rennes entry only — do not create both "Rennes School of Business" and "University of Rennes" as separate rows. Use company_name = "University of Rennes".
 - Sprint (Paranet): start_date = 1998-07-01, end_date = 2003-07-01, is_current = false
 - The Hill School: start_date = 1995-07-01, end_date = 1998-07-01, is_current = false
 - University of Virginia (UVA): start_date = 1993-08-01, end_date = 1995-05-01, is_current = false
