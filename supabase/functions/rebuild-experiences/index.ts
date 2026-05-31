@@ -29,6 +29,12 @@ CRITICAL RULES — DATES:
 - University of Virginia (UVA): start_date = 1993-08-01, end_date = 1995-05-01, is_current = false
 - Indian Hill High School: start_date = 1990-07-01, end_date = 1993-06-01, is_current = false
 
+CRITICAL RULES — CONTEXT FIELDS:
+- technical_work must use the most specific, concrete, memorable technical detail available — a named project, algorithm, system, or quantified result. Never write generic phrases like "building technical foundations" or "gaining skills." If you can name the thing, name it.
+- For University of Virginia: technical_work must reference the machine learning specialization and the DNA sequence alignment research specifically. The problem is NP-complete at scale; Brett's algorithm was briefly the best-performing in the world by a factor of three.
+- For Indian Hill High School: this is where Brett taught physics and brought technology into the classroom after graduating from Purdue. He was a teacher, not a student.
+- lessons_learned must be a single sentence in first person ("I") — a genuine insight Brett took away, not an aphoristic comment about his career from the outside.
+
 CRITICAL RULES — OTHER:
 - is_current = true ONLY when the content explicitly says the role is ongoing right now.
 - Use the institution's actual proper name, not its city or district (e.g. 'Indian Hill High School' not 'Cincinnati Public Schools').
