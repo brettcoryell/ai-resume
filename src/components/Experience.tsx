@@ -1,7 +1,11 @@
 import { useExperiences } from "@/hooks/useCandidateData";
 import ExperienceCard from "./ExperienceCard";
 
-const Experience = () => {
+interface ExperienceProps {
+  onOpenChat?: (initialMessage: string) => void;
+}
+
+const Experience = ({ onOpenChat }: ExperienceProps) => {
   const { data: experiences, isLoading } = useExperiences();
 
   return (
@@ -50,6 +54,7 @@ const Experience = () => {
                 key={exp.id}
                 experience={exp}
                 index={index}
+                onOpenChat={onOpenChat}
               />
             ))}
           </div>

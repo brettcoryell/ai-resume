@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Experience {
@@ -12,11 +12,16 @@ export interface Experience {
   is_current: boolean;
   bullet_points: string[];
   display_order: number;
+  situation: string | null;
+  approach: string | null;
+  technical_work: string | null;
+  lessons_learned: string | null;
 }
 
 interface ExperienceCardProps {
   experience: Experience;
   index: number;
+  onOpenChat?: (initialMessage: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -26,7 +31,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-const ExperienceCard = ({ experience, index }: ExperienceCardProps) => {
+const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) => {
   const [expanded, setExpanded] = useState(false);
 
   const {
@@ -37,7 +42,13 @@ const ExperienceCard = ({ experience, index }: ExperienceCardProps) => {
     end_date,
     is_current,
     bullet_points,
+    situation,
+    approach,
+    technical_work,
+    lessons_learned,
   } = experience;
+
+  const hasContext = situation || approach || technical_work || lessons_learned;
 
   const period = `${formatDate(start_date)} — ${is_current || !end_date ? "Present" : formatDate(end_date)}`;
 
@@ -70,13 +81,13 @@ const ExperienceCard = ({ experience, index }: ExperienceCardProps) => {
         </ul>
       )}
 
-      {/* AI Context Toggle */}
+      {/* Context Toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
-        <span>{expanded ? "Hide" : "View"} AI Context</span>
+        <span>{expanded ? "Hide" : "View"} Context</span>
         {expanded ? (
           <ChevronUp className="w-4 h-4" />
         ) : (
@@ -84,12 +95,59 @@ const ExperienceCard = ({ experience, index }: ExperienceCardProps) => {
         )}
       </button>
 
-      {/* Expanded AI Context placeholder */}
+      {/* Expanded Context Panel */}
       {expanded && (
         <div className="mt-4 p-4 bg-secondary rounded-xl border border-border animate-slide-down">
-          <p className="text-muted-foreground text-sm italic">
-            AI context available via chat — ask me about my time at {company_name}.
-          </p>
+          {hasContext ? (
+            <div className="grid gap-4 text-sm">
+              {situation && (
+                <div>
+                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
+                    Situation
+                  </span>
+                  <p className="text-foreground mt-1">{situation}</p>
+                </div>
+              )}
+              {approach && (
+                <div>
+                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
+                    Approach
+                  </span>
+                  <p className="text-foreground mt-1">{approach}</p>
+                </div>
+              )}
+              {technical_work && (
+                <div>
+                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
+                    Technical Work
+                  </span>
+                  <p className="text-foreground mt-1">{technical_work}</p>
+                </div>
+              )}
+              {lessons_learned && (
+                <div>
+                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
+                    Lessons Learned
+                  </span>
+                  <p className="text-foreground mt-1 italic">"{lessons_learned}"</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm italic">
+              Context is being built — check back soon.
+            </p>
+          )}
+
+          {onOpenChat && (
+            <button
+              onClick={() => onOpenChat(`Tell me more about Brett's time at ${company_name}.`)}
+              className="mt-4 flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Ask me more in the chat →</span>
+            </button>
+          )}
         </div>
       )}
     </div>

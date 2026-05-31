@@ -21,7 +21,7 @@ export function useExperiences() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('experiences')
-        .select('id, company_name, title, title_progression, start_date, end_date, is_current, bullet_points, display_order')
+        .select('id, company_name, title, title_progression, start_date, end_date, is_current, bullet_points, display_order, situation, approach, technical_work, lessons_learned')
         .order('display_order');
       if (error) throw error;
       return data ?? [];

@@ -9,18 +9,29 @@ Return a JSON array of all career entries. Each entry must exactly match this sc
   "company_name": "string — exact institution name (e.g. 'Indian Hill High School', NOT 'Cincinnati Public Schools')",
   "title": "string — primary or most recent title at this employer",
   "title_progression": "string or null — if multiple titles were held, format: 'First Title → Final Title'; null if only one title",
-  "start_date": "string or null — YYYY-MM-DD format; use YYYY-01-01 if only year is known; null if unknown",
+  "start_date": "string or null — YYYY-MM-DD format; use the specific month if stated, otherwise YYYY-01-01; null if completely unknown",
   "end_date": "string or null — YYYY-MM-DD format; null ONLY if the role is explicitly described as current/ongoing",
   "is_current": "boolean — CRITICAL: set true ONLY if the content explicitly states the role is currently active. If Brett says 'I left', 'when I left', 'after I left', 'I departed', or similar — is_current MUST be false and end_date MUST be set.",
   "bullet_points": ["2 to 4 achievement-focused bullets in first person; specific, concrete, include scale/numbers where present; Brett's voice"],
+  "situation": "string — 1-2 sentences describing the context or challenge Brett walked into at this role",
+  "approach": "string — 1-2 sentences describing Brett's strategy or how he tackled the core challenge",
+  "technical_work": "string or null — 1-2 sentences on specific technical implementations, platforms, tools, or systems; null if the role was non-technical",
+  "lessons_learned": "string — 1 sentence, a key insight Brett took away; write in first person without quotes",
   "display_order": "integer — 1 = most recent, incrementing chronologically backward"
 }
 
-CRITICAL RULES:
-- is_current = true ONLY when the content explicitly says the role is ongoing right now. If Brett left a role (even recently), is_current = false.
+CRITICAL RULES — DATES:
+- Use the exact month stated in the content. If a month is given, use it. If only a year is given, use YYYY-01-01.
+- Elementum: start_date = 2025-09-01, end_date = 2026-04-01, is_current = false
+- Rennes / University of Rennes doctoral program: start_date = 2022-07-01, end_date = 2023-09-01, is_current = false
+- Sprint (Paranet): start_date = 1998-07-01, end_date = 2003-07-01, is_current = false
+- The Hill School: start_date = 1995-07-01, end_date = 1998-07-01, is_current = false
+- University of Virginia (UVA): start_date = 1993-08-01, end_date = 1995-05-01, is_current = false
+- Indian Hill High School: start_date = 1990-07-01, end_date = 1993-06-01, is_current = false
+
+CRITICAL RULES — OTHER:
+- is_current = true ONLY when the content explicitly says the role is ongoing right now.
 - Use the institution's actual proper name, not its city or district (e.g. 'Indian Hill High School' not 'Cincinnati Public Schools').
-- Elementum: Brett left this role. is_current = false.
-- Rennes doctoral program: Brett returned to the US in 2023. is_current = false.
 
 Include every career stop: teaching, graduate school, consulting, corporate, startup, academic programs.
 Sort most recent first (Elementum = display_order 1).
@@ -61,7 +72,7 @@ serve(async (req) => {
 
     const claudeResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [{
         role: 'user',
         content: `${EXTRACTION_PROMPT}\n\nBIOGRAPHICAL CONTENT:\n${blobContent}`,
@@ -102,6 +113,10 @@ serve(async (req) => {
       end_date: exp.end_date ?? null,
       is_current: exp.is_current ?? false,
       bullet_points: Array.isArray(exp.bullet_points) ? exp.bullet_points : [],
+      situation: exp.situation ?? null,
+      approach: exp.approach ?? null,
+      technical_work: exp.technical_work ?? null,
+      lessons_learned: exp.lessons_learned ?? null,
       display_order: exp.display_order,
     }));
 

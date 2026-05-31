@@ -12,6 +12,7 @@ interface Message {
 interface AIChatProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMessage?: string;
 }
 
 // Stable session ID for this browser tab
@@ -68,7 +69,7 @@ function normalizeQuestion(input: string): string {
   return input;
 }
 
-const AIChat = ({ isOpen, onClose }: AIChatProps) => {
+const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
   const { data: profile } = useCandidateProfile();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -77,6 +78,12 @@ const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const [loadingAudioIndex, setLoadingAudioIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && initialMessage) {
+      setInput(initialMessage);
+    }
+  }, [isOpen, initialMessage]);
 
   const stopAudio = () => {
     if (audioRef.current) {
