@@ -129,7 +129,7 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
                   <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
                     Lessons Learned
                   </span>
-                  <p className="text-foreground mt-1 italic">"{lessons_learned}"</p>
+                  <p className="text-foreground mt-1 italic">{lessons_learned}</p>
                 </div>
               )}
             </div>
