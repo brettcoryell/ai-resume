@@ -73,6 +73,18 @@ serve(async (req) => {
       `rebuild-blob: version=${nextVersion} thoughts=${thoughts.length} tokens=~${tokenCount}`
     );
 
+    // Fire rebuild-experiences — don't await, let it run independently
+    const experiencesUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/rebuild-experiences`;
+    fetch(experiencesUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
+    }).then((r) => console.log(`rebuild-experiences kicked off: ${r.status}`))
+      .catch((e) => console.error(`rebuild-experiences kick failed: ${e}`));
+
     return new Response(
       JSON.stringify({
         ok: true,
