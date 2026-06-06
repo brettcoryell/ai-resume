@@ -26,8 +26,8 @@ from pathlib import Path
 ANON_KEY_FALLBACK = (
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
     ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5YnR0Zmpld3Vub2tldnh3dHFjIiwi"
-    "cm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMjQzOTMsImV4cCI6MjA2MTcwMDM5M30"
-    ".ab6uh0pxe-WMNf6JBfNaGJLmXTM_OJjqiL5bIVQbmRM"
+    "cm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODk4NjUsImV4cCI6MjA4ODU2NTg2NX0"
+    ".zkJbJZ9kn8iRo9yTaOnKYKbwnlA2ASJNQEFKsbDjWP0"
 )
 SUPABASE_URL_FALLBACK = "https://zybttfjewunokevxwtqc.supabase.co"
 
