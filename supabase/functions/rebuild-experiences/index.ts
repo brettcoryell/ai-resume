@@ -102,6 +102,17 @@ serve(async (req) => {
       throw new Error('Claude returned empty or non-array experience data');
     }
 
+    // Fetch locked context fields before deleting — these survive the rebuild
+    const { data: lockedRows } = await supabase
+      .from('experiences')
+      .select('company_name, situation, approach, technical_work, lessons_learned')
+      .eq('context_locked', true);
+
+    const lockedByCompany = new Map<string, any>();
+    for (const row of lockedRows ?? []) {
+      lockedByCompany.set(row.company_name.toLowerCase(), row);
+    }
+
     // Truncate and repopulate the experiences table
     const { error: deleteErr } = await supabase
       .from('experiences')
@@ -110,21 +121,25 @@ serve(async (req) => {
 
     if (deleteErr) throw deleteErr;
 
-    // Insert all entries
-    const rows = experiences.map((exp: any) => ({
-      company_name: exp.company_name,
-      title: exp.title,
-      title_progression: exp.title_progression ?? null,
-      start_date: exp.start_date ?? null,
-      end_date: exp.end_date ?? null,
-      is_current: exp.is_current ?? false,
-      bullet_points: Array.isArray(exp.bullet_points) ? exp.bullet_points : [],
-      situation: exp.situation ?? null,
-      approach: exp.approach ?? null,
-      technical_work: exp.technical_work ?? null,
-      lessons_learned: exp.lessons_learned ?? null,
-      display_order: exp.display_order,
-    }));
+    // Insert all entries; restore locked context fields where present
+    const rows = experiences.map((exp: any) => {
+      const locked = lockedByCompany.get((exp.company_name ?? '').toLowerCase());
+      return {
+        company_name: exp.company_name,
+        title: exp.title,
+        title_progression: exp.title_progression ?? null,
+        start_date: exp.start_date ?? null,
+        end_date: exp.end_date ?? null,
+        is_current: exp.is_current ?? false,
+        bullet_points: Array.isArray(exp.bullet_points) ? exp.bullet_points : [],
+        situation: locked ? locked.situation : (exp.situation ?? null),
+        approach: locked ? locked.approach : (exp.approach ?? null),
+        technical_work: locked ? locked.technical_work : (exp.technical_work ?? null),
+        lessons_learned: locked ? locked.lessons_learned : (exp.lessons_learned ?? null),
+        context_locked: locked ? true : false,
+        display_order: exp.display_order,
+      };
+    });
 
     const { error: insertErr } = await supabase.from('experiences').insert(rows);
     if (insertErr) throw insertErr;
