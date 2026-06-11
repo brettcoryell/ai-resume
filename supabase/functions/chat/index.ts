@@ -23,6 +23,12 @@ serve(async (req) => {
       });
     }
 
+    if (typeof message !== 'string' || message.length > 2000) {
+      return new Response(JSON.stringify({ error: 'message must be a string under 2000 characters' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!

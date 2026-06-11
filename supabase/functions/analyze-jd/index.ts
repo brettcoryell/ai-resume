@@ -23,6 +23,12 @@ serve(async (req) => {
       });
     }
 
+    if (typeof jobDescription !== 'string' || jobDescription.length > 20000) {
+      return new Response(JSON.stringify({ error: 'jobDescription must be a string under 20000 characters' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
