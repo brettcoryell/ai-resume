@@ -1,31 +1,31 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
 
 interface HeaderProps {
   onOpenChat?: () => void;
 }
 
+const NAV_LINK_BASE: React.CSSProperties = {
+  fontSize: "0.875rem",
+  fontWeight: 500,
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  padding: 0,
+  transition: "color 0.15s ease",
+  fontFamily: "var(--font-sans)",
+};
+
 const Header = ({ onOpenChat }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: profile } = useCandidateProfile();
 
-  // Derive initials from name in database
-  const initials = profile?.name
-    ? profile.name
-        .split(" ")
-        .filter(Boolean)
-        .map((w: string) => w[0].toUpperCase())
-        .slice(0, 2)
-        .join("")
-    : "BC"; // fallback while loading
+  const name = profile?.name ?? "Brett Coryell";
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -37,47 +37,78 @@ const Header = ({ onOpenChat }: HeaderProps) => {
 
   const handleAskAI = () => {
     setMobileMenuOpen(false);
-    if (onOpenChat) {
-      onOpenChat();
-    } else {
-      scrollToSection("experience");
-    }
+    if (onOpenChat) onOpenChat();
   };
+
+  const linkColor = scrolled ? "var(--site-ink)" : "var(--site-sky)";
 
   return (
     <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-background/80 backdrop-blur-lg border-b border-border"
-          : "bg-transparent"
-      )}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+        backgroundColor: scrolled ? "rgba(255,255,255,0.95)" : "transparent",
+        backdropFilter: scrolled ? "blur(8px)" : "none",
+        boxShadow: scrolled ? "0 1px 0 var(--site-fog)" : "none",
+      }}
     >
-      <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <nav
+        style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+          padding: "1rem 2rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Site name */}
         <button
           onClick={() => scrollToSection("hero")}
-          className="font-serif text-xl text-foreground hover:text-primary transition-colors"
+          style={{
+            ...NAV_LINK_BASE,
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            color: "var(--site-sky)",
+          }}
         >
-          {initials}
+          {name}
         </button>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           <button
             onClick={() => scrollToSection("experience")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            style={{ ...NAV_LINK_BASE, color: linkColor }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky)")}
+            onMouseLeave={e => (e.currentTarget.style.color = linkColor)}
           >
             Experience
           </button>
           <button
             onClick={() => scrollToSection("fit-assessment")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            style={{ ...NAV_LINK_BASE, color: linkColor }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky)")}
+            onMouseLeave={e => (e.currentTarget.style.color = linkColor)}
           >
             Fit Check
           </button>
           <button
             onClick={handleAskAI}
-            className="text-sm px-4 py-2 bg-accent text-accent-foreground rounded-full hover:opacity-90 transition-opacity"
+            style={{
+              ...NAV_LINK_BASE,
+              backgroundColor: "var(--site-sky)",
+              color: "#ffffff",
+              padding: "0.5rem 1.25rem",
+              borderRadius: "4px",
+              transition: "background-color 0.15s ease",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--site-sky-deep)")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--site-sky)")}
           >
             Ask AI
           </button>
@@ -86,7 +117,8 @@ const Header = ({ onOpenChat }: HeaderProps) => {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+          className="md:hidden p-2"
+          style={{ color: "var(--site-mist)", background: "none", border: "none", cursor: "pointer" }}
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -94,23 +126,29 @@ const Header = ({ onOpenChat }: HeaderProps) => {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-card border-b border-border animate-slide-down">
-          <div className="px-6 py-4 space-y-4">
+        <div
+          className="md:hidden animate-slide-down"
+          style={{
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid var(--site-fog)",
+          }}
+        >
+          <div style={{ padding: "1rem 2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
             <button
               onClick={() => scrollToSection("experience")}
-              className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors"
+              style={{ ...NAV_LINK_BASE, color: "var(--site-ink)", textAlign: "left", fontSize: "1rem" }}
             >
               Experience
             </button>
             <button
               onClick={() => scrollToSection("fit-assessment")}
-              className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors"
+              style={{ ...NAV_LINK_BASE, color: "var(--site-ink)", textAlign: "left", fontSize: "1rem" }}
             >
               Fit Check
             </button>
             <button
               onClick={handleAskAI}
-              className="block w-full text-left text-accent hover:opacity-80 transition-opacity"
+              style={{ ...NAV_LINK_BASE, color: "var(--site-sky)", textAlign: "left", fontSize: "1rem" }}
             >
               Ask AI About Me
             </button>

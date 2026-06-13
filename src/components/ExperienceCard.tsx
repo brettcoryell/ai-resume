@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Sparkles, MessageSquare } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export interface Experience {
   id: string;
@@ -31,6 +30,16 @@ function formatDate(dateStr: string): string {
   });
 }
 
+const CONTEXT_LABEL: React.CSSProperties = {
+  fontSize: "0.7rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  color: "var(--site-mist)",
+  fontFamily: "var(--font-sans)",
+  marginBottom: "0.375rem",
+};
+
 const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -49,92 +58,152 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
   } = experience;
 
   const hasContext = situation || approach || technical_work || lessons_learned;
-
   const period = `${formatDate(start_date)} — ${is_current || !end_date ? "Present" : formatDate(end_date)}`;
 
   return (
     <div
-      className={cn(
-        "group relative p-6 md:p-8 bg-card border border-border rounded-2xl transition-all duration-300 hover:border-accent/50",
-        "animate-slide-up opacity-0"
-      )}
-      style={{ animationDelay: `${index * 0.1 + 0.2}s`, animationFillMode: "forwards" }}
+      className="animate-slide-up opacity-0"
+      style={{
+        backgroundColor: "var(--site-page)",
+        border: "1px solid var(--site-fog)",
+        borderRadius: "8px",
+        padding: "1.75rem",
+        boxShadow: "0 1px 4px rgba(26,35,50,0.05)",
+        animationDelay: `${index * 0.08 + 0.1}s`,
+        animationFillMode: "forwards",
+      }}
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "0.75rem",
+          marginBottom: "1.25rem",
+        }}
+      >
         <div>
-          <h3 className="text-2xl font-serif text-foreground mb-1">{company_name}</h3>
-          <p className="text-primary">{title_progression || title}</p>
+          <h3
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "1.25rem",
+              fontWeight: 400,
+              color: "var(--site-ink)",
+              marginBottom: "0.25rem",
+            }}
+          >
+            {company_name}
+          </h3>
+          <p style={{ fontSize: "0.9375rem", color: "var(--site-sky)", fontFamily: "var(--font-sans)" }}>
+            {title_progression || title}
+          </p>
         </div>
-        <span className="text-sm font-mono text-muted-foreground">{period}</span>
+        <span
+          style={{
+            fontSize: "0.8rem",
+            color: "var(--site-mist)",
+            fontFamily: "var(--font-sans)",
+            fontVariantNumeric: "tabular-nums",
+            whiteSpace: "nowrap",
+            paddingTop: "0.2rem",
+          }}
+        >
+          {period}
+        </span>
       </div>
 
       {/* Bullet points */}
       {bullet_points && bullet_points.length > 0 && (
-        <ul className="space-y-3 mb-6">
+        <ul style={{ marginBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
           {bullet_points.map((point, i) => (
-            <li key={i} className="flex items-start gap-3 text-muted-foreground">
-              <span className="text-accent mt-1.5">→</span>
-              <span>{point}</span>
+            <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+              <span
+                style={{
+                  color: "var(--site-sky)",
+                  fontFamily: "var(--font-sans)",
+                  flexShrink: 0,
+                  marginTop: "0.1em",
+                  fontSize: "0.9375rem",
+                }}
+              >
+                →
+              </span>
+              <span style={{ color: "var(--site-dusk)", fontSize: "0.9375rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
+                {point}
+              </span>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Context Toggle */}
+      {/* Context toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.375rem",
+          fontSize: "0.875rem",
+          color: "var(--site-sky)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
+          fontFamily: "var(--font-sans)",
+          transition: "color 0.15s ease",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky-deep)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "var(--site-sky)")}
       >
-        <Sparkles className="w-4 h-4" />
-        <span>{expanded ? "Hide" : "View"} Context</span>
-        {expanded ? (
-          <ChevronUp className="w-4 h-4" />
-        ) : (
-          <ChevronDown className="w-4 h-4" />
-        )}
+        <span>{expanded ? "Hide" : "View"} context</span>
+        {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </button>
 
-      {/* Expanded Context Panel */}
+      {/* Expanded context panel */}
       {expanded && (
-        <div className="mt-4 p-4 bg-secondary rounded-xl border border-border animate-slide-down">
+        <div
+          className="animate-slide-down"
+          style={{
+            marginTop: "1rem",
+            padding: "1.25rem",
+            backgroundColor: "var(--site-cloud)",
+            borderLeft: "4px solid var(--site-sky-pale)",
+            borderRadius: "0 6px 6px 0",
+          }}
+        >
           {hasContext ? (
-            <div className="grid gap-4 text-sm">
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {situation && (
                 <div>
-                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-                    Situation
-                  </span>
-                  <p className="text-foreground mt-1">{situation}</p>
+                  <p style={CONTEXT_LABEL}>Situation</p>
+                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{situation}</p>
                 </div>
               )}
               {approach && (
                 <div>
-                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-                    Approach
-                  </span>
-                  <p className="text-foreground mt-1">{approach}</p>
+                  <p style={CONTEXT_LABEL}>Approach</p>
+                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{approach}</p>
                 </div>
               )}
               {technical_work && (
                 <div>
-                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-                    Technical Work
-                  </span>
-                  <p className="text-foreground mt-1">{technical_work}</p>
+                  <p style={CONTEXT_LABEL}>Technical work</p>
+                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{technical_work}</p>
                 </div>
               )}
               {lessons_learned && (
                 <div>
-                  <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-                    Lessons Learned
-                  </span>
-                  <p className="text-foreground mt-1 italic">{lessons_learned}</p>
+                  <p style={CONTEXT_LABEL}>Lessons learned</p>
+                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
+                    {lessons_learned}
+                  </p>
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm italic">
+            <p style={{ color: "var(--site-mist)", fontSize: "0.9rem", fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
               Context is being built — check back soon.
             </p>
           )}
@@ -142,10 +211,24 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
           {onOpenChat && (
             <button
               onClick={() => onOpenChat(`Tell me more about Brett's time at ${company_name}.`)}
-              className="mt-4 flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors"
+              style={{
+                marginTop: "1rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                fontSize: "0.875rem",
+                color: "var(--site-sky)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                fontFamily: "var(--font-sans)",
+                transition: "color 0.15s ease",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky-deep)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--site-sky)")}
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Ask me more in the chat →</span>
+              Ask me more in the chat →
             </button>
           )}
         </div>

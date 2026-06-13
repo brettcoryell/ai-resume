@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { FileText, Check, AlertTriangle, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 
 type TabType = "strong" | "weak" | "custom";
-
 type Verdict = "strong_fit" | "worth_conversation" | "probably_not";
 
 interface Gap {
@@ -63,22 +61,35 @@ Requirements:
 • CompTIA, MCSA, or similar certifications preferred`,
 };
 
-const verdictStyle: Record<Verdict, { banner: string; icon: string; text: string }> = {
+const VERDICT_STYLES: Record<Verdict, { bg: string; txt: string; border: string; iconBg: string }> = {
   strong_fit: {
-    banner: "bg-success-muted border-success/20",
-    icon: "bg-success/20",
-    text: "text-success",
+    bg:     "var(--ar-fit-strong-bg)",
+    txt:    "var(--ar-fit-strong-txt)",
+    border: "var(--ar-fit-strong-border)",
+    iconBg: "rgba(21,128,61,0.12)",
   },
   worth_conversation: {
-    banner: "bg-secondary border-border",
-    icon: "bg-muted/20",
-    text: "text-foreground",
+    bg:     "var(--ar-fit-neutral-bg)",
+    txt:    "var(--ar-fit-neutral-txt)",
+    border: "var(--ar-fit-neutral-border)",
+    iconBg: "rgba(74,85,104,0.08)",
   },
   probably_not: {
-    banner: "bg-warning-muted border-warning/20",
-    icon: "bg-warning/20",
-    text: "text-warning",
+    bg:     "var(--ar-fit-weak-bg)",
+    txt:    "var(--ar-fit-weak-txt)",
+    border: "var(--ar-fit-weak-border)",
+    iconBg: "rgba(146,64,14,0.10)",
   },
+};
+
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: "0.7rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  color: "var(--site-mist)",
+  fontFamily: "var(--font-sans)",
+  marginBottom: "0.5rem",
 };
 
 const FitAssessment = () => {
@@ -109,12 +120,10 @@ const FitAssessment = () => {
         headers: EDGE_FN_HEADERS,
         body: JSON.stringify({ jobDescription: jdText }),
       });
-
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `HTTP ${res.status}`);
       }
-
       const data: AnalysisResult = await res.json();
       setResult(data);
     } catch (err) {
@@ -124,186 +133,308 @@ const FitAssessment = () => {
     }
   };
 
-  const style = result ? verdictStyle[result.verdict] : null;
+  const vs = result ? VERDICT_STYLES[result.verdict] : null;
+
+  const tabStyle = (tab: TabType): React.CSSProperties => {
+    const isActive = activeTab === tab;
+    const activeColors: Record<TabType, { bg: string; txt: string; border: string }> = {
+      strong: { bg: "var(--ar-fit-strong-bg)", txt: "var(--ar-fit-strong-txt)", border: "var(--ar-fit-strong-border)" },
+      weak:   { bg: "var(--ar-fit-weak-bg)",   txt: "var(--ar-fit-weak-txt)",   border: "var(--ar-fit-weak-border)" },
+      custom: { bg: "var(--site-sky-pale)",    txt: "var(--site-sky-deep)",    border: "var(--site-sky)" },
+    };
+    const c = activeColors[tab];
+    return {
+      padding: "0.5rem 1.25rem",
+      borderRadius: "4px",
+      fontFamily: "var(--font-sans)",
+      fontSize: "0.875rem",
+      fontWeight: 500,
+      cursor: "pointer",
+      border: `1px solid ${isActive ? c.border : "var(--site-fog)"}`,
+      backgroundColor: isActive ? c.bg : "var(--site-page)",
+      color: isActive ? c.txt : "var(--site-dusk)",
+      transition: "all 0.15s ease",
+    };
+  };
 
   return (
-    <section id="fit-assessment" className="py-24 px-6 bg-secondary/30">
-      <div className="max-w-4xl mx-auto">
+    <section
+      id="fit-assessment"
+      style={{ padding: "5rem 2rem", backgroundColor: "var(--site-page)" }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* Section header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">
+        <div style={{ marginBottom: "2.5rem" }}>
+          <p style={{ ...SECTION_LABEL, fontSize: "0.75rem" }}>JD Analysis</p>
+          <h2
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "1.6rem",
+              fontWeight: 400,
+              color: "var(--site-ink)",
+              marginBottom: "0.75rem",
+            }}
+          >
             Honest Fit Assessment
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Paste a job description. Get an honest assessment of whether I'm the right person—including when I'm not.
+          <p style={{ color: "var(--site-dusk)", fontSize: "1rem", lineHeight: 1.6, maxWidth: "52ch", fontFamily: "var(--font-sans)" }}>
+            Paste a job description and get an honest read on fit — including when the answer is no.
           </p>
         </div>
 
         {/* Tab buttons */}
-        <div className="flex justify-center gap-4 mb-8">
-          <button
-            onClick={() => handleTabClick("strong")}
-            className={cn(
-              "px-6 py-3 rounded-xl font-medium transition-all border",
-              activeTab === "strong"
-                ? "bg-success-muted text-success border-success/30"
-                : "bg-card text-muted-foreground border-border hover:border-muted-foreground"
-            )}
-          >
-            Strong Fit Example
-          </button>
-          <button
-            onClick={() => handleTabClick("weak")}
-            className={cn(
-              "px-6 py-3 rounded-xl font-medium transition-all border",
-              activeTab === "weak"
-                ? "bg-warning-muted text-warning border-warning/30"
-                : "bg-card text-muted-foreground border-border hover:border-muted-foreground"
-            )}
-          >
-            Weak Fit Example
-          </button>
-          <button
-            onClick={() => handleTabClick("custom")}
-            className={cn(
-              "px-6 py-3 rounded-xl font-medium transition-all border",
-              activeTab === "custom"
-                ? "bg-accent/20 text-accent border-accent/30"
-                : "bg-card text-muted-foreground border-border hover:border-muted-foreground"
-            )}
-          >
-            Paste Your Own JD
-          </button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.75rem" }}>
+          <button onClick={() => handleTabClick("strong")} style={tabStyle("strong")}>Strong fit example</button>
+          <button onClick={() => handleTabClick("weak")}   style={tabStyle("weak")}>Weak fit example</button>
+          <button onClick={() => handleTabClick("custom")} style={tabStyle("custom")}>Paste your own JD</button>
         </div>
 
-        {/* Main interface */}
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        {/* Main interface card */}
+        <div
+          style={{
+            border: "1px solid var(--site-fog)",
+            borderRadius: "8px",
+            overflow: "hidden",
+            backgroundColor: "var(--site-page)",
+          }}
+        >
           {/* Input section */}
-          <div className="p-6 border-b border-border">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-accent" />
+          <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--site-fog)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
+              <div
+                style={{
+                  width: "2rem",
+                  height: "2rem",
+                  borderRadius: "6px",
+                  backgroundColor: "var(--site-sky-pale)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <FileText style={{ width: "1rem", height: "1rem", color: "var(--site-sky-deep)" }} />
               </div>
-              <span className="text-muted-foreground text-sm">
+              <span style={{ fontSize: "0.875rem", color: "var(--site-mist)", fontFamily: "var(--font-sans)" }}>
                 Job description to analyze
               </span>
             </div>
             <textarea
-              className={cn(
-                "w-full bg-secondary rounded-xl p-4 border border-border text-sm font-mono text-muted-foreground leading-relaxed resize-none transition-colors",
-                activeTab === "custom"
-                  ? "focus:outline-none focus:border-accent/50 cursor-text"
-                  : "cursor-default opacity-80"
-              )}
+              style={{
+                width: "100%",
+                backgroundColor: "var(--site-cloud)",
+                borderRadius: "6px",
+                padding: "1rem",
+                border: "1px solid var(--site-fog)",
+                fontSize: "0.875rem",
+                fontFamily: "var(--font-sans)",
+                color: activeTab === "custom" ? "var(--site-ink)" : "var(--site-dusk)",
+                lineHeight: 1.6,
+                resize: "none",
+                transition: "border-color 0.15s ease",
+                outline: "none",
+                opacity: activeTab !== "custom" ? 0.75 : 1,
+                cursor: activeTab !== "custom" ? "default" : "text",
+                boxSizing: "border-box",
+              }}
               rows={8}
               value={jdText}
               onChange={(e) => activeTab === "custom" && setJdText(e.target.value)}
               readOnly={activeTab !== "custom"}
               placeholder="Paste a job description here..."
+              onFocus={e => { if (activeTab === "custom") e.currentTarget.style.borderColor = "var(--site-sky)"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "var(--site-fog)"; }}
             />
-            <div className="mt-4 flex justify-end">
+            <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end" }}>
               <button
                 onClick={handleAnalyze}
                 disabled={analyzing || !jdText.trim()}
-                className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-medium transition-all hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 1.25rem",
+                  backgroundColor: "var(--site-sky)",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-sans)",
+                  cursor: analyzing || !jdText.trim() ? "not-allowed" : "pointer",
+                  opacity: analyzing || !jdText.trim() ? 0.5 : 1,
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={e => { if (!analyzing && jdText.trim()) e.currentTarget.style.backgroundColor = "var(--site-sky-deep)"; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--site-sky)"; }}
               >
                 {analyzing && <Loader2 className="w-4 h-4 animate-spin" />}
-                Analyze Fit
+                Analyze fit
               </button>
             </div>
           </div>
 
-          {/* Analysis section */}
-          <div className="p-6">
+          {/* Results section */}
+          <div style={{ padding: "1.5rem", minHeight: "6rem" }}>
             {analyzing && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex items-center gap-3 text-muted-foreground">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "3rem 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--site-mist)", fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Analyzing against my experience...</span>
+                  <span>Analyzing against my experience…</span>
                 </div>
               </div>
             )}
 
             {error && !analyzing && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-warning text-sm bg-warning-muted border border-warning/20 rounded-xl px-6 py-4 max-w-lg text-center">
+              <div style={{ display: "flex", justifyContent: "center", padding: "3rem 0" }}>
+                <div
+                  style={{
+                    backgroundColor: "var(--ar-fit-weak-bg)",
+                    border: "1px solid var(--ar-fit-weak-border)",
+                    borderRadius: "6px",
+                    padding: "1rem 1.5rem",
+                    color: "var(--ar-fit-weak-txt)",
+                    fontSize: "0.875rem",
+                    fontFamily: "var(--font-sans)",
+                    maxWidth: "30rem",
+                    textAlign: "center",
+                  }}
+                >
                   {error}
                 </div>
               </div>
             )}
 
-            {result && !analyzing && style && (
+            {result && !analyzing && vs && (
               <div className="animate-slide-up">
-                {/* Verdict header */}
-                <div className={cn("flex items-center gap-4 mb-6 p-4 rounded-xl border", style.banner)}>
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", style.icon)}>
-                    {result.verdict === "probably_not" ? (
-                      <AlertTriangle className={cn("w-6 h-6", style.text)} />
-                    ) : (
-                      <Check className={cn("w-6 h-6", style.text)} />
-                    )}
+                {/* Verdict banner */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    padding: "1rem 1.25rem",
+                    borderRadius: "6px",
+                    border: `1px solid ${vs.border}`,
+                    backgroundColor: vs.bg,
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "2.5rem",
+                      height: "2.5rem",
+                      borderRadius: "50%",
+                      backgroundColor: vs.iconBg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {result.verdict === "probably_not"
+                      ? <AlertTriangle style={{ width: "1.25rem", height: "1.25rem", color: vs.txt }} />
+                      : <Check style={{ width: "1.25rem", height: "1.25rem", color: vs.txt }} />
+                    }
                   </div>
                   <div>
-                    <h3 className={cn("text-xl font-serif", style.text)}>
+                    <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 400, color: vs.txt, marginBottom: "0.25rem" }}>
                       {result.headline}
                     </h3>
-                    <p className="text-muted-foreground text-sm mt-1">{result.opening}</p>
+                    <p style={{ color: "var(--site-dusk)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.5 }}>
+                      {result.opening}
+                    </p>
                   </div>
                 </div>
 
                 {/* Gaps */}
                 {result.gaps && result.gaps.length > 0 && (
-                  <div className="space-y-4 mb-6">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                      Gaps to Note
-                    </h4>
-                    {result.gaps.map((gap, i) => (
-                      <div key={i} className="p-4 bg-secondary rounded-xl border border-border">
-                        <div className="flex items-start gap-3">
-                          <span className="text-warning mt-0.5">✗</span>
-                          <div>
-                            <p className="text-warning font-medium mb-1">{gap.gap_title}</p>
-                            <p className="text-muted-foreground text-xs font-mono mb-1">{gap.requirement}</p>
-                            <p className="text-muted-foreground text-sm leading-relaxed">{gap.explanation}</p>
+                  <div style={{ marginBottom: "1.25rem" }}>
+                    <p style={SECTION_LABEL}>Gaps to note</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      {result.gaps.map((gap, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            padding: "1rem",
+                            backgroundColor: "var(--site-cloud)",
+                            border: "1px solid var(--site-fog)",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                            <span style={{ color: "var(--ar-fit-weak-txt)", marginTop: "0.1em", flexShrink: 0 }}>✗</span>
+                            <div>
+                              <p style={{ color: "var(--ar-fit-weak-txt)", fontWeight: 500, fontSize: "0.9375rem", fontFamily: "var(--font-sans)", marginBottom: "0.25rem" }}>
+                                {gap.gap_title}
+                              </p>
+                              <p style={{ color: "var(--site-mist)", fontSize: "0.8rem", fontFamily: "var(--font-sans)", marginBottom: "0.375rem" }}>
+                                {gap.requirement}
+                              </p>
+                              <p style={{ color: "var(--site-dusk)", fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
+                                {gap.explanation}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {/* Transfers */}
+                {/* What transfers */}
                 {result.transfers && (
-                  <div className="p-4 bg-secondary rounded-xl border border-border mb-6">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">
-                      What Transfers
-                    </h4>
-                    <p className="text-muted-foreground text-sm">{result.transfers}</p>
+                  <div
+                    style={{
+                      padding: "1rem 1.25rem",
+                      backgroundColor: "var(--site-cloud)",
+                      border: "1px solid var(--site-fog)",
+                      borderRadius: "6px",
+                      marginBottom: "1.25rem",
+                    }}
+                  >
+                    <p style={SECTION_LABEL}>What transfers</p>
+                    <p style={{ color: "var(--site-dusk)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>
+                      {result.transfers}
+                    </p>
                   </div>
                 )}
 
                 {/* Recommendation */}
-                <div className={cn("p-4 rounded-xl border", style.banner)}>
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">
-                    My Recommendation
-                  </h4>
-                  <p className={cn("leading-relaxed", style.text)}>{result.recommendation}</p>
+                <div
+                  style={{
+                    padding: "1rem 1.25rem",
+                    backgroundColor: vs.bg,
+                    border: `1px solid ${vs.border}`,
+                    borderRadius: "6px",
+                  }}
+                >
+                  <p style={SECTION_LABEL}>My recommendation</p>
+                  <p style={{ color: vs.txt, lineHeight: 1.65, fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
+                    {result.recommendation}
+                  </p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Bottom insight */}
-        <div className="mt-8 text-center">
-          <div className="inline-block p-6 bg-card rounded-2xl border border-border max-w-2xl">
-            <p className="text-muted-foreground leading-relaxed">
-              This signals something completely different than "please consider my resume."
-              <br />
-              <br />
-              <span className="text-foreground font-medium">
-                You're qualifying them. Your time is valuable too.
-              </span>
+        {/* Bottom callout */}
+        <div style={{ marginTop: "2rem", textAlign: "center" }}>
+          <div
+            style={{
+              display: "inline-block",
+              padding: "1.25rem 2rem",
+              border: "1px solid var(--site-fog)",
+              borderRadius: "8px",
+              maxWidth: "38rem",
+            }}
+          >
+            <p style={{ color: "var(--site-dusk)", lineHeight: 1.7, fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
+              This signals something different than "please consider my resume."
+            </p>
+            <p style={{ color: "var(--site-ink)", fontWeight: 500, fontFamily: "var(--font-sans)", fontSize: "0.9375rem", marginTop: "0.5rem" }}>
+              You're qualifying them. Your time is valuable too.
             </p>
           </div>
         </div>

@@ -1,4 +1,3 @@
-import { MessageSquare } from "lucide-react";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
 
 interface HeroProps {
@@ -10,18 +9,15 @@ const Hero = ({ onOpenChat }: HeroProps) => {
 
   if (isLoading) {
     return (
-      <section id="hero" className="min-h-screen flex flex-col justify-center px-6 pt-20 opacity-50">
-        <div className="max-w-4xl mx-auto w-full animate-pulse">
-          <div className="h-8 w-48 bg-secondary rounded-full mb-8" />
-          <div className="h-20 w-3/4 bg-secondary rounded-xl mb-6" />
-          <div className="h-8 w-1/2 bg-secondary rounded-xl mb-4" />
-          <div className="h-6 w-2/3 bg-secondary rounded-xl mb-8" />
-          <div className="flex gap-3 mb-12">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-10 w-28 bg-secondary rounded-full" />
-            ))}
-          </div>
-          <div className="h-14 w-48 bg-secondary rounded-2xl" />
+      <section
+        id="hero"
+        style={{ minHeight: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "6rem 2rem 4rem" }}
+      >
+        <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%", opacity: 0.4 }}>
+          <div style={{ height: "1.5rem", width: "12rem", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "2rem" }} />
+          <div style={{ height: "4rem", width: "75%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "1.5rem" }} />
+          <div style={{ height: "1.5rem", width: "40%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "1rem" }} />
+          <div style={{ height: "1.25rem", width: "60%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "2rem" }} />
         </div>
       </section>
     );
@@ -29,9 +25,14 @@ const Hero = ({ onOpenChat }: HeroProps) => {
 
   if (!profile) {
     return (
-      <section id="hero" className="min-h-screen flex flex-col justify-center px-6 pt-20">
-        <div className="max-w-4xl mx-auto w-full">
-          <p className="text-muted-foreground text-2xl font-serif">Coming soon.</p>
+      <section
+        id="hero"
+        style={{ minHeight: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "6rem 2rem 4rem" }}
+      >
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", color: "var(--site-mist)" }}>
+            Coming soon.
+          </p>
         </div>
       </section>
     );
@@ -40,37 +41,112 @@ const Hero = ({ onOpenChat }: HeroProps) => {
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col justify-center px-6 pt-20"
+      style={{
+        minHeight: "80vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: "6rem 2rem 4rem",
+        backgroundColor: "var(--site-page)",
+      }}
     >
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Status badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary rounded-full mb-8 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse-soft" />
-          <span className="text-sm text-muted-foreground">{profile.availability_status}</span>
-        </div>
+      <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%" }}>
 
-        {/* Main heading */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-foreground mb-6 animate-slide-up">
+        {/* Availability badge */}
+        {profile.availability_status && (
+          <div
+            className="animate-fade-in"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.375rem 0.875rem",
+              backgroundColor: "var(--site-sky-pale)",
+              border: "1px solid var(--site-fog)",
+              borderRadius: "100px",
+              marginBottom: "2rem",
+            }}
+          >
+            <span
+              className="animate-pulse-soft"
+              style={{
+                width: "7px",
+                height: "7px",
+                borderRadius: "50%",
+                backgroundColor: "#15803d",
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ fontSize: "0.8125rem", color: "var(--site-dusk)", fontFamily: "var(--font-sans)" }}>
+              {profile.availability_status}
+            </span>
+          </div>
+        )}
+
+        {/* Name */}
+        <h1
+          className="animate-slide-up"
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
+            fontWeight: 400,
+            color: "var(--site-ink)",
+            lineHeight: 1.1,
+            marginBottom: "1rem",
+          }}
+        >
           {profile.name}
         </h1>
 
-        {/* Role */}
-        <p className="text-2xl md:text-3xl text-primary font-serif mb-4 animate-slide-up stagger-1">
+        {/* Title */}
+        <p
+          className="animate-slide-up stagger-1"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "1.125rem",
+            fontWeight: 500,
+            color: "var(--site-sky)",
+            marginBottom: "1.25rem",
+            letterSpacing: "0.01em",
+          }}
+        >
           {profile.title}
         </p>
 
-        {/* Subtitle */}
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8 animate-slide-up stagger-2">
-          {profile.elevator_pitch}
-        </p>
+        {/* Elevator pitch */}
+        {profile.elevator_pitch && (
+          <p
+            className="animate-slide-up stagger-2"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "1.0625rem",
+              color: "var(--site-dusk)",
+              lineHeight: 1.75,
+              maxWidth: "56ch",
+              marginBottom: "2rem",
+            }}
+          >
+            {profile.elevator_pitch}
+          </p>
+        )}
 
-        {/* Company badges */}
+        {/* Target company stages */}
         {profile.target_company_stages && profile.target_company_stages.length > 0 && (
-          <div className="flex flex-wrap gap-3 mb-12 animate-slide-up stagger-3">
+          <div
+            className="animate-slide-up stagger-3"
+            style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem" }}
+          >
             {profile.target_company_stages.map((stage: string) => (
               <span
                 key={stage}
-                className="px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground"
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  border: "1px solid var(--site-fog)",
+                  borderRadius: "100px",
+                  fontSize: "0.8125rem",
+                  color: "var(--site-dusk)",
+                  backgroundColor: "var(--site-cloud)",
+                }}
               >
                 {stage}
               </span>
@@ -78,23 +154,30 @@ const Hero = ({ onOpenChat }: HeroProps) => {
           </div>
         )}
 
-        {/* CTA Button */}
+        {/* CTA */}
         <button
           onClick={onOpenChat}
-          className="group relative inline-flex items-center gap-3 px-8 py-4 bg-accent text-accent-foreground rounded-2xl font-medium transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/20 animate-slide-up stagger-4"
+          className="animate-slide-up stagger-4"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.625rem 1.5rem",
+            backgroundColor: "var(--site-sky)",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "4px",
+            fontSize: "0.9375rem",
+            fontWeight: 500,
+            fontFamily: "var(--font-sans)",
+            cursor: "pointer",
+            transition: "background-color 0.15s ease",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--site-sky-deep)")}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--site-sky)")}
         >
-          <MessageSquare className="w-5 h-5" />
-          <span>Ask AI About Me</span>
-          <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-success text-primary-foreground rounded-full text-xs font-medium">
-            New
-          </span>
+          Ask AI about me
         </button>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "1.5s", animationFillMode: "forwards" }}>
-          <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
-          <div className="w-px h-8 bg-gradient-to-b from-muted-foreground to-transparent" />
-        </div>
       </div>
     </section>
   );

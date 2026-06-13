@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, Sparkles, ChevronLeft, Volume2, Square, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X, Send, ChevronLeft, Volume2, Square, Loader2 } from "lucide-react";
 import { EDGE_FN_URL, EDGE_FN_HEADERS } from "@/lib/supabase";
 import { useCandidateProfile } from "@/hooks/useCandidateData";
 
@@ -15,10 +14,8 @@ interface AIChatProps {
   initialMessage?: string;
 }
 
-// Stable session ID for this browser tab
 const SESSION_ID = crypto.randomUUID();
 
-// Suggested questions shown as buttons on the chat empty state
 const DEFAULT_QUESTIONS = [
   "Tell me about yourself",
   "What's your biggest weakness?",
@@ -29,36 +26,14 @@ const DEFAULT_QUESTIONS = [
   "Tell me about a time you failed",
 ];
 
-// Maps common paraphrases to canonical FAQ keys so typed questions also get verbatim answers
 const FAQ_ALIASES: Array<{ canonical: string; keywords: string[] }> = [
-  {
-    canonical: "Tell me about yourself",
-    keywords: ["about yourself", "introduce yourself", "tell me about you", "your background", "who are you"],
-  },
-  {
-    canonical: "What's your biggest weakness?",
-    keywords: ["weakness", "weaknesses", "not good at", "areas for improvement", "where do you struggle"],
-  },
-  {
-    canonical: "Why are you looking?",
-    keywords: ["why are you looking", "why did you leave", "why did you leave your last", "on the market", "job search", "looking for a new"],
-  },
-  {
-    canonical: "Where do you see yourself in 5 years?",
-    keywords: ["5 years", "five years", "where do you see yourself", "your future", "long-term goal"],
-  },
-  {
-    canonical: "What would your last manager say about you?",
-    keywords: ["manager say", "boss say", "supervisor say", "reference say", "would say about you", "former manager"],
-  },
-  {
-    canonical: "What kind of work environment do you thrive in?",
-    keywords: ["work environment", "company culture", "thrive in", "work style", "ideal workplace", "team environment"],
-  },
-  {
-    canonical: "Tell me about a time you failed",
-    keywords: ["time you failed", "project that failed", "failure", "biggest failure", "memorable failure", "went wrong", "didn't work out"],
-  },
+  { canonical: "Tell me about yourself", keywords: ["about yourself", "introduce yourself", "tell me about you", "your background", "who are you"] },
+  { canonical: "What's your biggest weakness?", keywords: ["weakness", "weaknesses", "not good at", "areas for improvement", "where do you struggle"] },
+  { canonical: "Why are you looking?", keywords: ["why are you looking", "why did you leave", "on the market", "job search", "looking for a new"] },
+  { canonical: "Where do you see yourself in 5 years?", keywords: ["5 years", "five years", "where do you see yourself", "your future", "long-term goal"] },
+  { canonical: "What would your last manager say about you?", keywords: ["manager say", "boss say", "supervisor say", "reference say", "would say about you", "former manager"] },
+  { canonical: "What kind of work environment do you thrive in?", keywords: ["work environment", "company culture", "thrive in", "work style", "ideal workplace"] },
+  { canonical: "Tell me about a time you failed", keywords: ["time you failed", "project that failed", "failure", "biggest failure", "went wrong"] },
 ];
 
 function normalizeQuestion(input: string): string {
@@ -80,52 +55,35 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && initialMessage) {
-      setInput(initialMessage);
-    }
+    if (isOpen && initialMessage) setInput(initialMessage);
   }, [isOpen, initialMessage]);
 
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = '';
+      audioRef.current.src = "";
       audioRef.current = null;
     }
     setPlayingIndex(null);
   };
 
   const speakMessage = async (text: string, index: number) => {
-    if (playingIndex === index) {
-      stopAudio();
-      return;
-    }
+    if (playingIndex === index) { stopAudio(); return; }
     stopAudio();
-
     setLoadingAudioIndex(index);
     try {
       const res = await fetch(`${EDGE_FN_URL}/tts`, {
-        method: 'POST',
+        method: "POST",
         headers: EDGE_FN_HEADERS,
         body: JSON.stringify({ text }),
       });
       if (!res.ok) throw new Error(`TTS error ${res.status}`);
-
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
-
-      audio.onended = () => {
-        URL.revokeObjectURL(url);
-        setPlayingIndex(null);
-        audioRef.current = null;
-      };
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
-        setPlayingIndex(null);
-        audioRef.current = null;
-      };
-
+      audio.onended = () => { URL.revokeObjectURL(url); setPlayingIndex(null); audioRef.current = null; };
+      audio.onerror = () => { URL.revokeObjectURL(url); setPlayingIndex(null); audioRef.current = null; };
       setLoadingAudioIndex(null);
       setPlayingIndex(index);
       audio.play();
@@ -135,7 +93,6 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
   };
 
   const candidateName = profile?.name ?? "the candidate";
-  const initial = candidateName.charAt(0).toUpperCase();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -143,69 +100,144 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
 
   const sendMessage = async (question: string) => {
     if (!question.trim() || isLoading) return;
-
     const normalized = normalizeQuestion(question);
-    const userMsg: Message = { role: "user", content: question };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { role: "user", content: question }]);
     setInput("");
     setIsLoading(true);
-
     try {
       const res = await fetch(`${EDGE_FN_URL}/chat`, {
         method: "POST",
         headers: EDGE_FN_HEADERS,
         body: JSON.stringify({ message: normalized, sessionId: SESSION_ID }),
       });
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { message: reply } = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, I ran into an error. Please try again in a moment." },
-      ]);
+    } catch {
+      setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I ran into an error. Please try again in a moment." }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) stopAudio();
-  }, [isOpen]);
+  useEffect(() => { if (!isOpen) stopAudio(); }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-slide-up">
+    <div
+      className="animate-fade-in"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+        backgroundColor: "rgba(26,35,50,0.55)",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="animate-slide-up"
+        style={{
+          width: "100%",
+          maxWidth: "38rem",
+          height: "82vh",
+          maxHeight: "680px",
+          backgroundColor: "var(--site-page)",
+          border: "1px solid var(--site-fog)",
+          borderRadius: "8px",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          boxShadow: "0 8px 40px rgba(26,35,50,0.18)",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center text-accent-foreground font-serif font-bold">
-              {initial}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "1rem 1.25rem",
+            borderBottom: "1px solid var(--site-fog)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <div
+              style={{
+                width: "2.25rem",
+                height: "2.25rem",
+                borderRadius: "50%",
+                backgroundColor: "var(--site-sky-pale)",
+                border: "1px solid var(--site-fog)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: "var(--font-serif)",
+                fontSize: "1rem",
+                color: "var(--site-sky-deep)",
+                fontWeight: 400,
+                flexShrink: 0,
+              }}
+            >
+              {candidateName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-foreground font-medium">Ask AI About {candidateName}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <p style={{ fontSize: "0.9375rem", fontWeight: 500, color: "var(--site-ink)", fontFamily: "var(--font-sans)" }}>
+                Ask about {candidateName}
+              </p>
+              <p style={{ fontSize: "0.75rem", color: "var(--site-mist)", display: "flex", alignItems: "center", gap: "0.375rem", fontFamily: "var(--font-sans)" }}>
+                <span
+                  className="animate-pulse-soft"
+                  style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#15803d", display: "inline-block" }}
+                />
                 Ready to answer your questions
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             {messages.length > 0 && (
               <button
                 onClick={() => setMessages([])}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground border border-border hover:border-accent/50 rounded-lg transition-colors"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  padding: "0.375rem 0.75rem",
+                  fontSize: "0.8125rem",
+                  color: "var(--site-mist)",
+                  border: "1px solid var(--site-fog)",
+                  borderRadius: "4px",
+                  background: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                  transition: "color 0.15s ease, border-color 0.15s ease",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--site-ink)"; e.currentTarget.style.borderColor = "var(--site-mist)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--site-mist)"; e.currentTarget.style.borderColor = "var(--site-fog)"; }}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
                 Questions
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
+              style={{
+                padding: "0.375rem",
+                color: "var(--site-mist)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                borderRadius: "4px",
+                display: "flex",
+                transition: "color 0.15s ease",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--site-ink)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--site-mist)")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -213,22 +245,35 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
           {messages.length === 0 && !isLoading && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-6">
-              <Sparkles className="w-12 h-12 text-accent mb-4" />
-              <h3 className="text-xl font-serif text-foreground mb-2">
+            <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "1rem" }}>
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 400, color: "var(--site-ink)", marginBottom: "0.5rem" }}>
                 What would you like to know?
               </h3>
-              <p className="text-muted-foreground text-sm mb-6 max-w-md">
-                Ask specific questions about experience, skills, or fit for your role. Get honest, detailed answers.
+              <p style={{ color: "var(--site-mist)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.6, marginBottom: "1.5rem", maxWidth: "28rem" }}>
+                Ask specific questions about experience, skills, or fit. Get honest, direct answers.
               </p>
-              <div className="w-full max-w-md space-y-2">
+              <div style={{ width: "100%", maxWidth: "28rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {DEFAULT_QUESTIONS.map((q, i) => (
                   <button
                     key={i}
                     onClick={() => sendMessage(q)}
-                    className="w-full text-left p-3 bg-secondary rounded-xl text-sm text-foreground hover:bg-muted transition-colors border border-transparent hover:border-accent/30"
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "0.625rem 0.875rem",
+                      backgroundColor: "var(--site-cloud)",
+                      border: "1px solid var(--site-fog)",
+                      borderRadius: "6px",
+                      fontSize: "0.875rem",
+                      color: "var(--site-dusk)",
+                      fontFamily: "var(--font-sans)",
+                      cursor: "pointer",
+                      transition: "border-color 0.15s ease, background-color 0.15s ease",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--site-sky)"; e.currentTarget.style.backgroundColor = "var(--site-sky-pale)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--site-fog)"; e.currentTarget.style.backgroundColor = "var(--site-cloud)"; }}
                   >
                     "{q}"
                   </button>
@@ -238,36 +283,47 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} className={cn("flex flex-col", msg.role === "user" ? "items-end" : "items-start")}>
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start" }}>
               <div
-                className={cn(
-                  "max-w-[85%] rounded-2xl px-4 py-3",
-                  msg.role === "user"
-                    ? "bg-accent text-accent-foreground rounded-br-md"
-                    : "bg-secondary text-foreground rounded-bl-md"
-                )}
+                style={{
+                  maxWidth: "85%",
+                  padding: "0.625rem 0.875rem",
+                  borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+                  backgroundColor: msg.role === "user" ? "var(--site-sky)" : "var(--site-cloud)",
+                  color: msg.role === "user" ? "#ffffff" : "var(--site-ink)",
+                }}
               >
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                <p style={{ fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-sans)", whiteSpace: "pre-wrap" }}>
+                  {msg.content}
+                </p>
               </div>
               {msg.role === "assistant" && (
                 <button
                   onClick={() => speakMessage(msg.content, i)}
                   disabled={loadingAudioIndex !== null}
-                  className={cn(
-                    "mt-1 flex items-center gap-1 px-2 py-1 rounded-lg text-sm transition-colors",
-                    playingIndex === i
-                      ? "text-accent bg-accent/10 hover:bg-accent/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  )}
+                  style={{
+                    marginTop: "0.25rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    padding: "0.25rem 0.5rem",
+                    fontSize: "0.8rem",
+                    fontFamily: "var(--font-sans)",
+                    color: playingIndex === i ? "var(--site-sky)" : "var(--site-mist)",
+                    backgroundColor: playingIndex === i ? "var(--site-sky-pale)" : "transparent",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    transition: "color 0.15s ease",
+                  }}
                   title={playingIndex === i ? "Stop" : "Hear this in Brett's voice"}
                 >
-                  {loadingAudioIndex === i ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : playingIndex === i ? (
-                    <Square className="w-3 h-3 fill-current" />
-                  ) : (
-                    <Volume2 className="w-3 h-3" />
-                  )}
+                  {loadingAudioIndex === i
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : playingIndex === i
+                    ? <Square className="w-3 h-3" style={{ fill: "currentColor" }} />
+                    : <Volume2 className="w-3 h-3" />
+                  }
                   <span>{playingIndex === i ? "Stop" : "Hear this"}</span>
                 </button>
               )}
@@ -275,12 +331,28 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
           ))}
 
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-secondary text-foreground rounded-2xl rounded-bl-md px-4 py-3">
-                <div className="flex gap-1 items-center h-5">
-                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+              <div
+                style={{
+                  padding: "0.625rem 0.875rem",
+                  borderRadius: "12px 12px 12px 2px",
+                  backgroundColor: "var(--site-cloud)",
+                }}
+              >
+                <div style={{ display: "flex", gap: "4px", alignItems: "center", height: "1.25rem" }}>
+                  {[0, 150, 300].map((delay) => (
+                    <span
+                      key={delay}
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        backgroundColor: "var(--site-mist)",
+                        display: "inline-block",
+                        animation: `bounce-dots 1.2s ease-in-out ${delay}ms infinite`,
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -290,25 +362,52 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-border">
+        <div style={{ padding: "1rem 1.25rem", borderTop: "1px solid var(--site-fog)" }}>
           <form
             onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
-            className="flex gap-3"
+            style={{ display: "flex", gap: "0.625rem" }}
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a question..."
+              placeholder="Ask a question…"
               disabled={isLoading}
-              className="flex-1 bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground border border-border focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
+              style={{
+                flex: 1,
+                backgroundColor: "var(--site-cloud)",
+                border: "1px solid var(--site-fog)",
+                borderRadius: "6px",
+                padding: "0.625rem 0.875rem",
+                fontSize: "0.9rem",
+                fontFamily: "var(--font-sans)",
+                color: "var(--site-ink)",
+                outline: "none",
+                transition: "border-color 0.15s ease",
+                opacity: isLoading ? 0.6 : 1,
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "var(--site-sky)")}
+              onBlur={e => (e.currentTarget.style.borderColor = "var(--site-fog)")}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="px-4 py-3 bg-accent text-accent-foreground rounded-xl font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+              style={{
+                padding: "0.625rem 0.875rem",
+                backgroundColor: "var(--site-sky)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: !input.trim() || isLoading ? "not-allowed" : "pointer",
+                opacity: !input.trim() || isLoading ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+                transition: "background-color 0.15s ease",
+              }}
+              onMouseEnter={e => { if (input.trim() && !isLoading) e.currentTarget.style.backgroundColor = "var(--site-sky-deep)"; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--site-sky)"; }}
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </button>
           </form>
         </div>

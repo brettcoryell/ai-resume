@@ -2,72 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/*
+  Site palette — mirrors brettcoryell.com site design guide v1.1.
+  ai-resume is a light-mode-only site sub-page. No dark mode.
+  See ai-resume-design-guide.md in Google Drive for component-level specs.
 */
 
-@layer base {
-  :root {
-    /* Deep, sophisticated dark palette inspired by lucis.life */
-    --background: 240 10% 4%;
-    --foreground: 60 9% 98%;
-
-    --card: 240 8% 8%;
-    --card-foreground: 60 9% 98%;
-
-    --popover: 240 8% 8%;
-    --popover-foreground: 60 9% 98%;
-
-    /* Warm cream accent - premium feel */
-    --primary: 45 30% 70%;
-    --primary-foreground: 240 10% 4%;
-
-    --secondary: 240 6% 12%;
-    --secondary-foreground: 60 9% 90%;
-
-    --muted: 240 6% 15%;
-    --muted-foreground: 240 5% 55%;
-
-    /* Teal accent for interactive elements */
-    --accent: 173 58% 39%;
-    --accent-foreground: 60 9% 98%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 60 9% 98%;
-
-    --border: 240 6% 18%;
-    --input: 240 6% 15%;
-    --ring: 173 58% 39%;
-
-    --radius: 0.75rem;
-
-    /* Custom tokens for this design */
-    --surface-elevated: 240 8% 10%;
-    --text-subtle: 240 5% 45%;
-    --text-highlight: 45 80% 80%;
-    --success: 158 64% 52%;
-    --success-muted: 158 40% 20%;
-    --warning: 38 92% 50%;
-    --warning-muted: 38 50% 20%;
-
-    --sidebar-background: 240 10% 4%;
-    --sidebar-foreground: 60 9% 90%;
-    --sidebar-primary: 173 58% 39%;
-    --sidebar-primary-foreground: 60 9% 98%;
-    --sidebar-accent: 240 6% 12%;
-    --sidebar-accent-foreground: 60 9% 90%;
-    --sidebar-border: 240 6% 18%;
-    --sidebar-ring: 173 58% 39%;
-  }
-}
-
-/* Typography - premium feel with serif headings */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Raw site palette tokens (hex — use in inline styles) */
+  --site-sky:       #7a9cb8;
+  --site-sky-deep:  #5b7d99;
+  --site-sky-pale:  #dce8f0;
+  --site-ink:       #1a2332;
+  --site-dusk:      #4a5568;
+  --site-mist:      #8a9ab5;
+  --site-fog:       #e8edf3;
+  --site-cloud:     #f5f7fa;
+  --site-page:      #ffffff;
+  --site-warm:      #c4956a;
+
+  /* Semantic aliases */
+  --site-txt:           var(--site-ink);
+  --site-txt-secondary: var(--site-dusk);
+  --site-txt-faint:     var(--site-mist);
+  --site-border:        var(--site-fog);
+  --site-accent:        var(--site-sky);
+  --site-accent-hover:  var(--site-sky-deep);
+  --site-bg:            var(--site-page);
+  --site-bg-alt:        var(--site-cloud);
+
+  /* ai-resume extension tokens — verdict states */
+  --ar-fit-strong-bg:      #dcfce7;
+  --ar-fit-strong-txt:     #15803d;
+  --ar-fit-strong-border:  #a8d5a8;
+  --ar-fit-neutral-bg:     var(--site-cloud);
+  --ar-fit-neutral-txt:    var(--site-dusk);
+  --ar-fit-neutral-border: var(--site-fog);
+  --ar-fit-weak-bg:        #fef3c7;
+  --ar-fit-weak-txt:       #92400e;
+  --ar-fit-weak-border:    #d4b896;
+
+  /* Typography — system fonts matching the site */
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+  --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* shadcn/ui token remapping — light mode only */
+  --background: 0 0% 100%;
+  --foreground: 218 32% 15%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 218 32% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 218 32% 15%;
+
+  --primary: 207 31% 60%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 215 32% 97%;
+  --secondary-foreground: 218 32% 15%;
+
+  --muted: 215 32% 97%;
+  --muted-foreground: 218 17% 35%;
+
+  --accent: 207 31% 60%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 44%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 31% 93%;
+  --input: 214 31% 93%;
+  --ring: 207 31% 60%;
+
+  --radius: 0.5rem;
+
+  --success: 142 72% 29%;
+  --success-muted: 140 76% 93%;
+  --warning: 38 93% 44%;
+  --warning-muted: 43 96% 90%;
+
+  --surface-elevated: 215 32% 97%;
+  --text-subtle: 218 23% 63%;
+  --text-highlight: 204 40% 90%;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 218 32% 15%;
+  --sidebar-primary: 207 31% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 32% 97%;
+  --sidebar-accent-foreground: 218 32% 15%;
+  --sidebar-border: 214 31% 93%;
+  --sidebar-ring: 207 31% 60%;
 }
 
 @layer base {
@@ -87,78 +113,51 @@ All colors MUST be HSL.
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
   }
-
-  code, pre {
-    font-family: var(--font-mono);
-  }
 }
 
-/* Custom animations */
+/* Minimal utility animations */
 @keyframes fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slide-up {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-down {
-  from { 
-    opacity: 0; 
-    transform: translateY(-10px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-@keyframes typing-cursor {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse-soft {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
+@keyframes bounce-dots {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%           { transform: translateY(-5px); }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.5s ease-out forwards;
-}
+.animate-fade-in   { animation: fade-in 0.5s ease-out forwards; }
+.animate-slide-up  { animation: slide-up 0.5s ease-out forwards; }
+.animate-slide-down{ animation: slide-down 0.25s ease-out forwards; }
+.animate-pulse-soft{ animation: pulse-soft 2s ease-in-out infinite; }
 
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out forwards;
-}
-
-.animate-typing-cursor {
-  animation: typing-cursor 1s step-end infinite;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
-}
-
-/* Staggered animations */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 
-/* Gradient text utility */
-.text-gradient {
-  @apply bg-clip-text text-transparent;
-  background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-pulse-soft {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
