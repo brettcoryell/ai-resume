@@ -419,25 +419,6 @@ const FitAssessment = () => {
           </div>
         </div>
 
-        {/* Bottom callout */}
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <div
-            style={{
-              display: "inline-block",
-              padding: "1.25rem 2rem",
-              border: "1px solid var(--site-fog)",
-              borderRadius: "8px",
-              maxWidth: "38rem",
-            }}
-          >
-            <p style={{ color: "var(--site-dusk)", lineHeight: 1.7, fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
-              This signals something different than "please consider my resume."
-            </p>
-            <p style={{ color: "var(--site-ink)", fontWeight: 500, fontFamily: "var(--font-sans)", fontSize: "0.9375rem", marginTop: "0.5rem" }}>
-              You're qualifying them. Your time is valuable too.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
