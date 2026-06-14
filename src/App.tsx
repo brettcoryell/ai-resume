@@ -8,7 +8,6 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import ProfileForm from "./pages/admin/ProfileForm";
-import ExperienceForm from "./pages/admin/ExperienceForm";
 
 const queryClient = new QueryClient();
 
@@ -23,8 +22,7 @@ const App = () => (
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/profile" element={<ProfileForm />} />
-          <Route path="/admin/experience" element={<ExperienceForm />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

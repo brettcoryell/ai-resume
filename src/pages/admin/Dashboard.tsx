@@ -46,10 +46,6 @@ const Dashboard = () => {
 
   const navLinks = [
     { label: "Profile", to: "/admin/profile" },
-    { label: "Experience", to: "/admin/experience" },
-    { label: "Skills", to: "/admin/skills" },
-    { label: "Gaps & Weaknesses", to: "/admin/gaps" },
-    { label: "AI Instructions", to: "/admin/ai-instructions" },
   ];
 
   return (
