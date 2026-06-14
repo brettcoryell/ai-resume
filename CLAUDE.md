@@ -393,7 +393,7 @@ supabase functions deploy analyze-jd
 Scripts in `scripts/` use a `.venv` at the project root built from Homebrew python@3.12.
 - **Never** invoke bare `python3` — always `.venv/bin/python`
 - Rebuild: `python3.12 -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt`
-- Canonical standard: `~/Code/AI/PYTHON-ENVIRONMENT.md`
+- Canonical standard: `~/Code/AI/open_brain/PYTHON-ENVIRONMENT.md`
 
 ---
 
