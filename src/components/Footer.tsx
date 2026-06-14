@@ -91,17 +91,14 @@ const Footer = () => {
         <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-sans)" }}>
           © 2026 Brett Coryell
         </p>
-        <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-sans)" }}>
-          AI powered by{" "}
-          <a
-            href="https://brettcoryell.com"
-            style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none", transition: "color 0.15s ease" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
-          >
-            Ariel
-          </a>
-        </p>
+        <a
+          href="https://brettcoryell.com"
+          style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-sans)", textDecoration: "none", transition: "color 0.15s ease" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+        >
+          ← brettcoryell.com
+        </a>
       </div>
     </footer>
   );
