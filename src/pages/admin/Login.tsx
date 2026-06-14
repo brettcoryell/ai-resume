@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabaseAdmin as supabase } from "@/lib/supabase";
 
 const Login = () => {
@@ -32,6 +32,9 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
+          <Link to="/" className="inline-block text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
+            ← Back to site
+          </Link>
           <h1 className="text-3xl font-serif text-foreground mb-1">Admin</h1>
           <p className="text-muted-foreground text-sm">Sign in to manage your resume</p>
         </div>

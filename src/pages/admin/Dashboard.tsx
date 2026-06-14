@@ -21,15 +21,18 @@ const Dashboard = () => {
       }
 
       // Load counts in parallel
-      const [expRes, skillRes] = await Promise.all([
-        supabase.from("experiences").select("id", { count: "exact", head: true }),
-        supabase.from("skills").select("id", { count: "exact", head: true }),
-      ]);
-
-      setStats({
-        experiences: expRes.count ?? 0,
-        skills: skillRes.count ?? 0,
-      });
+      try {
+        const [expRes, skillRes] = await Promise.all([
+          supabase.from("experiences").select("id", { count: "exact", head: true }),
+          supabase.from("skills").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({
+          experiences: expRes.count ?? 0,
+          skills: skillRes.count ?? 0,
+        });
+      } catch (_) {
+        // counts unavailable — display zeros
+      }
       setLoading(false);
     };
 
@@ -54,7 +57,10 @@ const Dashboard = () => {
       {/* Sidebar */}
       <aside className="w-56 bg-card border-r border-border flex flex-col">
         <div className="p-6 border-b border-border">
-          <h1 className="text-lg font-serif text-foreground">Admin</h1>
+          <h1 className="text-lg font-serif text-foreground mb-3">Admin</h1>
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            ← Back to site
+          </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navLinks.map((link) => (
