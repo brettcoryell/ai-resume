@@ -1,0 +1,4 @@
+# requires-python = ">=3.12"
+# Install: python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
+requests>=2.31.0
+python-dotenv>=1.0.0

@@ -388,6 +388,15 @@ supabase functions deploy analyze-jd
 
 ---
 
+## Python Environment — Hard Rule
+
+Scripts in `scripts/` use a `.venv` at the project root built from Homebrew python@3.12.
+- **Never** invoke bare `python3` — always `.venv/bin/python`
+- Rebuild: `python3.12 -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt`
+- Canonical standard: `~/Code/AI/PYTHON-ENVIRONMENT.md`
+
+---
+
 ## Lessons Learned
 
 Dense reference — symptom, root cause, exact fix. One to three lines max. Add an entry after every bug fix before committing.
