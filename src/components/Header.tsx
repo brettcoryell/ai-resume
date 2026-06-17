@@ -67,17 +67,18 @@ const Header = ({ onOpenChat }: HeaderProps) => {
         }}
       >
         {/* Site name */}
-        <button
-          onClick={() => scrollToSection("hero")}
+        <a
+          href="https://brettcoryell.com"
           style={{
             ...NAV_LINK_BASE,
             fontSize: "0.9rem",
             fontWeight: 600,
             color: "var(--color-interactive)",
+            textDecoration: "none",
           }}
         >
           {name}
-        </button>
+        </a>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
