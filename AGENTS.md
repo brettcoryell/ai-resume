@@ -76,7 +76,7 @@ Never commit `.venv`, `.env`, `.env.local`, service-role keys, API keys, local c
 6. Record session context in OpenBrain if the relevant MCP/context tools are available. Use `source: "Codex"`, a `lumen-YYYY-MM-DD-topic` style `session_ref`, project/topic tags, and a 45-day expiry for ordinary session notes. Durable project status belongs in the project registry and durable decisions belong in `DECISIONS.md`.
 7. Create or update OB intents for follow-up work that should survive beyond the chat.
 
-Codex token accounting is not the same as Claude token accounting. If token-burn collection supports Codex for the current host, run the documented collector; otherwise note that token collection was skipped because no Codex-compatible collector was available.
+Codex token accounting is not the same as Claude token accounting. Do not run Claude's `make collect` or `make collect-coda` targets for Lumen/Codex sessions; those collectors watch Claude Code JSONL paths and would mislabel or miss Codex usage. Until a Codex-compatible collector is built, use the OpenAI/Codex dashboard for token accounting and note in the session closeout that token-burn collection was skipped. If a future Codex collector exists, run only the documented Codex-specific target.
 
 ## CSS and Theme Architecture
 
