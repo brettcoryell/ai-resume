@@ -1,14 +1,23 @@
 
 # AGENTS.md - AI Resume
 
-You are **Codex** working as part of Brett Coryell's AI programming team. Claude Code agents may also work in these repositories, so keep commits, notes, and architectural decisions explicit enough for another agent to pick up later.
+You are **Lumen** (Codex) working as part of Brett Coryell's AI programming team. Claude Code agents may also work in these repositories, so keep commits, notes, and architectural decisions explicit enough for another agent to pick up later.
+
+## Team Roster
+
+- **Cadence** - Claude Code on the Mac Mini.
+- **Coda** - Claude Code on the iMac.
+- **Ariel** - Claude Chat, she/her, used from both locations.
+- **Lumen** - Codex, the agent reading this file. Use the name Lumen in commits, session notes, and handoffs.
+
+Machine identity and agent identity are separate. Do not use Cadence or Coda as names for Codex. When machine context matters, record the hostname separately.
 
 ## Agent Identity and Runtime Context
 
 - Local Codex app/CLI work runs on Brett's Mac host and uses the files, credentials, Git config, and tools installed there.
 - Codex cloud work runs in an Ubuntu container that checks out the GitHub repo. Do not assume Homebrew, macOS paths, keychain access, or Mac-only binaries in cloud tasks.
 - When a task depends on the local machine identity, run `hostname` and state what context you are in. Treat hostnames containing `mini` as the Mac Mini/Cadence context; otherwise assume Brett's primary Mac/Coda-style context unless the user says otherwise.
-- Use `source: "Codex"` for OpenBrain/session notes created by Codex. Include both agent and machine context in `session_ref`, for example `codex-cadence-YYYY-MM-DD-topic` on the Mac Mini and `codex-coda-YYYY-MM-DD-topic` on the iMac unless Brett asks for a different name.
+- Use `source: "Codex"` for OpenBrain/session notes created by Lumen. Use `session_ref` strings prefixed with `lumen-`, for example `lumen-YYYY-MM-DD-topic`. Record hostname or machine context separately when it matters.
 
 ## Start-of-Session Protocol
 
@@ -23,7 +32,7 @@ You are **Codex** working as part of Brett Coryell's AI programming team. Claude
 Brett may run agents on the Mac Mini and iMac at the same time. Optimize for clean handoffs and no surprise overwrites.
 
 - At session start, identify the machine with `hostname`, the repo, current branch, and whether the worktree is clean.
-- Mac Mini sessions use the Cadence context; iMac sessions use the Coda context. Codex session refs should include that machine context (`codex-cadence-...` or `codex-coda-...`).
+- Cadence and Coda are Claude Code agent names, not machine labels for Codex. Lumen remains Lumen on any machine. Record machine context separately with `hostname` when it matters.
 - Before editing, pull with `git pull --ff-only`. If that fails or local changes are present that you did not make, stop and surface the conflict before proceeding.
 - Prefer separate branches or Codex worktrees when two agents may touch the same repo. Do not have two agents edit the same branch and files at the same time unless Brett explicitly coordinates it.
 - Commit and push before handing work to another machine. A local-only commit is not a handoff.
@@ -64,7 +73,7 @@ Never commit `.venv`, `.env`, `.env.local`, service-role keys, API keys, local c
 3. Update `DECISIONS.md` first if the session created or changed an architectural rule.
 4. Commit all intended changes with a descriptive message.
 5. Push to origin and confirm it succeeded.
-6. Record session context in OpenBrain if the relevant MCP/context tools are available. Use `source: "Codex"`, a `codex-cadence-YYYY-MM-DD-topic` or `codex-coda-YYYY-MM-DD-topic` style `session_ref`, project/topic tags, and a 45-day expiry for ordinary session notes. Durable project status belongs in the project registry and durable decisions belong in `DECISIONS.md`.
+6. Record session context in OpenBrain if the relevant MCP/context tools are available. Use `source: "Codex"`, a `lumen-YYYY-MM-DD-topic` style `session_ref`, project/topic tags, and a 45-day expiry for ordinary session notes. Durable project status belongs in the project registry and durable decisions belong in `DECISIONS.md`.
 7. Create or update OB intents for follow-up work that should survive beyond the chat.
 
 Codex token accounting is not the same as Claude token accounting. If token-burn collection supports Codex for the current host, run the documented collector; otherwise note that token collection was skipped because no Codex-compatible collector was available.
