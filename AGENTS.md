@@ -66,6 +66,15 @@ Never commit `.venv`, `.env`, `.env.local`, service-role keys, API keys, local c
 - A session is not complete until changes are committed and pushed, unless Brett explicitly asks not to commit or push.
 - Before push, run the narrowest useful validation for the files changed and report anything not run.
 
+## Branch and PR Policy
+
+- Use `lumen/<short-topic>` branch names when creating a separate branch for Codex work. Keep names lowercase and kebab-case, e.g. `lumen/msm-fomc-sparkline`.
+- PRs are optional, not the default. Brett does not want routine AI-to-AI PR review overhead.
+- For normal requested work, commit and push directly to the active branch after validation, matching the Claude Code workflow.
+- If Lumen creates a branch, Lumen may merge it after validation unless Brett explicitly asks for a PR or manual review gate.
+- Prefer a separate branch when work is risky, long-running, cross-repo, likely to overlap with Coda/Cadence, touches deploy/secrets/database schema, or when Brett asks for review before merge.
+- At session start, check for existing remote branches and open PRs relevant to the repo before starting non-trivial work.
+
 ## Session-End Protocol
 
 1. Run `git status --short` and review the diff.
@@ -77,6 +86,13 @@ Never commit `.venv`, `.env`, `.env.local`, service-role keys, API keys, local c
 7. Create or update OB intents for follow-up work that should survive beyond the chat.
 
 Codex token accounting is not the same as Claude token accounting. Do not run Claude's `make collect` or `make collect-coda` targets for Lumen/Codex sessions; those collectors watch Claude Code JSONL paths and would mislabel or miss Codex usage. Until a Codex-compatible collector is built, use the OpenAI/Codex dashboard for token accounting and note in the session closeout that token-burn collection was skipped. If a future Codex collector exists, run only the documented Codex-specific target.
+
+## Visual Verification
+
+- Lumen can visually verify web work when the Codex Browser plugin is enabled and the target is a local dev server, file-backed preview, or public unauthenticated page.
+- For frontend changes, prefer running the app locally, opening the relevant route in the in-app browser, checking desktop and mobile widths, and using screenshots or browser inspection to verify rendered behavior.
+- The in-app browser is not a full replacement for Brett's signed-in browser profile. For authenticated production pages or extension-dependent flows, ask Brett to provide access, use the Chrome extension if configured, or clearly state what could not be verified.
+- Do not skip visual verification for UI work merely because the change is small. If verification is not possible, say why in the closeout.
 
 ## CSS and Theme Architecture
 
