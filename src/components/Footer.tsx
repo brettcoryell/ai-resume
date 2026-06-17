@@ -10,7 +10,7 @@ const Footer = () => {
   const linkedinUrl = profile?.linkedin_url;
 
   return (
-    <footer style={{ backgroundColor: "var(--site-ink)", padding: "3.5rem 2rem" }}>
+    <footer style={{ backgroundColor: "var(--color-text-primary)", padding: "3.5rem 2rem" }}>
       <div
         style={{
           maxWidth: "900px",

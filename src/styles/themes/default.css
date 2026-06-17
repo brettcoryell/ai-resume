@@ -1,0 +1,25 @@
+/* default.css — brettcoryell.com default theme (light, steel-blue) */
+/* To create a new theme, copy this file, rename it, and override the values below. */
+/* Do not add new token names here without also updating all five repos. */
+
+[data-theme="default"],
+:root {
+  --color-interactive:        #7a9cb8;
+  --color-interactive-hover:  #5b7d99;
+  --color-interactive-text:   #ffffff;
+  --color-bg-page:            #ffffff;
+  --color-bg-alt:             #f5f7fa;
+  --color-bg-raised:          #dce8f0;
+  --color-text-primary:       #1a2332;
+  --color-text-secondary:     #4a5568;
+  --color-text-faint:         #8a9ab5;
+  --color-text-on-dark:       rgba(255, 255, 255, 0.70);
+  --color-text-on-dark-faint: rgba(255, 255, 255, 0.40);
+  --color-border:             #e8edf3;
+  --color-border-accent:      #5b7d99;
+  --color-accent-warm:        #c4956a;
+  --color-accent-path:        #D85A30;
+  --color-sonar:              #5b9fd4;
+  --font-display:             'Georgia', 'Times New Roman', serif;
+  --font-body:                -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
