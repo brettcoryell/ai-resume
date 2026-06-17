@@ -82,7 +82,7 @@ serve(async (req) => {
       {
         type: 'text',
         text: headerText + '\n\n--- CAREER CONTEXT ---\n' + blobRow.content + '\n--- END CAREER CONTEXT ---',
-        // @ts-ignore: cache_control is supported but may not appear in older SDK type stubs
+        // @ts-expect-error: cache_control is supported but may not appear in older SDK type stubs
         cache_control: { type: 'ephemeral' },
       },
       {
