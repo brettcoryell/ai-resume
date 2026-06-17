@@ -25,7 +25,7 @@ Machine identity and agent identity are separate. Do not use Cadence or Coda as 
 2. Read this file and then read `DECISIONS.md` before non-trivial work. These files are operational rules, not background reading.
 3. If the task touches another project, also read that project's `AGENTS.md` and `DECISIONS.md` if present.
 4. For architectural changes, new features, data pipeline work, voice/content changes, or cross-system integration, state which `DECISIONS.md` constraints apply before building.
-5. Do not ask Brett for context that can be retrieved from repo docs, OpenBrain context tools, Git history, or the project registry.
+5. Load OB context on demand, not up front. When you need project history or prior decisions, fetch it: `list_context(topics=["project-<slug>"], permanent=true, limit=1)` for the registry entry, `list_context(topics=["project-<slug>"], permanent=false, limit=5)` for recent session notes. Do not load broad context speculatively.
 
 ## Multi-Machine / Multi-Agent Coordination
 
@@ -82,7 +82,9 @@ Never commit `.venv`, `.env`, `.env.local`, service-role keys, API keys, local c
 3. Update `DECISIONS.md` first if the session created or changed an architectural rule.
 4. Commit all intended changes with a descriptive message.
 5. Push to origin and confirm it succeeded.
-6. Record session context in OpenBrain if the relevant MCP/context tools are available. Use `source: "Codex"`, a `lumen-YYYY-MM-DD-topic` style `session_ref`, project/topic tags, and a 45-day expiry for ordinary session notes. Durable project status belongs in the project registry and durable decisions belong in `DECISIONS.md`.
+6. Record session context in OpenBrain if the relevant MCP/context tools are available:
+   - **Registry (upsert):** `session_ref: "project-registry-<slug>"` — same value every time. No `expires_at`. Content ≤ 100 words: what it is, where the code lives, stack, status, open items. Do not create a new entry; update the existing one.
+   - **Session note:** `session_ref: "lumen-YYYY-MM-DD-topic"`, project/topic tags, `expires_at` 45 days from today. Content: 3–5 bullets, ≤ 100 words — what changed, decisions made, what's pending. Durable decisions belong in `DECISIONS.md`; reference them here, don't duplicate.
 7. Create or update OB intents for follow-up work that should survive beyond the chat.
 
 Codex token accounting is not the same as Claude token accounting. Do not run Claude's `make collect` or `make collect-coda` targets for Lumen/Codex sessions; those collectors watch Claude Code JSONL paths and would mislabel or miss Codex usage. Until a Codex-compatible collector is built, use the OpenAI/Codex dashboard for token accounting and note in the session closeout that token-burn collection was skipped. If a future Codex collector exists, run only the documented Codex-specific target.
