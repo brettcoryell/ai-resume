@@ -14,9 +14,9 @@ Machine identity and agent identity are separate. Do not use Cadence or Coda as 
 
 ## Agent Identity and Runtime Context
 
-- Local Codex app/CLI work runs on Brett's Mac host and uses the files, credentials, Git config, and tools installed there.
-- Codex cloud work runs in an Ubuntu container that checks out the GitHub repo. Do not assume Homebrew, macOS paths, keychain access, or Mac-only binaries in cloud tasks.
-- When a task depends on the local machine identity, run `hostname` and state what context you are in. Treat hostnames containing `mini` as the Mac Mini/Cadence context; otherwise assume Brett's primary Mac/Coda-style context unless the user says otherwise.
+- Default mode is local Codex app/CLI work on Brett's Mac host, using the files, credentials, Git config, browser tools, and local development setup installed there.
+- Do not use or assume Codex cloud unless Brett explicitly asks for a cloud/remote task. Cloud work has different filesystem, secrets, Python, browser, and verification constraints and should be configured later as its own effort.
+- When a task depends on the local machine identity, run `hostname` and state what context you are in. Treat hostnames containing `mini` as the Mac Mini; otherwise assume Brett's primary Mac/iMac context unless the user says otherwise.
 - Use `source: "Codex"` for OpenBrain/session notes created by Lumen. Use `session_ref` strings prefixed with `lumen-`, for example `lumen-YYYY-MM-DD-topic`. Record hostname or machine context separately when it matters.
 
 ## Start-of-Session Protocol
@@ -91,7 +91,8 @@ Codex token accounting is not the same as Claude token accounting. Do not run Cl
 
 - Lumen can visually verify web work when the Codex Browser plugin is enabled and the target is a local dev server, file-backed preview, or public unauthenticated page.
 - For frontend changes, prefer running the app locally, opening the relevant route in the in-app browser, checking desktop and mobile widths, and using screenshots or browser inspection to verify rendered behavior.
-- The in-app browser is not a full replacement for Brett's signed-in browser profile. For authenticated production pages or extension-dependent flows, ask Brett to provide access, use the Chrome extension if configured, or clearly state what could not be verified.
+- Brett's default browser is Edge. The Chrome extension has been installed in Edge; use it or Computer Use only when the in-app Browser is insufficient, especially for authenticated production flows.
+- The in-app browser is not a full replacement for Brett's signed-in browser profile. For authenticated production pages or extension-dependent flows, ask Brett before using Edge/extension/Computer Use, or clearly state what could not be verified.
 - Do not skip visual verification for UI work merely because the change is small. If verification is not possible, say why in the closeout.
 
 ## CSS and Theme Architecture
