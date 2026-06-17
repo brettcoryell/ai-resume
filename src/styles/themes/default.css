@@ -19,6 +19,8 @@
   --color-border-accent:      #5b7d99;
   --color-accent-warm:        #c4956a;
   --color-accent-path:        #D85A30;
+  --color-chart-label:      #64748b;
+  --color-chart-grid:       rgba(26,35,50,0.04);
   --color-sonar:              #5b9fd4;
   --font-display:             'Georgia', 'Times New Roman', serif;
   --font-body:                -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
