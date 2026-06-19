@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabaseAdmin as supabase } from "@/lib/supabase";
+import { supabaseAdmin, arAdmin } from "@/lib/supabase";
 
 interface Stats {
   experiences: number;
@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabaseAdmin.auth.getUser();
       if (!user) {
         navigate("/admin/login");
         return;
@@ -23,8 +23,8 @@ const Dashboard = () => {
       // Load counts in parallel
       try {
         const [expRes, skillRes] = await Promise.all([
-          supabase.from("experiences").select("id", { count: "exact", head: true }),
-          supabase.from("skills").select("id", { count: "exact", head: true }),
+          arAdmin.from("experiences").select("id", { count: "exact", head: true }),
+          arAdmin.from("skills").select("id", { count: "exact", head: true }),
         ]);
         setStats({
           experiences: expRes.count ?? 0,
@@ -40,7 +40,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await supabaseAdmin.auth.signOut();
     navigate("/admin/login");
   };
 

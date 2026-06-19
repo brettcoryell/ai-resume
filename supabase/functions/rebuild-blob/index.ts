@@ -19,12 +19,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+    const ar = supabase.schema('ai_resume');
 
     // Debounce: if a blob was built in the last 30 seconds, skip this call.
     // Prevents a batch tag operation (e.g. cleanup script) from triggering
     // dozens of redundant rebuilds — the first one wins.
     const DEBOUNCE_SECONDS = 30;
-    const { data: latest } = await supabase
+    const { data: latest } = await ar
       .from('career_blob')
       .select('built_at, build_version')
       .order('built_at', { ascending: false })
@@ -54,14 +55,14 @@ serve(async (req) => {
     const tokenCount = Math.floor(blob.length / 4);
     const sourceIds = thoughts.map((t) => t.id);
 
-    const { data: prevRows } = await supabase
+    const { data: prevRows } = await ar
       .from('career_blob')
       .select('build_version')
       .order('build_version', { ascending: false })
       .limit(1);
     const nextVersion = ((prevRows?.[0]?.build_version) ?? 0) + 1;
 
-    const { error: insertError } = await supabase.from('career_blob').insert({
+    const { error: insertError } = await ar.from('career_blob').insert({
       content: blob,
       token_count: tokenCount,
       source_thought_ids: sourceIds,

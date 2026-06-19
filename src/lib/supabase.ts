@@ -15,6 +15,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Admin client — persists session so the admin UI stays logged in across page loads
 export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey);
 
+// Schema-scoped clients for the ai_resume schema
+export const ar = supabase.schema('ai_resume');
+export const arAdmin = supabaseAdmin.schema('ai_resume');
+
 // Edge function base URL and auth header (same project)
 export const EDGE_FN_URL = `${supabaseUrl}/functions/v1`;
 export const EDGE_FN_HEADERS = {

@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, ar, arAdmin } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,7 +73,7 @@ const ProfileForm = () => {
       if (!user) { navigate("/admin/login"); return; }
 
       // Read via public client — candidate_profile has USING (true) for all roles
-      const { data, error } = await supabase.from("candidate_profile").select("*").maybeSingle();
+      const { data, error } = await ar.from("candidate_profile").select("*").maybeSingle();
       if (error) {
         setLoadError(error.message);
       } else if (data) {
@@ -118,7 +118,7 @@ const ProfileForm = () => {
 
     if (profileId) payload.id = profileId;
 
-    const { error } = await supabaseAdmin.from("candidate_profile").upsert(payload);
+    const { error } = await arAdmin.from("candidate_profile").upsert(payload);
 
     if (error) {
       toast.error("Save failed: " + error.message);

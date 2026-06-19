@@ -33,6 +33,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+    const ar = supabase.schema('ai_resume');
 
     // Fetch persona context + blob in parallel
     const [
@@ -40,9 +41,9 @@ serve(async (req) => {
       { data: instructions },
       { data: blobRow },
     ] = await Promise.all([
-      supabase.from('candidate_profile').select('*').single(),
-      supabase.from('ai_instructions').select('*').order('priority', { ascending: false }),
-      supabase.from('career_blob').select('content').order('built_at', { ascending: false }).limit(1).single(),
+      ar.from('candidate_profile').select('*').single(),
+      ar.from('ai_instructions').select('*').order('priority', { ascending: false }),
+      ar.from('career_blob').select('content').order('built_at', { ascending: false }).limit(1).single(),
     ]);
 
     if (!profile) {
@@ -60,7 +61,7 @@ serve(async (req) => {
     const { headerText, footerText } = buildSystemPromptParts(profile, instructions, blobRow.content);
 
     // Get recent chat history (last 20 messages)
-    const { data: history } = await supabase
+    const { data: history } = await ar
       .from('chat_history')
       .select('*')
       .eq('session_id', sessionId)
@@ -100,7 +101,7 @@ serve(async (req) => {
 
     const assistantMessage = response.content[0].type === 'text' ? response.content[0].text : '';
 
-    await supabase.from('chat_history').insert([
+    await ar.from('chat_history').insert([
       { session_id: sessionId, role: 'user', content: message },
       { session_id: sessionId, role: 'assistant', content: assistantMessage },
     ]);
