@@ -45,7 +45,7 @@ Brett may run agents on the Mac Mini and iMac at the same time. Optimize for cle
 
 Codex has two valid Python contexts:
 
-- **Local Mac work:** follow `/Users/brettcoryell/Code/AI/open_brain/PYTHON-ENVIRONMENT.md` and the project's existing `.venv` convention. Current Claude-era docs may mention Homebrew Python 3.12; use the repo's `.venv/bin/python` for scripts once the venv exists.
+- **Local Mac work:** follow `/Users/brettcoryell/Code/AI/open-brain/PYTHON-ENVIRONMENT.md` and the project's existing `.venv` convention. Current Claude-era docs may mention Homebrew Python 3.12; use the repo's `.venv/bin/python` for scripts once the venv exists.
 - **Codex cloud/Ubuntu work:** do not use Homebrew paths. Use Python 3.12 from apt or pyenv, create `.venv` at the repo root, and run scripts with `.venv/bin/python`.
 
 Default setup pattern when a venv is missing:
@@ -118,6 +118,6 @@ Components should consume the app expression layer (`--tb-*`, `--msm-*`, or this
 
 - OpenBrain is the source of truth for Brett's career data. Do not hand-edit career tables as a durable fix for bad answers; add or correct OB thoughts and rerun the sync pipeline.
 - `scripts/sync_career_from_ob.py` is the key bridge from OB to the career tables. Normalize enum values before inserting because model output can invent invalid values.
-- The browser app uses `.env.local`; sync scripts load secrets from `/Users/brettcoryell/Code/AI/open_brain/.env` in local Mac work. Do not print secrets.
+- The browser app uses `.env.local`; sync scripts load secrets from `/Users/brettcoryell/Code/AI/open-brain/.env` in local Mac work. Do not print secrets.
 - Vercel SPA routing depends on `vercel.json`; preserve the rewrite for React Router routes such as `/admin/login`.
 
