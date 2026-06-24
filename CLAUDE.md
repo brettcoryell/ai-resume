@@ -1,34 +1,41 @@
 # CLAUDE.md — Session Bootstrap + Project Context
 
-You are **Coda** (Claude Code, he/him). The Claude Chat assistant is **Ariel** (she/her).
+## Machine Identity
+
+Run `hostname` to identify yourself. Map to structural `machine` value:
+- hostname contains "mini" → `machine=mini`
+- hostname contains "MacBook" → `machine=macbook`
+- otherwise → `machine=imac`
+
+Use `machine` (not agent nicknames) in session refs, token-burn records, and OB context.
 
 ---
 
 ## Session Start — Required
 
-At the start of every session, before responding to Brett:
+1. Run `hostname` and resolve `machine` value.
+2. Verify OB MCP is available (`claude mcp list` or confirm tools respond). If unavailable, continue from repo docs and note the outage.
+3. Pull latest: `git -C ~/Code/AI/ai-resume pull --ff-only`
+4. Read `DECISIONS.md` if it exists — these are the rules.
+5. Load project context on demand when needed:
+   - Registry: `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)`
+   - Recent notes: `list_context(topics=["project-ai-resume"], permanent=false, since="<30-days-ago-ISO>")`
 
-1. Call `list_context` with `permanent=true` to load all architectural context:
-   ```
-   list_context(permanent=true)
-   ```
-2. Call `list_context` with `since` set to 7 days ago to load recent session notes:
-   ```
-   list_context(since="<ISO date 7 days ago>", limit=15)
-   ```
-3. Read all returned entries and proceed informed. Do not ask Brett for context you
-   can retrieve from the table.
+## Session End — Required
 
-## Session End — Required (all 4 steps)
-
-1. **Commit** all uncommitted changes with a descriptive message.
-2. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
-3. **Call `capture_context`** summarizing what was done, decisions made, and anything pending.
+1. **Update project status docs** — mark completed items before committing.
+2. **Commit** all uncommitted changes with a descriptive message.
+3. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
+4. **Sync tokens**: `cd /Users/brettcoryell/Code/AI/token-burn && make collect`
+5. **Upsert project registry** — fetch first to get existing `id`, then update in-place:
+   - `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)`
+   - `capture_context(id=<existing-id>, session_ref="project-registry-ai-resume", topics=["project-registry", "project-ai-resume"], expires_at=null, source="claude-code", ...)`
+6. **Write a session note:**
+   - `session_ref`: `"claude-<machine>-<date>-<topic>"` (e.g. `"claude-imac-2026-06-25-chat-tuning"`)
+   - `topics`: `["project-ai-resume", "now"]` (or `soon`/`later`)
+   - `expires_at`: 45 days from today
    - `source`: `"claude-code"`
-   - `session_ref`: descriptive string (e.g. `"coda-2026-05-08-topic"`)
-   - `topics`: kebab-case tags + one priority bucket tag: `"now"`, `"soon"`, or `"later"`
-   - Omit `expires_at` for permanent entries; use ISO timestamp for time-limited ones.
-4. **Update persistent memory** (`~/.claude/projects/.../memory/`) if any new feedback or preferences were expressed this session.
+7. **Update persistent memory** if new feedback or preferences were expressed.
 
 ---
 
