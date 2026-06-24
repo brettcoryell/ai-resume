@@ -63,6 +63,6 @@ python3 scripts/migrate_ai_resume_source_tag.py             # apply
 
 ## Q&A Dataset
 
-`qa_dataset.json` is written by a parallel Coda session doing a manual OB + ai-resume
+`qa_dataset.json` is written by a parallel Claude Code session doing a manual OB + ai-resume
 read-through. Do not create it manually. It will be committed once that session completes.
 Format: `[{"question": "...", "expected_answer": "...", "ob_thought_ids": ["..."]}]`
