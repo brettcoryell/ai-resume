@@ -35,7 +35,7 @@ const CONTEXT_LABEL: React.CSSProperties = {
   fontWeight: 600,
   textTransform: "uppercase",
   letterSpacing: "0.08em",
-  color: "var(--site-mist)",
+  color: "var(--color-text-faint)",
   fontFamily: "var(--font-sans)",
   marginBottom: "0.375rem",
 };
@@ -64,8 +64,8 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
     <div
       className="animate-slide-up opacity-0"
       style={{
-        backgroundColor: "var(--site-page)",
-        border: "1px solid var(--site-fog)",
+        backgroundColor: "var(--color-bg-page)",
+        border: "1px solid var(--color-border)",
         borderRadius: "8px",
         padding: "1.75rem",
         boxShadow: "0 1px 4px rgba(26,35,50,0.05)",
@@ -90,20 +90,20 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
               fontFamily: "var(--font-serif)",
               fontSize: "1.25rem",
               fontWeight: 400,
-              color: "var(--site-ink)",
+              color: "var(--color-text-primary)",
               marginBottom: "0.25rem",
             }}
           >
             {company_name}
           </h3>
-          <p style={{ fontSize: "0.9375rem", color: "var(--site-sky)", fontFamily: "var(--font-sans)" }}>
+          <p style={{ fontSize: "0.9375rem", color: "var(--color-interactive)", fontFamily: "var(--font-sans)" }}>
             {title_progression || title}
           </p>
         </div>
         <span
           style={{
             fontSize: "0.8rem",
-            color: "var(--site-mist)",
+            color: "var(--color-text-faint)",
             fontFamily: "var(--font-sans)",
             fontVariantNumeric: "tabular-nums",
             whiteSpace: "nowrap",
@@ -121,7 +121,7 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
             <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
               <span
                 style={{
-                  color: "var(--site-sky)",
+                  color: "var(--color-interactive)",
                   fontFamily: "var(--font-sans)",
                   flexShrink: 0,
                   marginTop: "0.1em",
@@ -130,7 +130,7 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
               >
                 →
               </span>
-              <span style={{ color: "var(--site-dusk)", fontSize: "0.9375rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
+              <span style={{ color: "var(--color-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
                 {point}
               </span>
             </li>
@@ -146,7 +146,7 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
           alignItems: "center",
           gap: "0.375rem",
           fontSize: "0.875rem",
-          color: "var(--site-sky)",
+          color: "var(--color-interactive)",
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -154,8 +154,8 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
           fontFamily: "var(--font-sans)",
           transition: "color 0.15s ease",
         }}
-        onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky-deep)")}
-        onMouseLeave={e => (e.currentTarget.style.color = "var(--site-sky)")}
+        onMouseEnter={e => (e.currentTarget.style.color = "var(--color-interactive-hover)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "var(--color-interactive)")}
       >
         <span>{expanded ? "Hide" : "View"} context</span>
         {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -168,8 +168,8 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
           style={{
             marginTop: "1rem",
             padding: "1.25rem",
-            backgroundColor: "var(--site-cloud)",
-            borderLeft: "4px solid var(--site-sky-pale)",
+            backgroundColor: "var(--color-bg-alt)",
+            borderLeft: "4px solid var(--color-bg-raised)",
             borderRadius: "0 6px 6px 0",
           }}
         >
@@ -178,32 +178,32 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
               {situation && (
                 <div>
                   <p style={CONTEXT_LABEL}>Situation</p>
-                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{situation}</p>
+                  <p style={{ color: "var(--color-text-primary)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{situation}</p>
                 </div>
               )}
               {approach && (
                 <div>
                   <p style={CONTEXT_LABEL}>Approach</p>
-                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{approach}</p>
+                  <p style={{ color: "var(--color-text-primary)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{approach}</p>
                 </div>
               )}
               {technical_work && (
                 <div>
                   <p style={CONTEXT_LABEL}>Technical work</p>
-                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{technical_work}</p>
+                  <p style={{ color: "var(--color-text-primary)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>{technical_work}</p>
                 </div>
               )}
               {lessons_learned && (
                 <div>
                   <p style={CONTEXT_LABEL}>Lessons learned</p>
-                  <p style={{ color: "var(--site-ink)", fontSize: "0.9375rem", lineHeight: 1.65, fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
+                  <p style={{ color: "var(--color-text-primary)", fontSize: "0.9375rem", lineHeight: 1.65, fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
                     {lessons_learned}
                   </p>
                 </div>
               )}
             </div>
           ) : (
-            <p style={{ color: "var(--site-mist)", fontSize: "0.9rem", fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
+            <p style={{ color: "var(--color-text-faint)", fontSize: "0.9rem", fontStyle: "italic", fontFamily: "var(--font-sans)" }}>
               Context is being built — check back soon.
             </p>
           )}
@@ -217,7 +217,7 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
                 alignItems: "center",
                 gap: "0.375rem",
                 fontSize: "0.875rem",
-                color: "var(--site-sky)",
+                color: "var(--color-interactive)",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -225,8 +225,8 @@ const ExperienceCard = ({ experience, index, onOpenChat }: ExperienceCardProps) 
                 fontFamily: "var(--font-sans)",
                 transition: "color 0.15s ease",
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky-deep)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--site-sky)")}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--color-interactive-hover)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--color-interactive)")}
             >
               Ask me more in the chat →
             </button>

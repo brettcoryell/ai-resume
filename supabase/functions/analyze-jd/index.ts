@@ -33,6 +33,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+    const ar = supabase.schema('ai_resume');
 
     const [
       { data: profile },
@@ -41,11 +42,11 @@ serve(async (req) => {
       { data: gaps },
       { data: instructions },
     ] = await Promise.all([
-      supabase.from('candidate_profile').select('*').single(),
-      supabase.from('experiences').select('*').order('display_order'),
-      supabase.from('skills').select('*'),
-      supabase.from('gaps_weaknesses').select('*'),
-      supabase.from('ai_instructions').select('*').order('priority', { ascending: false }),
+      ar.from('candidate_profile').select('*').single(),
+      ar.from('experiences').select('*').order('display_order'),
+      ar.from('skills').select('*'),
+      ar.from('gaps_weaknesses').select('*'),
+      ar.from('ai_instructions').select('*').order('priority', { ascending: false }),
     ]);
 
     if (!profile) {

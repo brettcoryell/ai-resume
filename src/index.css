@@ -1,43 +1,36 @@
+@import './styles/themes/default.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
-  Site palette — mirrors brettcoryell.com site design guide v1.1.
+  Site tokens — mirrors brettcoryell.com site design guide v2.0.
   ai-resume is a light-mode-only site sub-page. No dark mode.
-  See ai-resume-design-guide.md in Google Drive for component-level specs.
+  Components reference --color-* semantic tokens; --primitive-* are palette docs only.
 */
 
 :root {
-  /* Raw site palette tokens (hex — use in inline styles) */
-  --site-sky:       #7a9cb8;
-  --site-sky-deep:  #5b7d99;
-  --site-sky-pale:  #dce8f0;
-  --site-ink:       #1a2332;
-  --site-dusk:      #4a5568;
-  --site-mist:      #8a9ab5;
-  --site-fog:       #e8edf3;
-  --site-cloud:     #f5f7fa;
-  --site-page:      #ffffff;
-  --site-warm:      #c4956a;
-
-  /* Semantic aliases */
-  --site-txt:           var(--site-ink);
-  --site-txt-secondary: var(--site-dusk);
-  --site-txt-faint:     var(--site-mist);
-  --site-border:        var(--site-fog);
-  --site-accent:        var(--site-sky);
-  --site-accent-hover:  var(--site-sky-deep);
-  --site-bg:            var(--site-page);
-  --site-bg-alt:        var(--site-cloud);
+  /* Site primitives — raw palette. Do not reference in components. */
+  --primitive-sky:       #7a9cb8;
+  --primitive-sky-deep:  #5b7d99;
+  --primitive-sky-pale:  #dce8f0;
+  --primitive-ink:       #1a2332;
+  --primitive-dusk:      #4a5568;
+  --primitive-mist:      #8a9ab5;
+  --primitive-fog:       #e8edf3;
+  --primitive-cloud:     #f5f7fa;
+  --primitive-page:      #ffffff;
+  --primitive-warm:      #c4956a;
+  --primitive-coral:     #D85A30;
+  --primitive-sonar:     #5b9fd4;
 
   /* ai-resume extension tokens — verdict states */
   --ar-fit-strong-bg:      #dcfce7;
   --ar-fit-strong-txt:     #15803d;
   --ar-fit-strong-border:  #a8d5a8;
-  --ar-fit-neutral-bg:     var(--site-cloud);
-  --ar-fit-neutral-txt:    var(--site-dusk);
-  --ar-fit-neutral-border: var(--site-fog);
+  --ar-fit-neutral-bg:     var(--color-bg-alt);
+  --ar-fit-neutral-txt:    var(--color-text-secondary);
+  --ar-fit-neutral-border: var(--color-border);
   --ar-fit-weak-bg:        #fef3c7;
   --ar-fit-weak-txt:       #92400e;
   --ar-fit-weak-border:    #d4b896;

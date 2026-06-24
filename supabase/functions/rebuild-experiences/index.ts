@@ -57,9 +57,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+    const ar = supabase.schema('ai_resume');
 
     // Load the latest blob
-    const { data: blobRow, error: blobErr } = await supabase
+    const { data: blobRow, error: blobErr } = await ar
       .from('career_blob')
       .select('content, build_version, built_at')
       .order('built_at', { ascending: false })
@@ -103,7 +104,7 @@ serve(async (req) => {
     }
 
     // Fetch locked context fields before deleting — these survive the rebuild
-    const { data: lockedRows } = await supabase
+    const { data: lockedRows } = await ar
       .from('experiences')
       .select('company_name, situation, approach, technical_work, lessons_learned')
       .eq('context_locked', true);
@@ -114,7 +115,7 @@ serve(async (req) => {
     }
 
     // Truncate and repopulate the experiences table
-    const { error: deleteErr } = await supabase
+    const { error: deleteErr } = await ar
       .from('experiences')
       .delete()
       .gte('display_order', 0); // delete all rows
@@ -141,7 +142,7 @@ serve(async (req) => {
       };
     });
 
-    const { error: insertErr } = await supabase.from('experiences').insert(rows);
+    const { error: insertErr } = await ar.from('experiences').insert(rows);
     if (insertErr) throw insertErr;
 
     console.log(`rebuild-experiences: inserted ${rows.length} entries from blob v${blobRow.build_version}`);

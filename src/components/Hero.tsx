@@ -14,10 +14,10 @@ const Hero = ({ onOpenChat }: HeroProps) => {
         style={{ minHeight: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "6rem 2rem 4rem" }}
       >
         <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%", opacity: 0.4 }}>
-          <div style={{ height: "1.5rem", width: "12rem", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "2rem" }} />
-          <div style={{ height: "4rem", width: "75%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "1.5rem" }} />
-          <div style={{ height: "1.5rem", width: "40%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "1rem" }} />
-          <div style={{ height: "1.25rem", width: "60%", backgroundColor: "var(--site-fog)", borderRadius: "4px", marginBottom: "2rem" }} />
+          <div style={{ height: "1.5rem", width: "12rem", backgroundColor: "var(--color-border)", borderRadius: "4px", marginBottom: "2rem" }} />
+          <div style={{ height: "4rem", width: "75%", backgroundColor: "var(--color-border)", borderRadius: "4px", marginBottom: "1.5rem" }} />
+          <div style={{ height: "1.5rem", width: "40%", backgroundColor: "var(--color-border)", borderRadius: "4px", marginBottom: "1rem" }} />
+          <div style={{ height: "1.25rem", width: "60%", backgroundColor: "var(--color-border)", borderRadius: "4px", marginBottom: "2rem" }} />
         </div>
       </section>
     );
@@ -30,7 +30,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
         style={{ minHeight: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "6rem 2rem 4rem" }}
       >
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", color: "var(--site-mist)" }}>
+          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", color: "var(--color-text-faint)" }}>
             Coming soon.
           </p>
         </div>
@@ -47,7 +47,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
         flexDirection: "column",
         justifyContent: "center",
         padding: "6rem 2rem 4rem",
-        backgroundColor: "var(--site-page)",
+        backgroundColor: "var(--color-bg-page)",
       }}
     >
       <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%" }}>
@@ -61,8 +61,8 @@ const Hero = ({ onOpenChat }: HeroProps) => {
               alignItems: "center",
               gap: "0.5rem",
               padding: "0.375rem 0.875rem",
-              backgroundColor: "var(--site-sky-pale)",
-              border: "1px solid var(--site-fog)",
+              backgroundColor: "var(--color-bg-raised)",
+              border: "1px solid var(--color-border)",
               borderRadius: "100px",
               marginBottom: "2rem",
             }}
@@ -77,7 +77,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: "0.8125rem", color: "var(--site-dusk)", fontFamily: "var(--font-sans)" }}>
+            <span style={{ fontSize: "0.8125rem", color: "var(--color-text-secondary)", fontFamily: "var(--font-sans)" }}>
               {profile.availability_status}
             </span>
           </div>
@@ -90,7 +90,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
             fontWeight: 400,
-            color: "var(--site-ink)",
+            color: "var(--color-text-primary)",
             lineHeight: 1.1,
             marginBottom: "1rem",
           }}
@@ -105,7 +105,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
             fontFamily: "var(--font-sans)",
             fontSize: "1.125rem",
             fontWeight: 500,
-            color: "var(--site-sky)",
+            color: "var(--color-interactive)",
             marginBottom: "1.25rem",
             letterSpacing: "0.01em",
           }}
@@ -120,7 +120,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "1.0625rem",
-              color: "var(--site-dusk)",
+              color: "var(--color-text-secondary)",
               lineHeight: 1.75,
               maxWidth: "56ch",
               marginBottom: "2rem",
@@ -141,11 +141,11 @@ const Hero = ({ onOpenChat }: HeroProps) => {
                 key={stage}
                 style={{
                   padding: "0.25rem 0.75rem",
-                  border: "1px solid var(--site-fog)",
+                  border: "1px solid var(--color-border)",
                   borderRadius: "100px",
                   fontSize: "0.8125rem",
-                  color: "var(--site-dusk)",
-                  backgroundColor: "var(--site-cloud)",
+                  color: "var(--color-text-secondary)",
+                  backgroundColor: "var(--color-bg-alt)",
                 }}
               >
                 {stage}
@@ -163,7 +163,7 @@ const Hero = ({ onOpenChat }: HeroProps) => {
             alignItems: "center",
             gap: "0.5rem",
             padding: "0.625rem 1.5rem",
-            backgroundColor: "var(--site-sky)",
+            backgroundColor: "var(--color-interactive)",
             color: "#ffffff",
             border: "none",
             borderRadius: "4px",
@@ -173,8 +173,8 @@ const Hero = ({ onOpenChat }: HeroProps) => {
             cursor: "pointer",
             transition: "background-color 0.15s ease",
           }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--site-sky-deep)")}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--site-sky)")}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--color-interactive-hover)")}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--color-interactive)")}
         >
           Ask AI about me
         </button>

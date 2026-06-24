@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin, arAdmin } from "@/lib/supabase";
 
 interface Stats {
   experiences: number;
@@ -14,22 +14,25 @@ const Dashboard = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabaseAdmin.auth.getUser();
       if (!user) {
         navigate("/admin/login");
         return;
       }
 
       // Load counts in parallel
-      const [expRes, skillRes] = await Promise.all([
-        supabase.from("experiences").select("id", { count: "exact", head: true }),
-        supabase.from("skills").select("id", { count: "exact", head: true }),
-      ]);
-
-      setStats({
-        experiences: expRes.count ?? 0,
-        skills: skillRes.count ?? 0,
-      });
+      try {
+        const [expRes, skillRes] = await Promise.all([
+          arAdmin.from("experiences").select("id", { count: "exact", head: true }),
+          arAdmin.from("skills").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({
+          experiences: expRes.count ?? 0,
+          skills: skillRes.count ?? 0,
+        });
+      } catch (_) {
+        // counts unavailable — display zeros
+      }
       setLoading(false);
     };
 
@@ -37,16 +40,12 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await supabaseAdmin.auth.signOut();
     navigate("/admin/login");
   };
 
   const navLinks = [
     { label: "Profile", to: "/admin/profile" },
-    { label: "Experience", to: "/admin/experience" },
-    { label: "Skills", to: "/admin/skills" },
-    { label: "Gaps & Weaknesses", to: "/admin/gaps" },
-    { label: "AI Instructions", to: "/admin/ai-instructions" },
   ];
 
   return (
@@ -54,7 +53,10 @@ const Dashboard = () => {
       {/* Sidebar */}
       <aside className="w-56 bg-card border-r border-border flex flex-col">
         <div className="p-6 border-b border-border">
-          <h1 className="text-lg font-serif text-foreground">Admin</h1>
+          <h1 className="text-lg font-serif text-foreground mb-3">Admin</h1>
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            ← Back to site
+          </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navLinks.map((link) => (

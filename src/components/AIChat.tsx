@@ -147,8 +147,8 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
           maxWidth: "38rem",
           height: "82vh",
           maxHeight: "680px",
-          backgroundColor: "var(--site-page)",
-          border: "1px solid var(--site-fog)",
+          backgroundColor: "var(--color-bg-page)",
+          border: "1px solid var(--color-border)",
           borderRadius: "8px",
           display: "flex",
           flexDirection: "column",
@@ -163,7 +163,7 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "1rem 1.25rem",
-            borderBottom: "1px solid var(--site-fog)",
+            borderBottom: "1px solid var(--color-border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -172,14 +172,14 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                 width: "2.25rem",
                 height: "2.25rem",
                 borderRadius: "50%",
-                backgroundColor: "var(--site-sky-pale)",
-                border: "1px solid var(--site-fog)",
+                backgroundColor: "var(--color-bg-raised)",
+                border: "1px solid var(--color-border)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontFamily: "var(--font-serif)",
                 fontSize: "1rem",
-                color: "var(--site-sky-deep)",
+                color: "var(--color-interactive-hover)",
                 fontWeight: 400,
                 flexShrink: 0,
               }}
@@ -187,10 +187,10 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
               {candidateName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p style={{ fontSize: "0.9375rem", fontWeight: 500, color: "var(--site-ink)", fontFamily: "var(--font-sans)" }}>
+              <p style={{ fontSize: "0.9375rem", fontWeight: 500, color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}>
                 Ask about {candidateName}
               </p>
-              <p style={{ fontSize: "0.75rem", color: "var(--site-mist)", display: "flex", alignItems: "center", gap: "0.375rem", fontFamily: "var(--font-sans)" }}>
+              <p style={{ fontSize: "0.75rem", color: "var(--color-text-faint)", display: "flex", alignItems: "center", gap: "0.375rem", fontFamily: "var(--font-sans)" }}>
                 <span
                   className="animate-pulse-soft"
                   style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#15803d", display: "inline-block" }}
@@ -209,16 +209,16 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                   gap: "0.25rem",
                   padding: "0.375rem 0.75rem",
                   fontSize: "0.8125rem",
-                  color: "var(--site-mist)",
-                  border: "1px solid var(--site-fog)",
+                  color: "var(--color-text-faint)",
+                  border: "1px solid var(--color-border)",
                   borderRadius: "4px",
                   background: "none",
                   cursor: "pointer",
                   fontFamily: "var(--font-sans)",
                   transition: "color 0.15s ease, border-color 0.15s ease",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--site-ink)"; e.currentTarget.style.borderColor = "var(--site-mist)"; }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--site-mist)"; e.currentTarget.style.borderColor = "var(--site-fog)"; }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--color-text-primary)"; e.currentTarget.style.borderColor = "var(--color-text-faint)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--color-text-faint)"; e.currentTarget.style.borderColor = "var(--color-border)"; }}
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Questions
@@ -228,7 +228,7 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
               onClick={onClose}
               style={{
                 padding: "0.375rem",
-                color: "var(--site-mist)",
+                color: "var(--color-text-faint)",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -236,8 +236,8 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                 display: "flex",
                 transition: "color 0.15s ease",
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--site-ink)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--site-mist)")}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--color-text-primary)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--color-text-faint)")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -248,10 +248,10 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
         <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
           {messages.length === 0 && !isLoading && (
             <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "1rem" }}>
-              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 400, color: "var(--site-ink)", marginBottom: "0.5rem" }}>
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 400, color: "var(--color-text-primary)", marginBottom: "0.5rem" }}>
                 What would you like to know?
               </h3>
-              <p style={{ color: "var(--site-mist)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.6, marginBottom: "1.5rem", maxWidth: "28rem" }}>
+              <p style={{ color: "var(--color-text-faint)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.6, marginBottom: "1.5rem", maxWidth: "28rem" }}>
                 Ask specific questions about experience, skills, or fit. Get honest, direct answers.
               </p>
               <div style={{ width: "100%", maxWidth: "28rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -263,17 +263,17 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                       width: "100%",
                       textAlign: "left",
                       padding: "0.625rem 0.875rem",
-                      backgroundColor: "var(--site-cloud)",
-                      border: "1px solid var(--site-fog)",
+                      backgroundColor: "var(--color-bg-alt)",
+                      border: "1px solid var(--color-border)",
                       borderRadius: "6px",
                       fontSize: "0.875rem",
-                      color: "var(--site-dusk)",
+                      color: "var(--color-text-secondary)",
                       fontFamily: "var(--font-sans)",
                       cursor: "pointer",
                       transition: "border-color 0.15s ease, background-color 0.15s ease",
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--site-sky)"; e.currentTarget.style.backgroundColor = "var(--site-sky-pale)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--site-fog)"; e.currentTarget.style.backgroundColor = "var(--site-cloud)"; }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--color-interactive)"; e.currentTarget.style.backgroundColor = "var(--color-bg-raised)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--color-border)"; e.currentTarget.style.backgroundColor = "var(--color-bg-alt)"; }}
                   >
                     "{q}"
                   </button>
@@ -289,8 +289,8 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                   maxWidth: "85%",
                   padding: "0.625rem 0.875rem",
                   borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                  backgroundColor: msg.role === "user" ? "var(--site-sky)" : "var(--site-cloud)",
-                  color: msg.role === "user" ? "#ffffff" : "var(--site-ink)",
+                  backgroundColor: msg.role === "user" ? "var(--color-interactive)" : "var(--color-bg-alt)",
+                  color: msg.role === "user" ? "var(--color-interactive-text)" : "var(--color-text-primary)",
                 }}
               >
                 <p style={{ fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-sans)", whiteSpace: "pre-wrap" }}>
@@ -309,8 +309,8 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                     padding: "0.25rem 0.5rem",
                     fontSize: "0.8rem",
                     fontFamily: "var(--font-sans)",
-                    color: playingIndex === i ? "var(--site-sky)" : "var(--site-mist)",
-                    backgroundColor: playingIndex === i ? "var(--site-sky-pale)" : "transparent",
+                    color: playingIndex === i ? "var(--color-interactive)" : "var(--color-text-faint)",
+                    backgroundColor: playingIndex === i ? "var(--color-bg-raised)" : "transparent",
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
@@ -336,7 +336,7 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                 style={{
                   padding: "0.625rem 0.875rem",
                   borderRadius: "12px 12px 12px 2px",
-                  backgroundColor: "var(--site-cloud)",
+                  backgroundColor: "var(--color-bg-alt)",
                 }}
               >
                 <div style={{ display: "flex", gap: "4px", alignItems: "center", height: "1.25rem" }}>
@@ -347,7 +347,7 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                         width: "6px",
                         height: "6px",
                         borderRadius: "50%",
-                        backgroundColor: "var(--site-mist)",
+                        backgroundColor: "var(--color-text-faint)",
                         display: "inline-block",
                         animation: `bounce-dots 1.2s ease-in-out ${delay}ms infinite`,
                       }}
@@ -362,7 +362,7 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
         </div>
 
         {/* Input */}
-        <div style={{ padding: "1rem 1.25rem", borderTop: "1px solid var(--site-fog)" }}>
+        <div style={{ padding: "1rem 1.25rem", borderTop: "1px solid var(--color-border)" }}>
           <form
             onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
             style={{ display: "flex", gap: "0.625rem" }}
@@ -375,26 +375,26 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
               disabled={isLoading}
               style={{
                 flex: 1,
-                backgroundColor: "var(--site-cloud)",
-                border: "1px solid var(--site-fog)",
+                backgroundColor: "var(--color-bg-alt)",
+                border: "1px solid var(--color-border)",
                 borderRadius: "6px",
                 padding: "0.625rem 0.875rem",
                 fontSize: "0.9rem",
                 fontFamily: "var(--font-sans)",
-                color: "var(--site-ink)",
+                color: "var(--color-text-primary)",
                 outline: "none",
                 transition: "border-color 0.15s ease",
                 opacity: isLoading ? 0.6 : 1,
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = "var(--site-sky)")}
-              onBlur={e => (e.currentTarget.style.borderColor = "var(--site-fog)")}
+              onFocus={e => (e.currentTarget.style.borderColor = "var(--color-interactive)")}
+              onBlur={e => (e.currentTarget.style.borderColor = "var(--color-border)")}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
               style={{
                 padding: "0.625rem 0.875rem",
-                backgroundColor: "var(--site-sky)",
+                backgroundColor: "var(--color-interactive)",
                 color: "#ffffff",
                 border: "none",
                 borderRadius: "6px",
@@ -404,8 +404,8 @@ const AIChat = ({ isOpen, onClose, initialMessage }: AIChatProps) => {
                 alignItems: "center",
                 transition: "background-color 0.15s ease",
               }}
-              onMouseEnter={e => { if (input.trim() && !isLoading) e.currentTarget.style.backgroundColor = "var(--site-sky-deep)"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--site-sky)"; }}
+              onMouseEnter={e => { if (input.trim() && !isLoading) e.currentTarget.style.backgroundColor = "var(--color-interactive-hover)"; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--color-interactive)"; }}
             >
               <Send className="w-4 h-4" />
             </button>

@@ -40,7 +40,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
     if (onOpenChat) onOpenChat();
   };
 
-  const linkColor = scrolled ? "var(--site-ink)" : "var(--site-sky)";
+  const linkColor = scrolled ? "var(--color-text-primary)" : "var(--color-interactive)";
 
   return (
     <header
@@ -53,7 +53,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
         transition: "background-color 0.3s ease, box-shadow 0.3s ease",
         backgroundColor: scrolled ? "rgba(255,255,255,0.95)" : "transparent",
         backdropFilter: scrolled ? "blur(8px)" : "none",
-        boxShadow: scrolled ? "0 1px 0 var(--site-fog)" : "none",
+        boxShadow: scrolled ? "0 1px 0 var(--color-border)" : "none",
       }}
     >
       <nav
@@ -73,7 +73,8 @@ const Header = ({ onOpenChat }: HeaderProps) => {
             ...NAV_LINK_BASE,
             fontSize: "0.9rem",
             fontWeight: 600,
-            color: "var(--site-sky)",
+
+            color: "var(--color-interactive)",
             textDecoration: "none",
           }}
         >
@@ -85,7 +86,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
           <button
             onClick={() => scrollToSection("experience")}
             style={{ ...NAV_LINK_BASE, color: linkColor }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky)")}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--color-interactive)")}
             onMouseLeave={e => (e.currentTarget.style.color = linkColor)}
           >
             Experience
@@ -93,7 +94,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
           <button
             onClick={() => scrollToSection("fit-assessment")}
             style={{ ...NAV_LINK_BASE, color: linkColor }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--site-sky)")}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--color-interactive)")}
             onMouseLeave={e => (e.currentTarget.style.color = linkColor)}
           >
             Fit Check
@@ -102,14 +103,14 @@ const Header = ({ onOpenChat }: HeaderProps) => {
             onClick={handleAskAI}
             style={{
               ...NAV_LINK_BASE,
-              backgroundColor: "var(--site-sky)",
+              backgroundColor: "var(--color-interactive)",
               color: "#ffffff",
               padding: "0.5rem 1.25rem",
               borderRadius: "4px",
               transition: "background-color 0.15s ease",
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--site-sky-deep)")}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--site-sky)")}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--color-interactive-hover)")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--color-interactive)")}
           >
             Ask AI
           </button>
@@ -119,7 +120,7 @@ const Header = ({ onOpenChat }: HeaderProps) => {
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden p-2"
-          style={{ color: "var(--site-mist)", background: "none", border: "none", cursor: "pointer" }}
+          style={{ color: "var(--color-text-faint)", background: "none", border: "none", cursor: "pointer" }}
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -131,25 +132,25 @@ const Header = ({ onOpenChat }: HeaderProps) => {
           className="md:hidden animate-slide-down"
           style={{
             backgroundColor: "#ffffff",
-            borderTop: "1px solid var(--site-fog)",
+            borderTop: "1px solid var(--color-border)",
           }}
         >
           <div style={{ padding: "1rem 2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
             <button
               onClick={() => scrollToSection("experience")}
-              style={{ ...NAV_LINK_BASE, color: "var(--site-ink)", textAlign: "left", fontSize: "1rem" }}
+              style={{ ...NAV_LINK_BASE, color: "var(--color-text-primary)", textAlign: "left", fontSize: "1rem" }}
             >
               Experience
             </button>
             <button
               onClick={() => scrollToSection("fit-assessment")}
-              style={{ ...NAV_LINK_BASE, color: "var(--site-ink)", textAlign: "left", fontSize: "1rem" }}
+              style={{ ...NAV_LINK_BASE, color: "var(--color-text-primary)", textAlign: "left", fontSize: "1rem" }}
             >
               Fit Check
             </button>
             <button
               onClick={handleAskAI}
-              style={{ ...NAV_LINK_BASE, color: "var(--site-sky)", textAlign: "left", fontSize: "1rem" }}
+              style={{ ...NAV_LINK_BASE, color: "var(--color-interactive)", textAlign: "left", fontSize: "1rem" }}
             >
               Ask AI About Me
             </button>

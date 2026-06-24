@@ -12,7 +12,7 @@ const Experience = ({ onOpenChat }: ExperienceProps) => {
     <section
       id="experience"
       style={{
-        backgroundColor: "var(--site-cloud)",
+        backgroundColor: "var(--color-bg-alt)",
         padding: "5rem 2rem",
       }}
     >
@@ -25,7 +25,7 @@ const Experience = ({ onOpenChat }: ExperienceProps) => {
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--site-mist)",
+              color: "var(--color-text-faint)",
               fontFamily: "var(--font-sans)",
               marginBottom: "0.5rem",
             }}
@@ -37,13 +37,13 @@ const Experience = ({ onOpenChat }: ExperienceProps) => {
               fontFamily: "var(--font-serif)",
               fontSize: "1.6rem",
               fontWeight: 400,
-              color: "var(--site-ink)",
+              color: "var(--color-text-primary)",
               marginBottom: "0.75rem",
             }}
           >
             Experience
           </h2>
-          <p style={{ color: "var(--site-dusk)", fontSize: "1rem", lineHeight: 1.6, maxWidth: "48ch", fontFamily: "var(--font-sans)" }}>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "1rem", lineHeight: 1.6, maxWidth: "48ch", fontFamily: "var(--font-sans)" }}>
             Each role includes AI context — the real story behind the bullet points.
           </p>
         </div>
@@ -56,17 +56,17 @@ const Experience = ({ onOpenChat }: ExperienceProps) => {
                 key={i}
                 style={{
                   padding: "1.75rem",
-                  backgroundColor: "var(--site-page)",
-                  border: "1px solid var(--site-fog)",
+                  backgroundColor: "var(--color-bg-page)",
+                  border: "1px solid var(--color-border)",
                   borderRadius: "8px",
                   opacity: 0.5,
                 }}
               >
-                <div style={{ height: "1.5rem", width: "40%", backgroundColor: "var(--site-fog)", borderRadius: "3px", marginBottom: "0.75rem" }} />
-                <div style={{ height: "1rem", width: "25%", backgroundColor: "var(--site-fog)", borderRadius: "3px", marginBottom: "1.5rem" }} />
+                <div style={{ height: "1.5rem", width: "40%", backgroundColor: "var(--color-border)", borderRadius: "3px", marginBottom: "0.75rem" }} />
+                <div style={{ height: "1rem", width: "25%", backgroundColor: "var(--color-border)", borderRadius: "3px", marginBottom: "1.5rem" }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {[1, 2, 3].map(j => (
-                    <div key={j} style={{ height: "0.875rem", width: `${90 - j * 10}%`, backgroundColor: "var(--site-fog)", borderRadius: "3px" }} />
+                    <div key={j} style={{ height: "0.875rem", width: `${90 - j * 10}%`, backgroundColor: "var(--color-border)", borderRadius: "3px" }} />
                   ))}
                 </div>
               </div>
@@ -75,7 +75,7 @@ const Experience = ({ onOpenChat }: ExperienceProps) => {
         )}
 
         {!isLoading && (!experiences || experiences.length === 0) && (
-          <p style={{ color: "var(--site-mist)", fontSize: "1rem" }}>No experience records yet.</p>
+          <p style={{ color: "var(--color-text-faint)", fontSize: "1rem" }}>No experience records yet.</p>
         )}
 
         {!isLoading && experiences && experiences.length > 0 && (

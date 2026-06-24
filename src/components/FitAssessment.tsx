@@ -87,7 +87,7 @@ const SECTION_LABEL: React.CSSProperties = {
   fontWeight: 600,
   textTransform: "uppercase",
   letterSpacing: "0.08em",
-  color: "var(--site-mist)",
+  color: "var(--color-text-faint)",
   fontFamily: "var(--font-sans)",
   marginBottom: "0.5rem",
 };
@@ -140,7 +140,7 @@ const FitAssessment = () => {
     const activeColors: Record<TabType, { bg: string; txt: string; border: string }> = {
       strong: { bg: "var(--ar-fit-strong-bg)", txt: "var(--ar-fit-strong-txt)", border: "var(--ar-fit-strong-border)" },
       weak:   { bg: "var(--ar-fit-weak-bg)",   txt: "var(--ar-fit-weak-txt)",   border: "var(--ar-fit-weak-border)" },
-      custom: { bg: "var(--site-sky-pale)",    txt: "var(--site-sky-deep)",    border: "var(--site-sky)" },
+      custom: { bg: "var(--color-bg-raised)",    txt: "var(--color-interactive-hover)",    border: "var(--color-interactive)" },
     };
     const c = activeColors[tab];
     return {
@@ -150,9 +150,9 @@ const FitAssessment = () => {
       fontSize: "0.875rem",
       fontWeight: 500,
       cursor: "pointer",
-      border: `1px solid ${isActive ? c.border : "var(--site-fog)"}`,
-      backgroundColor: isActive ? c.bg : "var(--site-page)",
-      color: isActive ? c.txt : "var(--site-dusk)",
+      border: `1px solid ${isActive ? c.border : "var(--color-border)"}`,
+      backgroundColor: isActive ? c.bg : "var(--color-bg-page)",
+      color: isActive ? c.txt : "var(--color-text-secondary)",
       transition: "all 0.15s ease",
     };
   };
@@ -160,7 +160,7 @@ const FitAssessment = () => {
   return (
     <section
       id="fit-assessment"
-      style={{ padding: "5rem 2rem", backgroundColor: "var(--site-page)" }}
+      style={{ padding: "5rem 2rem", backgroundColor: "var(--color-bg-page)" }}
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* Section header */}
@@ -171,13 +171,13 @@ const FitAssessment = () => {
               fontFamily: "var(--font-serif)",
               fontSize: "1.6rem",
               fontWeight: 400,
-              color: "var(--site-ink)",
+              color: "var(--color-text-primary)",
               marginBottom: "0.75rem",
             }}
           >
             Honest Fit Assessment
           </h2>
-          <p style={{ color: "var(--site-dusk)", fontSize: "1rem", lineHeight: 1.6, maxWidth: "52ch", fontFamily: "var(--font-sans)" }}>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "1rem", lineHeight: 1.6, maxWidth: "52ch", fontFamily: "var(--font-sans)" }}>
             Paste a job description and get an honest read on fit — including when the answer is no.
           </p>
         </div>
@@ -192,43 +192,43 @@ const FitAssessment = () => {
         {/* Main interface card */}
         <div
           style={{
-            border: "1px solid var(--site-fog)",
+            border: "1px solid var(--color-border)",
             borderRadius: "8px",
             overflow: "hidden",
-            backgroundColor: "var(--site-page)",
+            backgroundColor: "var(--color-bg-page)",
           }}
         >
           {/* Input section */}
-          <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--site-fog)" }}>
+          <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--color-border)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
               <div
                 style={{
                   width: "2rem",
                   height: "2rem",
                   borderRadius: "6px",
-                  backgroundColor: "var(--site-sky-pale)",
+                  backgroundColor: "var(--color-bg-raised)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
                 }}
               >
-                <FileText style={{ width: "1rem", height: "1rem", color: "var(--site-sky-deep)" }} />
+                <FileText style={{ width: "1rem", height: "1rem", color: "var(--color-interactive-hover)" }} />
               </div>
-              <span style={{ fontSize: "0.875rem", color: "var(--site-mist)", fontFamily: "var(--font-sans)" }}>
+              <span style={{ fontSize: "0.875rem", color: "var(--color-text-faint)", fontFamily: "var(--font-sans)" }}>
                 Job description to analyze
               </span>
             </div>
             <textarea
               style={{
                 width: "100%",
-                backgroundColor: "var(--site-cloud)",
+                backgroundColor: "var(--color-bg-alt)",
                 borderRadius: "6px",
                 padding: "1rem",
-                border: "1px solid var(--site-fog)",
+                border: "1px solid var(--color-border)",
                 fontSize: "0.875rem",
                 fontFamily: "var(--font-sans)",
-                color: activeTab === "custom" ? "var(--site-ink)" : "var(--site-dusk)",
+                color: activeTab === "custom" ? "var(--color-text-primary)" : "var(--color-text-secondary)",
                 lineHeight: 1.6,
                 resize: "none",
                 transition: "border-color 0.15s ease",
@@ -242,8 +242,8 @@ const FitAssessment = () => {
               onChange={(e) => activeTab === "custom" && setJdText(e.target.value)}
               readOnly={activeTab !== "custom"}
               placeholder="Paste a job description here..."
-              onFocus={e => { if (activeTab === "custom") e.currentTarget.style.borderColor = "var(--site-sky)"; }}
-              onBlur={e => { e.currentTarget.style.borderColor = "var(--site-fog)"; }}
+              onFocus={e => { if (activeTab === "custom") e.currentTarget.style.borderColor = "var(--color-interactive)"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
             />
             <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end" }}>
               <button
@@ -254,7 +254,7 @@ const FitAssessment = () => {
                   alignItems: "center",
                   gap: "0.5rem",
                   padding: "0.5rem 1.25rem",
-                  backgroundColor: "var(--site-sky)",
+                  backgroundColor: "var(--color-interactive)",
                   color: "#ffffff",
                   border: "none",
                   borderRadius: "4px",
@@ -265,8 +265,8 @@ const FitAssessment = () => {
                   opacity: analyzing || !jdText.trim() ? 0.5 : 1,
                   transition: "background-color 0.15s ease",
                 }}
-                onMouseEnter={e => { if (!analyzing && jdText.trim()) e.currentTarget.style.backgroundColor = "var(--site-sky-deep)"; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--site-sky)"; }}
+                onMouseEnter={e => { if (!analyzing && jdText.trim()) e.currentTarget.style.backgroundColor = "var(--color-interactive-hover)"; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--color-interactive)"; }}
               >
                 {analyzing && <Loader2 className="w-4 h-4 animate-spin" />}
                 Analyze fit
@@ -278,7 +278,7 @@ const FitAssessment = () => {
           <div style={{ padding: "1.5rem", minHeight: "6rem" }}>
             {analyzing && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "3rem 0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--site-mist)", fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--color-text-faint)", fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Analyzing against my experience…</span>
                 </div>
@@ -341,7 +341,7 @@ const FitAssessment = () => {
                     <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 400, color: vs.txt, marginBottom: "0.25rem" }}>
                       {result.headline}
                     </h3>
-                    <p style={{ color: "var(--site-dusk)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.5 }}>
+                    <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", fontFamily: "var(--font-sans)", lineHeight: 1.5 }}>
                       {result.opening}
                     </p>
                   </div>
@@ -357,8 +357,8 @@ const FitAssessment = () => {
                           key={i}
                           style={{
                             padding: "1rem",
-                            backgroundColor: "var(--site-cloud)",
-                            border: "1px solid var(--site-fog)",
+                            backgroundColor: "var(--color-bg-alt)",
+                            border: "1px solid var(--color-border)",
                             borderRadius: "6px",
                           }}
                         >
@@ -368,10 +368,10 @@ const FitAssessment = () => {
                               <p style={{ color: "var(--ar-fit-weak-txt)", fontWeight: 500, fontSize: "0.9375rem", fontFamily: "var(--font-sans)", marginBottom: "0.25rem" }}>
                                 {gap.gap_title}
                               </p>
-                              <p style={{ color: "var(--site-mist)", fontSize: "0.8rem", fontFamily: "var(--font-sans)", marginBottom: "0.375rem" }}>
+                              <p style={{ color: "var(--color-text-faint)", fontSize: "0.8rem", fontFamily: "var(--font-sans)", marginBottom: "0.375rem" }}>
                                 {gap.requirement}
                               </p>
-                              <p style={{ color: "var(--site-dusk)", fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
+                              <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-sans)" }}>
                                 {gap.explanation}
                               </p>
                             </div>
@@ -387,14 +387,14 @@ const FitAssessment = () => {
                   <div
                     style={{
                       padding: "1rem 1.25rem",
-                      backgroundColor: "var(--site-cloud)",
-                      border: "1px solid var(--site-fog)",
+                      backgroundColor: "var(--color-bg-alt)",
+                      border: "1px solid var(--color-border)",
                       borderRadius: "6px",
                       marginBottom: "1.25rem",
                     }}
                   >
                     <p style={SECTION_LABEL}>What transfers</p>
-                    <p style={{ color: "var(--site-dusk)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>
+                    <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.65, fontFamily: "var(--font-sans)" }}>
                       {result.transfers}
                     </p>
                   </div>
@@ -419,25 +419,6 @@ const FitAssessment = () => {
           </div>
         </div>
 
-        {/* Bottom callout */}
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <div
-            style={{
-              display: "inline-block",
-              padding: "1.25rem 2rem",
-              border: "1px solid var(--site-fog)",
-              borderRadius: "8px",
-              maxWidth: "38rem",
-            }}
-          >
-            <p style={{ color: "var(--site-dusk)", lineHeight: 1.7, fontFamily: "var(--font-sans)", fontSize: "0.9375rem" }}>
-              This signals something different than "please consider my resume."
-            </p>
-            <p style={{ color: "var(--site-ink)", fontWeight: 500, fontFamily: "var(--font-sans)", fontSize: "0.9375rem", marginTop: "0.5rem" }}>
-              You're qualifying them. Your time is valuable too.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
