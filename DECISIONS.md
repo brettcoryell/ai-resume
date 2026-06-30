@@ -17,19 +17,19 @@ Violation looks like: Adding a new structured extraction step that reads the blo
 
 ## Voice preservation is primary
 
-Decision: Biographical content in the OB and blob must be Brett's words (from Ariel sessions or dictation). Agents never create or rewrite biographical content.
+Decision: Biographical content in the OB and blob must be Brett's words (from Claude Chat sessions or dictation). Agents never create or rewrite biographical content.
 
 Why: Brett's voice and specificity are the product. Generic AI-sounding language destroys the point of the site.
 
-Violation looks like: Coda using `capture_thought` to fill a gap in the OB ("Brett worked at X from Y to Z"). Any agent-written content that describes Brett's career, personality, or experiences. Rewriting OB thoughts to "improve" them.
+Violation looks like: Claude Code using `capture_thought` to fill a gap in the OB ("Brett worked at X from Y to Z"). Any agent-written content that describes Brett's career, personality, or experiences. Rewriting OB thoughts to "improve" them.
 
 ---
 
 ## View Context fields are curated and locked
 
-Decision: The four Experience fields (Situation, Approach, Technical Work, Lessons Learned) are written once by Brett/Ariel and stored with `context_locked = true`. The `rebuild-experiences` Edge Function reads locked rows before deleting and restores their context fields verbatim after re-insertion — extraction-generated values are used only for unlocked rows.
+Decision: The four Experience fields (Situation, Approach, Technical Work, Lessons Learned) are written once by Brett/Claude Chat and stored with `context_locked = true`. The `rebuild-experiences` Edge Function reads locked rows before deleting and restores their context fields verbatim after re-insertion — extraction-generated values are used only for unlocked rows.
 
-Why: LLM extraction from the blob produces inconsistent, voice-flattened output on every run. Quality degrades unpredictably. Curated fields written by Brett/Ariel are the "wow" version. As of 2026-06-08, University of Virginia and The Hill School are locked; the other 8 roles still use extraction (see LATER intent).
+Why: LLM extraction from the blob produces inconsistent, voice-flattened output on every run. Quality degrades unpredictably. Curated fields written by Brett/Claude Chat are the "wow" version. As of 2026-06-08, University of Virginia and The Hill School are locked; the other 8 roles still use extraction (see LATER intent).
 
 Violation looks like: Removing the locked-row fetch from rebuild-experiences. Setting context_locked = false on a curated row. Calling rebuild-experiences and assuming it preserved curated content without the lock logic in place.
 
