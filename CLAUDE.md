@@ -21,21 +21,44 @@ Use `machine` (not agent nicknames) in session refs, token-burn records, and OB 
    - Registry: `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)`
    - Recent notes: `list_context(topics=["project-ai-resume"], permanent=false, since="<30-days-ago-ISO>")`
 
+If expected project memory or a prior decision is not found on the first OB
+lookup, broaden retrieval before asking Brett to restate it:
+- Try tag variants, especially both `project-<slug>` and the bare slug.
+- Search repo docs and `DECISIONS.md`.
+- Search prior Claude/Codex handoff notes when the user references a previous
+  session.
+- Preserve exact locked wording for decisions; do not replace it with a softer
+  paraphrase.
+
 ## Session End — Required
 
 1. **Update project status docs** — mark completed items before committing.
-2. **Commit** all uncommitted changes with a descriptive message.
-3. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
-4. **Sync tokens**: `cd /Users/brettcoryell/Code/AI/token-burn && make collect`
-5. **Upsert project registry** — fetch first to get existing `id`, then update in-place:
+2. **Promote durable decisions first** — if the session created or recovered a
+   binding architecture, methodology, metric, data, deployment, or analysis rule,
+   write it to the project's `DECISIONS.md` before summarizing it in OB. OB may
+   point to the decision; it must not be the only durable copy.
+3. **Run project closeout checker** if present (for example
+   `bin/closeout_check.py`) and address or explicitly report failures.
+4. **Commit** all uncommitted changes with a descriptive message.
+5. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
+6. **Sync tokens**: `cd /Users/brettcoryell/Code/AI/token-burn && make collect`
+7. **Upsert project registry** — fetch first to get existing `id`, then update in-place:
    - `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)`
    - `capture_context(id=<existing-id>, session_ref="project-registry-ai-resume", topics=["project-registry", "project-ai-resume"], expires_at=null, source="claude-code", ...)`
-6. **Write a session note:**
+8. **Write a session note:**
    - `session_ref`: `"claude-<machine>-<date>-<topic>"` (e.g. `"claude-imac-2026-06-25-chat-tuning"`)
-   - `topics`: `["project-ai-resume", "now"]` (or `soon`/`later`)
+   - `topics`: include both `project-ai-resume` and `ai-resume` when practical,
+     plus priority bucket (`now` / `soon` / `later`)
    - `expires_at`: 45 days from today
    - `source`: `"claude-code"`
-7. **Update persistent memory** if new feedback or preferences were expressed.
+   - Content: what changed, decisions made, what's pending. 3–5 bullets, ≤ 100
+     words. If an architectural decision was made, write it to `DECISIONS.md`
+     first and reference it here; do not duplicate the full text.
+9. **Update persistent memory** if new feedback or preferences were expressed.
+
+OpenBrain should stay high-signal. Do not dump raw transcripts or every paragraph
+of discussion into OB. Capture exact durable decisions, concise handoffs, and
+curated pointers to canonical repo docs.
 
 ---
 
