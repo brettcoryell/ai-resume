@@ -128,7 +128,7 @@ The other two projects under `~/Code/AI/`:
 ## Supabase Project
 
 All three projects (open_brain, wiki, ai-resume) share **one Supabase project**:
-- Project name: `open-brain`
+- Project name: `exploration`
 - Project ref: `zybttfjewunokevxwtqc`
 - URL: `https://zybttfjewunokevxwtqc.supabase.co`
 

@@ -1,7 +1,7 @@
 -- ============================================================
 -- AI Resume Portfolio Tables
 -- Sits alongside the existing `thoughts` and `intent` tables
--- in the open-brain Supabase project. Do NOT modify those tables.
+-- in the exploration Supabase project. Do NOT modify those tables.
 --
 -- ob_thought_id columns enable traceability back to OB thoughts
 -- captured via the Interview Agent. The sync pipeline

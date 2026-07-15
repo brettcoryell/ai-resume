@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-smoke_test.py — Fast (~2s) sanity check for the ai-resume Supabase project.
+smoke_test.py — Fast (~2s) sanity check for ai-resume in the exploration Supabase project.
 
 Checks (no LLM calls):
   1. Anon key can SELECT from candidate_profile, experiences, skills
