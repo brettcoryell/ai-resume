@@ -99,3 +99,11 @@ Use Tailwind for layout/spacing/typography; CSS variables for color.
 - OpenBrain is the source of truth for Brett's career data. Do not hand-edit career tables as a durable fix for bad answers; add or correct OB thoughts and rerun the sync pipeline.
 - `scripts/sync_career_from_ob.py` is the key bridge from OB to the career tables. Normalize enum values before inserting because model output can invent invalid values.
 - Vercel SPA routing depends on `vercel.json`; preserve the rewrite for React Router routes such as `/admin/login`.
+
+## Networked Git Operations
+
+For local AI repositories, Codex should not attempt networked Git commands inside the sandbox first. Commands such as `git push`, `git pull --ff-only`, `git fetch`, and `git ls-remote` require network access, so use `require_escalated` on the first attempt with a narrow prefix rule when useful.
+
+Do not retry a failed sandboxed Git network command unless the first failure was not network/DNS/remote-access related.
+
+When closing repo work, if a push is needed, run `git push` with escalation on the first try. Brett has approved this pattern for local AI repo handoffs.
