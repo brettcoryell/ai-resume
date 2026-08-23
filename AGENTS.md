@@ -59,7 +59,7 @@ Use `machine` (not agent nicknames) in session refs, token-burn records, and OB 
 4. Update `DECISIONS.md` first if an architectural rule changed.
 5. Commit all intended changes with a descriptive message.
 6. Push to origin and confirm it succeeded.
-7. **Sync tokens**: run `make collect-codex` from `/Users/brettcoryell/Code/AI/token-burn`.
+7. **Sync token accounting**: run `make token-accounting-closeout` from `/Users/brettcoryell/Code/AI/token-burn`. This is only the token-accounting subroutine; it does not replace the rest of closeout.
 8. Record session context in OpenBrain if tools are available:
    - **Registry (upsert):** First fetch: `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)` to get the existing `id`. Then call `capture_context` with that `id` to update in-place.
      - `session_ref`: `"project-registry-ai-resume"`

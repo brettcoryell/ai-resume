@@ -41,7 +41,7 @@ lookup, broaden retrieval before asking Brett to restate it:
    `bin/closeout_check.py`) and address or explicitly report failures.
 4. **Commit** all uncommitted changes with a descriptive message.
 5. **Push** to origin — a commit without a push is incomplete. Confirm push succeeded.
-6. **Sync tokens**: `cd /Users/brettcoryell/Code/AI/token-burn && make collect`
+6. **Sync token accounting**: `cd /Users/brettcoryell/Code/AI/token-burn && make token-accounting-closeout`. This is only the token-accounting subroutine; it does not replace the rest of closeout. Do not use old one-off targets such as `make collect`, `make collect-codex`, or `make collect-coda` as the normal closeout path.
 7. **Upsert project registry** — fetch first to get existing `id`, then update in-place:
    - `list_context(topics=["project-registry", "project-ai-resume"], permanent=true, limit=1)`
    - `capture_context(id=<existing-id>, session_ref="project-registry-ai-resume", topics=["project-registry", "project-ai-resume"], expires_at=null, source="claude-code", ...)`
