@@ -38,6 +38,7 @@ CRITICAL RULES — CONTEXT FIELDS:
 CRITICAL RULES — OTHER:
 - is_current = true ONLY when the content explicitly says the role is ongoing right now.
 - Use the institution's actual proper name, not its city or district (e.g. 'Indian Hill High School' not 'Cincinnati Public Schools').
+- Elementum title = "Engagement Manager". Do not use Brett's global profile headline ("Chief Technology Officer") as the Elementum role title.
 
 Include every career stop: teaching, graduate school, consulting, corporate, startup, academic programs.
 Sort most recent first (Elementum = display_order 1).

@@ -112,8 +112,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Chat function error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const message = error instanceof Error ? error.message : String(error);
+    const status = message.toLowerCase().includes('credit balance is too low') ? 402 : 500;
+    const publicMessage = status === 402
+      ? 'Ariel is temporarily unavailable because the Anthropic API credit balance is too low. Please add API credits or update the ANTHROPIC_API_KEY billing workspace.'
+      : 'Internal server error';
+
+    return new Response(JSON.stringify({ error: publicMessage }), {
+      status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
