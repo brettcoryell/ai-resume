@@ -432,3 +432,7 @@ Scripts in `scripts/` use a `.venv` at the project root built from Homebrew pyth
 Dense reference — symptom, root cause, exact fix. One to three lines max. Add an entry after every bug fix before committing.
 
 **JWT error on edge function calls** (`UNAUTHORIZED_INVALID_JWT_FORMAT`): `VITE_SUPABASE_ANON_KEY` was set to `sb_publishable_*` format, which is not a JWT. Edge functions require a Bearer JWT. Fix: `vercel env rm VITE_SUPABASE_ANON_KEY production` then re-add using the JWT key from `supabase projects api-keys` (the `anon` row, starts with `eyJ`).
+
+**Chat returns HTTP 402 "credit balance is too low"**: the Anthropic org behind `ANTHROPIC_API_KEY` had a negative purchased balance (-$0.45), which blocked requests even though $200 of Max promo credit was available. Fix: pay the deficit in Console Billing (paid $10); promo credit (API/Agent SDK, not Claude Code) then drew down. Key must belong to the org holding the credits.
+
+**`scripts/smoke_test.py` 404 PGRST205 on all tables**: tables moved to the `ai_resume` schema; REST calls need `Accept-Profile: ai_resume`. Fixed in the script.
