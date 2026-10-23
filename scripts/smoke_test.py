@@ -59,7 +59,7 @@ def anon_headers(key):
 def check_table(session, url, key, table, description):
     r = session.get(
         f"{url}/rest/v1/{table}",
-        headers={**anon_headers(key), "Accept": "application/json"},
+        headers={**anon_headers(key), "Accept": "application/json", "Accept-Profile": "ai_resume"},
         params={"select": "id", "limit": "1"},
         timeout=10,
     )
@@ -77,6 +77,7 @@ def check_career_blob(session, url, service_role_key):
         "apikey": service_role_key,
         "Authorization": f"Bearer {service_role_key}",
         "Accept": "application/json",
+        "Accept-Profile": "ai_resume",
     }
     r = session.get(
         f"{url}/rest/v1/career_blob",
